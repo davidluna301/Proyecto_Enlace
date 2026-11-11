@@ -13,18 +13,22 @@ import {
 export class CasesController {
   constructor(private readonly casesService: CasesService) {}
 
+  private query(req: Request) {
+    const text = (value: unknown) => (typeof value === "string" ? value : "");
+    return {
+      status: text(req.query.estado),
+      program: text(req.query.carrera || req.query.programa),
+      search: text(req.query.q || req.query.buscar),
+    };
+  }
+
   list = async (
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const listing = await this.casesService.listWithFilters({
-        status: typeof req.query.estado === "string" ? req.query.estado : "",
-        program:
-          typeof req.query.programa === "string" ? req.query.programa : "",
-        search: typeof req.query.buscar === "string" ? req.query.buscar : "",
-      });
+      const listing = await this.casesService.listWithFilters(this.query(req));
       const created = req.session.caseCreated;
       delete req.session.caseCreated;
       res.render("cases/list", {
@@ -34,6 +38,23 @@ export class CasesController {
         urgencyLabels,
         created,
       });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  data = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { cases } = await this.casesService.listWithFilters(
+        this.query(req),
+      );
+      res
+        .set("Cache-Control", "no-store")
+        .json({ items: cases, total: cases.length });
     } catch (error) {
       next(error);
     }

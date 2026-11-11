@@ -13,7 +13,7 @@ import { MockCasesRepository } from "./modules/cases/mock-cases.repository";
 import { CasesService } from "./modules/cases/cases.service";
 import { createCasesRouter } from "./modules/cases/cases.routes";
 
-export function createApp() {
+export function createApp(options: { auditDirectory?: string } = {}) {
   const app = express();
   const authService = new AuthService();
   const casesService = new CasesService(new MockCasesRepository());
@@ -76,8 +76,8 @@ export function createApp() {
       users: authService.listPublicUsers(),
     });
   });
-  app.use("/cases", createCasesRouter(casesController));
-  app.use("/casos", createCasesRouter(casesController));
+  app.use("/cases", createCasesRouter(casesController, options.auditDirectory));
+  app.use("/casos", createCasesRouter(casesController, options.auditDirectory));
   app.use(notFoundHandler);
   app.use(errorHandler);
 
