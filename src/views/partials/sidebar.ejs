@@ -1,0 +1,21 @@
+<nav class="offcanvas-lg offcanvas-start sidebar" tabindex="-1" id="sidebar" aria-label="Navegación principal">
+  <div class="offcanvas-header sidebar-header">
+    <a href="/home"><img src="/img/logolink.png" alt="ENLACE"></a>
+    <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Cerrar navegación"></button>
+  </div>
+  <div class="offcanvas-body sidebar-body">
+    <p class="sidebar-role"><%= currentUser.role === 'ASESOR' ? 'Asesor' : 'Administrador' %></p>
+    <div class="sidebar-links">
+      <a class="sidebar-link <%= currentPath === '/home' ? 'active' : '' %>" href="/home" <%- currentPath === '/home' ? 'aria-current="page"' : '' %>><span aria-hidden="true">⌂</span> Inicio</a>
+      <% if (currentUser.role === 'ASESOR') { %>
+        <a class="sidebar-link <%= (currentPath.startsWith('/casos') || currentPath.startsWith('/cases')) && !currentPath.endsWith('/nuevo') ? 'active' : '' %>" href="/casos" <%- (currentPath === '/casos' || currentPath === '/cases') ? 'aria-current="page"' : '' %>><span aria-hidden="true">▤</span> Casos</a>
+        <a class="sidebar-link <%= currentPath.endsWith('/nuevo') ? 'active' : '' %>" href="/casos/nuevo" <%- currentPath.endsWith('/nuevo') ? 'aria-current="page"' : '' %>><span aria-hidden="true">＋</span> Nuevo caso</a>
+      <% } else { %>
+        <a class="sidebar-link" href="/home#usuarios"><span aria-hidden="true">♙</span> Usuarios</a>
+      <% } %>
+    </div>
+    <form class="sidebar-logout" action="/logout" method="post">
+      <button class="sidebar-link" type="submit"><span aria-hidden="true">↪</span> Cerrar sesión</button>
+    </form>
+  </div>
+</nav>

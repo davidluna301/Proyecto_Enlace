@@ -9,27 +9,17 @@
   </head>
   <body>
     <% if (currentUser) { %>
-      <header class="site-header">
-        <nav class="navbar navbar-expand-lg navbar-dark container py-3" aria-label="Navegación principal">
-          <a class="navbar-brand d-flex align-items-center gap-3" href="/home" aria-label="ENLACE UCC, inicio">
-            <img class="brand-institution" src="/img/logo.png" alt="Universidad Cooperativa de Colombia">
-            <span class="brand-divider" aria-hidden="true"></span>
-            <img class="brand-platform" src="/img/logolink.png" alt="ENLACE">
-          </a>
-          <div class="ms-auto d-flex align-items-center gap-3">
-            <span class="user-greeting d-none d-sm-inline">Hola, <strong><%= currentUser.name.split(" ")[0] %></strong></span>
-            <form action="/logout" method="post">
-              <button class="btn btn-logout" type="submit">Cerrar sesión</button>
-            </form>
-          </div>
-        </nav>
+      <header class="mobile-header d-lg-none">
+        <button class="btn menu-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir navegación">☰</button>
+        <a href="/home"><img src="/img/logolink.png" alt="ENLACE"></a>
       </header>
+      <%- include('../partials/sidebar') %>
     <% } %>
-    <main id="contenido" class="<%= currentUser ? 'page-shell' : 'login-shell' %>">
+    <main id="contenido" class="<%= currentUser ? 'page-shell authenticated-content' : 'login-shell' %>">
       <%- body %>
     </main>
     <% if (currentUser) { %>
-      <footer class="site-footer">
+      <footer class="site-footer authenticated-footer">
         <div class="container d-flex justify-content-between flex-wrap gap-2">
           <span>ENLACE UCC · Acompañamiento que conecta</span>
           <span>Vista de demostración</span>

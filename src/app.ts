@@ -56,6 +56,10 @@ export function createApp() {
       }).format(new Date(date));
     next();
   });
+  app.use((req, res, next) => {
+    res.locals.currentPath = req.path;
+    next();
+  });
 
   app.use(createAuthRouter(authController));
   app.get("/", (req, res) => {
