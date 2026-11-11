@@ -1,8 +1,19 @@
+import type { MarcadorId } from "../../data/marcadores";
+
 export const statusLabels = {
+  REGISTRADO: "Registrado",
   NUEVO: "Nuevo",
   EN_SEGUIMIENTO: "En seguimiento",
   EN_ESPERA: "En espera",
   CERRADO: "Cerrado",
+} as const;
+
+export const statusIcons = {
+  REGISTRADO: "＋",
+  NUEVO: "●",
+  EN_SEGUIMIENTO: "↻",
+  EN_ESPERA: "◷",
+  CERRADO: "✓",
 } as const;
 
 export const urgencyLabels = {
@@ -29,4 +40,20 @@ export interface StudentCase {
   lastMovement: string;
   summary: string;
   events: CaseEvent[];
+  email?: string | null;
+  tieneCorreoInstitucional: boolean;
+  contactEmail?: string;
+  observacionesAsesor?: string;
+  markers: MarcadorId[];
+}
+
+export interface NewCase {
+  studentName: string;
+  email: string | null;
+  tieneCorreoInstitucional: boolean;
+  contactEmail?: string;
+  program: string;
+  summary: string;
+  observacionesAsesor?: string;
+  markers: MarcadorId[];
 }

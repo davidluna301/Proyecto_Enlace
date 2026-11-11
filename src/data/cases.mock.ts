@@ -8,6 +8,8 @@ export const mockCases: StudentCase[] = [
     status: "EN_SEGUIMIENTO",
     urgency: "ALTA",
     lastMovement: "2026-11-09T14:30:00-05:00",
+    tieneCorreoInstitucional: true,
+    markers: [],
     summary:
       "La estudiante solicita orientación para retomar sus actividades académicas y definir un plan de acompañamiento.",
     events: [
@@ -37,6 +39,8 @@ export const mockCases: StudentCase[] = [
     status: "NUEVO",
     urgency: "MEDIA",
     lastMovement: "2026-11-10T08:45:00-05:00",
+    tieneCorreoInstitucional: true,
+    markers: [],
     summary:
       "El estudiante pidió acompañamiento para organizar su carga académica.",
     events: [
@@ -54,6 +58,8 @@ export const mockCases: StudentCase[] = [
     status: "EN_ESPERA",
     urgency: "BAJA",
     lastMovement: "2026-11-06T16:20:00-05:00",
+    tieneCorreoInstitucional: true,
+    markers: [],
     summary:
       "Se espera que la estudiante confirme el horario para su próximo encuentro.",
     events: [
@@ -78,6 +84,8 @@ export const mockCases: StudentCase[] = [
     status: "EN_SEGUIMIENTO",
     urgency: "MEDIA",
     lastMovement: "2026-11-08T10:10:00-05:00",
+    tieneCorreoInstitucional: true,
+    markers: [],
     summary:
       "Está construyendo un plan para prepararse para sus evaluaciones de cierre.",
     events: [
@@ -100,6 +108,8 @@ export const mockCases: StudentCase[] = [
     status: "NUEVO",
     urgency: "ALTA",
     lastMovement: "2026-11-10T11:05:00-05:00",
+    tieneCorreoInstitucional: true,
+    markers: [],
     summary:
       "La estudiante requiere una conversación prioritaria sobre su continuidad académica.",
     events: [
@@ -117,6 +127,8 @@ export const mockCases: StudentCase[] = [
     status: "CERRADO",
     urgency: "BAJA",
     lastMovement: "2026-10-30T15:40:00-05:00",
+    tieneCorreoInstitucional: true,
+    markers: [],
     summary: "El estudiante completó el acompañamiento acordado.",
     events: [
       {
@@ -139,6 +151,8 @@ export const mockCases: StudentCase[] = [
     status: "EN_ESPERA",
     urgency: "MEDIA",
     lastMovement: "2026-11-07T09:25:00-05:00",
+    tieneCorreoInstitucional: true,
+    markers: [],
     summary:
       "Está pendiente recibir la confirmación de una actividad de bienestar.",
     events: [
@@ -161,6 +175,8 @@ export const mockCases: StudentCase[] = [
     status: "EN_SEGUIMIENTO",
     urgency: "BAJA",
     lastMovement: "2026-11-04T14:00:00-05:00",
+    tieneCorreoInstitucional: true,
+    markers: [],
     summary:
       "El estudiante avanza en la organización de su proyecto de semestre.",
     events: [
@@ -183,6 +199,8 @@ export const mockCases: StudentCase[] = [
     status: "EN_ESPERA",
     urgency: "ALTA",
     lastMovement: "2026-11-09T08:20:00-05:00",
+    tieneCorreoInstitucional: true,
+    markers: [],
     summary: "Está pendiente coordinar un espacio de conversación esta semana.",
     events: [
       {
@@ -204,6 +222,8 @@ export const mockCases: StudentCase[] = [
     status: "CERRADO",
     urgency: "BAJA",
     lastMovement: "2026-10-22T11:35:00-05:00",
+    tieneCorreoInstitucional: true,
+    markers: [],
     summary:
       "El estudiante recibió la orientación solicitada y cerró su proceso.",
     events: [

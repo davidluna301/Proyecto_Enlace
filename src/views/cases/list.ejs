@@ -5,13 +5,15 @@
       <h1>Casos de estudiantes</h1>
       <p class="text-muted mb-0">Cada caso es una oportunidad para estar más cerca.</p>
     </div>
-    <span class="count-pill"><strong><%= cases.length %></strong> <%= cases.length === 1 ? 'caso' : 'casos' %></span>
+    <div class="mt-3"><a class="btn btn-primary-action" href="/casos/nuevo">Registrar un caso</a></div>
+    <% if (created) { %><div class="alert alert-success mt-3" role="status">El caso se registró correctamente.</div><% } %>
+    <span class="count-pill" id="case-count"><strong><%= cases.length %></strong> <%= cases.length === 1 ? 'caso' : 'casos' %></span>
   </div>
 
-  <form class="filter-panel mt-4" action="/cases" method="get" role="search" aria-label="Buscar y filtrar casos">
+  <form class="filter-panel mt-4" id="case-filters" action="/casos" method="get" role="search" aria-label="Buscar y filtrar casos">
     <div class="filter-search">
       <label class="form-label" for="buscar">Buscar estudiante o identificador</label>
-      <input class="form-control" id="buscar" name="buscar" type="search" placeholder="Ej. Valentina o EN-2026-001" value="<%= filters.search %>">
+      <input class="form-control" id="buscar" name="q" type="search" placeholder="Ej. Valentina o EN-2026-001" value="<%= filters.search %>">
     </div>
     <div>
       <label class="form-label" for="estado">Estado del caso</label>
@@ -24,7 +26,7 @@
     </div>
     <div>
       <label class="form-label" for="programa">Programa</label>
-      <select class="form-select" id="programa" name="programa">
+      <select class="form-select" id="programa" name="carrera">
         <option value="">Todos los programas</option>
         <% programs.forEach((program) => { %>
           <option value="<%= program %>" <%= filters.program === program ? 'selected' : '' %>><%= program %></option>
@@ -32,11 +34,15 @@
       </select>
     </div>
     <div class="filter-actions">
-      <button class="btn btn-primary-action" type="submit">Aplicar filtros</button>
-      <a class="btn btn-filter-clear" href="/cases">Limpiar</a>
+      <noscript><button class="btn btn-primary-action" type="submit">Buscar</button></noscript>
+      <a class="btn btn-filter-clear" id="clear-filters" href="/casos">Limpiar</a>
     </div>
   </form>
 
+  <p id="filter-loading" class="filter-loading mt-3" role="status" hidden>Actualizando casos…</p>
+  <p id="filter-error" class="field-error" role="alert" hidden></p>
+  <p class="visually-hidden" id="filter-announcement" aria-live="polite"></p>
+  <div id="case-results" data-urgency-alta="<%= urgencyLabels.ALTA %>" data-urgency-media="<%= urgencyLabels.MEDIA %>" data-urgency-baja="<%= urgencyLabels.BAJA %>" data-status-registrado="<%= statusIcons.REGISTRADO %>" data-status-nuevo="<%= statusIcons.NUEVO %>" data-status-en_seguimiento="<%= statusIcons.EN_SEGUIMIENTO %>" data-status-en_espera="<%= statusIcons.EN_ESPERA %>" data-status-cerrado="<%= statusIcons.CERRADO %>">
   <% if (cases.length) { %>
     <div class="case-grid mt-4">
       <% cases.forEach((studentCase) => { %>
@@ -48,9 +54,11 @@
               Urgencia <%= urgencyLabels[studentCase.urgency] %>
             </span>
           </div>
-          <h2><a href="/cases/<%= encodeURIComponent(studentCase.id) %>"><%= studentCase.studentName %></a></h2>
+          <h2><a href="/casos/<%= encodeURIComponent(studentCase.id) %>"><%= studentCase.studentName %></a></h2>
           <p class="case-program"><%= studentCase.program %></p>
-          <span class="status-chip status-<%= studentCase.status.toLowerCase() %>"><%= statusLabels[studentCase.status] %></span>
+          <span class="status-chip status-<%= studentCase.status.toLowerCase() %>"><span aria-hidden="true"><%= statusIcons[studentCase.status] %></span><%= statusLabels[studentCase.status] %></span>
+          <% if (studentCase.tieneCorreoInstitucional === false) { %><span class="contact-status-chip">Sin correo institucional</span><% } %>
+          <% if (!studentCase.markers?.length) { %><p class="neutral-case-note">Sin marcadores registrados</p><% } %>
           <p class="case-summary"><%= studentCase.summary %></p>
           <div class="case-card-footer">
             <span>Último movimiento</span>
@@ -64,7 +72,9 @@
       <span class="empty-mark" aria-hidden="true">⌕</span>
       <h2 id="empty-title">No encontramos casos con esos filtros</h2>
       <p>Prueba con otro nombre, identificador o estado. Si buscabas empezar de nuevo, puedes ver todos los casos.</p>
-      <a class="btn btn-primary-action" href="/cases">Ver todos los casos</a>
+      <a class="btn btn-primary-action" href="/casos">Ver todos los casos</a>
     </section>
   <% } %>
+  </div>
+  <script src="/js/case-filters.js" defer></script>
 </section>

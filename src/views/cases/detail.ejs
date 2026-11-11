@@ -1,46 +1,99 @@
 <section class="container py-5 detail-container">
-  <a class="back-link" href="/cases">← Volver a los casos</a>
+  <a class="back-link" href="/casos">← Volver al listado</a>
   <article class="detail-card mt-4">
-    <header class="detail-heading">
-      <div>
-        <p class="eyebrow"><%= studentCase.id %> · <%= studentCase.program %></p>
-        <h1><%= studentCase.studentName %></h1>
-        <p class="detail-summary"><%= studentCase.summary %></p>
+    <div class="detail-layout">
+      <div class="detail-main">
+        <header class="student-heading">
+          <p class="eyebrow"><%= studentCase.id %> · <%= studentCase.program %></p>
+          <h1><%= studentCase.studentName %></h1>
+          <div class="student-contact">
+            <% if (studentCase.tieneCorreoInstitucional === false) { %>
+              <span class="contact-status-chip">Sin correo institucional</span>
+            <% } else if (studentCase.email) { %>
+              <p><span class="detail-label">Correo institucional</span> <%= studentCase.email %></p>
+            <% } %>
+            <% if (studentCase.contactEmail) { %>
+              <p><span class="detail-label">Correo de contacto alternativo</span> <%= studentCase.contactEmail %></p>
+            <% } %>
+            <p><span class="detail-label">Carrera</span> <%= studentCase.program %></p>
+          </div>
+        </header>
+
+        <section class="detail-section" aria-labelledby="summary-title">
+          <p class="eyebrow">Motivo registrado</p>
+          <h2 id="summary-title">Descripción del caso</h2>
+          <p class="case-description"><%= studentCase.summary %></p>
+        </section>
+
+        <section class="detail-section" aria-labelledby="selected-markers-title">
+          <p class="eyebrow">Señales para orientar el acompañamiento</p>
+          <h2 id="selected-markers-title">Marcadores críticos</h2>
+          <% if (groups.length) { %>
+            <% groups.forEach((group) => { %>
+              <div class="marker-detail-group">
+                <h3><%= group.nombre %></h3>
+                <ul>
+                  <% group.marcadores.forEach((marker) => { %>
+                    <li><strong><%= marker.nombre %></strong><span><%= marker.descripcion %></span></li>
+                  <% }) %>
+                </ul>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p class="neutral-case-note">Sin marcadores registrados</p>
+          <% } %>
+        </section>
+
+        <% if (studentCase.observacionesAsesor) { %>
+          <section class="detail-section" aria-labelledby="advisor-notes-title">
+            <p class="eyebrow">Seguimiento interno</p>
+            <h2 id="advisor-notes-title">Observaciones del asesor</h2>
+            <p class="advisor-notes"><%= studentCase.observacionesAsesor %></p>
+          </section>
+        <% } %>
+
+        <section class="detail-section timeline-section" aria-labelledby="timeline-title">
+          <div class="section-title-row">
+            <div><p class="eyebrow">Lo que hemos recorrido</p><h2 id="timeline-title">Seguimiento del caso</h2></div>
+            <span class="event-count"><%= studentCase.events.length %> <%= studentCase.events.length === 1 ? 'momento' : 'momentos' %></span>
+          </div>
+          <ol class="timeline">
+            <% studentCase.events.forEach((event) => { %>
+              <li class="timeline-item">
+                <span class="timeline-dot" aria-hidden="true"></span>
+                <div class="timeline-content">
+                  <div class="timeline-meta">
+                    <h3><%= event.type %></h3>
+                    <time datetime="<%= event.date %>"><%= formatDate(event.date) %></time>
+                  </div>
+                  <p><%= event.description %></p>
+                </div>
+              </li>
+            <% }) %>
+          </ol>
+        </section>
       </div>
-      <div class="detail-badges">
-        <span class="status-chip status-<%= studentCase.status.toLowerCase() %>"><%= statusLabels[studentCase.status] %></span>
-        <span class="urgency-chip urgency-<%= studentCase.urgency.toLowerCase() %>">
+
+      <aside class="detail-status-panel" aria-labelledby="case-status-title">
+        <p class="eyebrow">Resumen del caso</p>
+        <h2 id="case-status-title">Estado actual</h2>
+        <span class="status-chip status-<%= studentCase.status.toLowerCase() %>"><span aria-hidden="true"><%= statusIcons[studentCase.status] %></span><%= statusLabels[studentCase.status] %></span>
+        <p class="urgency-chip urgency-<%= studentCase.urgency.toLowerCase() %>">
           <span aria-hidden="true"><%= studentCase.urgency === 'ALTA' ? '!' : studentCase.urgency === 'MEDIA' ? '◷' : '✓' %></span>
           Urgencia <%= urgencyLabels[studentCase.urgency] %>
-        </span>
-      </div>
-    </header>
-
-    <section class="timeline-section" aria-labelledby="timeline-title">
-      <div class="section-title-row">
-        <div><p class="eyebrow">Lo que hemos recorrido</p><h2 id="timeline-title">Seguimiento del caso</h2></div>
-        <span class="event-count"><%= studentCase.events.length %> <%= studentCase.events.length === 1 ? 'momento' : 'momentos' %></span>
-      </div>
-      <ol class="timeline">
-        <% studentCase.events.forEach((event) => { %>
-          <li class="timeline-item">
-            <span class="timeline-dot" aria-hidden="true"></span>
-            <div class="timeline-content">
-              <div class="timeline-meta">
-                <h3><%= event.type %></h3>
-                <time datetime="<%= event.date %>"><%= formatDate(event.date) %></time>
-              </div>
-              <p><%= event.description %></p>
-            </div>
-          </li>
-        <% }) %>
-      </ol>
-    </section>
-
-    <aside class="next-step">
-      <span class="next-step-icon" aria-hidden="true">↗</span>
-      <div><h2>El siguiente paso</h2><p>Continúa la conversación y registra aquí el próximo avance de este acompañamiento.</p></div>
-      <span class="coming-soon">Próximamente</span>
-    </aside>
+        </p>
+        <dl class="case-metadata">
+          <div><dt>Identificador</dt><dd><%= studentCase.id %></dd></div>
+          <div><dt>Fecha de creación</dt><dd><%= formatDate(studentCase.events[0]?.date || studentCase.lastMovement) %></dd></div>
+          <div><dt>Último movimiento</dt><dd><%= formatDate(studentCase.lastMovement) %></dd></div>
+        </dl>
+        <a class="btn btn-primary-action w-100" href="/casos">Volver al listado</a>
+        <div class="next-step mt-3">
+          <h3>El siguiente paso</h3>
+          <p>Continúa la conversación y registra aquí el próximo avance de este acompañamiento.</p>
+          <span class="coming-soon">Próximamente</span>
+        </div>
+      </aside>
+    </div>
   </article>
 </section>

@@ -1,11 +1,17 @@
 import { mockCases } from "../../data/cases.mock";
-import type { StudentCase } from "./cases.model";
-import type { CaseFilter, CasesRepository } from "./cases.service";
+import type { NewCase, StudentCase } from "./cases.model";
+import {
+  DuplicateEmailError,
+  type CaseFilter,
+  type CasesRepository,
+} from "./cases.service";
 
 export class MockCasesRepository implements CasesRepository {
+  private readonly cases = structuredClone(mockCases);
+
   async list(filter: CaseFilter = {}): Promise<StudentCase[]> {
     const search = filter.search?.trim().toLocaleLowerCase("es-CO");
-    return mockCases
+    return this.cases
       .filter((studentCase) => {
         if (filter.status && studentCase.status !== filter.status) return false;
         if (filter.program && studentCase.program !== filter.program)
@@ -28,6 +34,43 @@ export class MockCasesRepository implements CasesRepository {
   }
 
   async getById(id: string): Promise<StudentCase | null> {
-    return mockCases.find((studentCase) => studentCase.id === id) ?? null;
+    return this.cases.find((studentCase) => studentCase.id === id) ?? null;
+  }
+
+  async create(input: NewCase): Promise<StudentCase> {
+    if (
+      input.email &&
+      this.cases.some(
+        (item) =>
+          item.status !== "CERRADO" &&
+          item.email?.toLowerCase() === input.email,
+      )
+    ) {
+      throw new DuplicateEmailError("Ya existe un caso para este correo.");
+    }
+    const now = new Date();
+    const prefix = `CASO-${now.getFullYear()}-`;
+    const numbers = this.cases
+      .filter((item) => item.id.startsWith(prefix))
+      .map((item) => Number(item.id.slice(prefix.length)))
+      .filter(Number.isSafeInteger);
+    const id = prefix + String(Math.max(0, ...numbers) + 1).padStart(4, "0");
+    const date = now.toISOString();
+    const studentCase: StudentCase = {
+      ...input,
+      id,
+      status: "REGISTRADO",
+      urgency: "MEDIA",
+      lastMovement: date,
+      events: [
+        {
+          date,
+          type: "Caso creado",
+          description: "Se registró la solicitud de acompañamiento.",
+        },
+      ],
+    };
+    this.cases.push(studentCase);
+    return studentCase;
   }
 }

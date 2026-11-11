@@ -6,9 +6,13 @@ const invalidPasswordHash =
 
 export class AuthService {
   async authenticate(email: string, password: string): Promise<User | null> {
+    const normalizedEmail = email.trim().toLowerCase();
     const user = mockUsers.find(
       (candidate) =>
-        candidate.email.toLowerCase() === email.trim().toLowerCase(),
+        candidate.email.toLowerCase() === normalizedEmail ||
+        candidate.aliases?.some(
+          (alias) => alias.toLowerCase() === normalizedEmail,
+        ),
     );
     const passwordMatches = await bcrypt.compare(
       password,

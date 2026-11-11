@@ -1,11 +1,17 @@
 import assert from "node:assert/strict";
 import { once } from "node:events";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import type { AddressInfo } from "node:net";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import test from "node:test";
 import { createApp } from "../app";
 
 test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", async () => {
-  const server = createApp().listen(0, "127.0.0.1");
+  const auditDirectory = await mkdtemp(
+    path.join(tmpdir(), "enlace-audit-test-"),
+  );
+  const server = createApp({ auditDirectory }).listen(0, "127.0.0.1");
   await once(server, "listening");
   const address = server.address() as AddressInfo;
   const base = `http://127.0.0.1:${address.port}`;
@@ -41,12 +47,129 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     assert.equal(invalid.response.status, 401);
     assert.match(invalid.html, /No pudimos validar tus datos/);
 
-    const advisor = await request("/login", {
+    const legacy = await request("/login", {
       form: { email: "asesor@enlace.edu.co", password: "Asesor123*" },
+    });
+    assert.equal(legacy.response.status, 302);
+
+    const advisor = await request("/login", {
+      form: { email: "asesor@ucc.edu.co", password: "Asesor123*" },
     });
     assert.equal(advisor.response.status, 302);
     assert.match(advisor.response.headers.get("set-cookie") ?? "", /HttpOnly/i);
     assert.ok(advisor.cookie);
+    const createForm = await request("/casos/nuevo", {
+      cookie: advisor.cookie,
+    });
+    assert.equal(createForm.response.status, 200);
+    assert.match(createForm.html, /Marcadores críticos/);
+    assert.match(createForm.html, /aria-expanded="false"/);
+    assert.match(createForm.html, /id="markers-panel" hidden/);
+    assert.match(createForm.html, /aria-current="page"/);
+    assert.match(createForm.html, /Navegación principal/);
+    assert.doesNotMatch(createForm.html, /src="\/img\/logo\.png"/);
+    const invalidCreate = await request("/casos", {
+      cookie: advisor.cookie,
+      form: {
+        studentName: "Estudiante de prueba",
+        email: "prueba@otro.edu.co",
+        program: "Psicología",
+        summary:
+          "Descripción suficientemente detallada para registrar un caso.",
+        includeMarkers: "on",
+      },
+    });
+    assert.equal(invalidCreate.response.status, 422);
+    assert.match(invalidCreate.html, /Estudiante de prueba/);
+    assert.match(invalidCreate.html, /Selecciona al menos un marcador válido/);
+    const validCase = {
+      studentName: "Estudiante de prueba",
+      email: "prueba@campusucc.edu.co",
+      program: "Psicología",
+      summary: "Descripción suficientemente detallada para registrar un caso.",
+      includeMarkers: "on",
+      markers: "AUSENTISMO",
+      observacionesAsesor: "Se acordó una conversación de seguimiento.",
+    };
+    const created = await request("/casos", {
+      cookie: advisor.cookie,
+      form: validCase,
+    });
+    assert.equal(created.response.status, 302);
+    assert.equal(created.response.headers.get("location"), "/casos");
+    const newList = await request("/casos", { cookie: advisor.cookie });
+    assert.match(newList.html, /El caso se registró correctamente/);
+    assert.match(newList.html, /Estudiante de prueba/);
+    const newId = newList.html.match(/CASO-\d{4}-\d{4}/)?.[0];
+    assert.ok(newId);
+    const audit = await readFile(
+      path.join(auditDirectory, "auditoria.jsonl"),
+      "utf8",
+    );
+    const entry = JSON.parse(audit.trim()) as {
+      action: string;
+      actorId: string;
+      caseId: string;
+      timestamp: string;
+    };
+    assert.equal(entry.action, "CASO_CREADO");
+    assert.equal(entry.actorId, "usr-asesor-01");
+    assert.equal(entry.caseId, newId);
+    assert.ok(!Number.isNaN(Date.parse(entry.timestamp)));
+    assert.doesNotMatch(audit, /prueba@campusucc|AUSENTISMO/);
+    const newDetail = await request(`/casos/${newId}`, {
+      cookie: advisor.cookie,
+    });
+    assert.match(newDetail.html, /Ausentismo crónico o intermitente/);
+    assert.match(newDetail.html, /Se acordó una conversación de seguimiento/);
+    const data = await request("/casos/data?estado=REGISTRADO&q=Estudiante", {
+      cookie: advisor.cookie,
+    });
+    assert.equal(data.response.status, 200);
+    const dataBody = JSON.parse(data.html) as {
+      items: { id: string }[];
+      total: number;
+    };
+    assert.equal(dataBody.total, 1);
+    assert.equal(dataBody.items[0].id, newId);
+    assert.equal((await request("/casos/data")).response.status, 302);
+    const duplicate = await request("/casos", {
+      cookie: advisor.cookie,
+      form: validCase,
+    });
+    assert.equal(duplicate.response.status, 422);
+    assert.match(duplicate.html, /Ya existe un caso con este correo/);
+    const noInstitutionalEmailCase = await request("/casos", {
+      cookie: advisor.cookie,
+      form: {
+        studentName: "Estudiante sin correo",
+        email: "",
+        sinCorreoInstitucional: "on",
+        contactEmail: "contacto@example.com",
+        program: "Psicología",
+        summary: "Descripción del caso sin correo institucional.",
+      },
+    });
+    assert.equal(noInstitutionalEmailCase.response.status, 302);
+    const listWithoutEmail = await request("/casos", {
+      cookie: advisor.cookie,
+    });
+    assert.match(listWithoutEmail.html, /Sin correo institucional/);
+    assert.match(listWithoutEmail.html, /Sin marcadores registrados/);
+    const noEmailId = listWithoutEmail.html.match(/CASO-\d{4}-\d{4}/g)?.[0];
+    assert.ok(noEmailId);
+    const noEmailDetail = await request(`/casos/${noEmailId}`, {
+      cookie: advisor.cookie,
+    });
+    assert.match(noEmailDetail.html, /Sin correo institucional/);
+    assert.match(noEmailDetail.html, /contacto@example.com/);
+    assert.match(noEmailDetail.html, /Sin marcadores registrados/);
+    assert.doesNotMatch(noEmailDetail.html, /Observaciones del asesor/);
+    const auditAfterNoEmail = await readFile(
+      path.join(auditDirectory, "auditoria.jsonl"),
+      "utf8",
+    );
+    assert.match(auditAfterNoEmail, /"tieneCorreoInstitucional":false/);
     const cases = await request(
       "/cases?estado=NUEVO&programa=Ingenier%C3%ADa%20de%20Sistemas",
       {
@@ -87,11 +210,28 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     const adminHome = await request("/home", { cookie: admin.cookie });
     assert.equal(adminHome.response.status, 200);
     assert.match(adminHome.html, /Usuarios disponibles/);
+    assert.match(adminHome.html, /href="\/home#usuarios"/);
+    assert.doesNotMatch(adminHome.html, /href="\/casos\/nuevo"/);
+    assert.doesNotMatch(adminHome.html, /src="\/img\/logo\.png"/);
     const forbidden = await request("/cases", { cookie: admin.cookie });
     assert.equal(forbidden.response.status, 403);
+    assert.equal(
+      (await request("/casos/data", { cookie: admin.cookie })).response.status,
+      403,
+    );
+    assert.equal(
+      (await request("/casos/nuevo", { cookie: admin.cookie })).response.status,
+      403,
+    );
+    assert.equal(
+      (await request("/casos", { cookie: admin.cookie, form: validCase }))
+        .response.status,
+      403,
+    );
   } finally {
     await new Promise<void>((resolve, reject) =>
       server.close((error) => (error ? reject(error) : resolve())),
     );
+    await rm(auditDirectory, { recursive: true, force: true });
   }
 });
