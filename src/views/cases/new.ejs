@@ -5,51 +5,84 @@
     <h1>Registrar un caso</h1>
     <p class="text-muted">Comparte la información necesaria para iniciar el acompañamiento.</p>
     <% if (Object.keys(errors).length) { %>
-      <div class="alert alert-danger" role="alert">Revisa los campos indicados antes de continuar.</div>
+      <div class="alert alert-danger" role="alert" aria-labelledby="form-errors-title">
+        <h2 class="h6" id="form-errors-title">Revisa los campos indicados antes de continuar.</h2>
+        <ul class="mb-0">
+          <% Object.entries(errors).forEach(([field, message]) => { %>
+            <li><a href="#<%= field === 'markers' ? 'markers-toggle' : field %>"><%= message %></a></li>
+          <% }) %>
+        </ul>
+      </div>
     <% } %>
-    <form action="/casos" method="post" id="case-create-form">
+    <form action="/casos" method="post" id="case-create-form" novalidate>
       <h2 class="h4 mt-4">Datos del estudiante</h2>
       <div class="mb-3">
         <label class="form-label" for="studentName">Nombre del estudiante</label>
-        <input class="form-control" id="studentName" name="studentName" value="<%= values.studentName %>" minlength="3" maxlength="100" required aria-describedby="studentName-error" <%= errors.studentName ? 'aria-invalid=true' : '' %>>
-        <div class="field-error" id="studentName-error"><%= errors.studentName || '' %></div>
+        <input class="form-control <%= errors.studentName ? 'is-invalid' : '' %>" id="studentName" name="studentName" value="<%= values.studentName %>" minlength="3" maxlength="100" required aria-describedby="studentName-error" <%= errors.studentName ? 'aria-invalid="true"' : '' %>>
+        <div class="field-error" id="studentName-error" role="alert"><%= errors.studentName || '' %></div>
       </div>
       <div class="mb-3">
         <label class="form-label" for="email">Correo institucional</label>
-        <input class="form-control" id="email" name="email" type="email" value="<%= values.email %>" pattern="[^@]+@campusucc[.]edu[.]co" title="Usa tu correo @campusucc.edu.co" required aria-describedby="email-help email-error" <%= errors.email ? 'aria-invalid=true' : '' %>>
-        <div class="form-text" id="email-help">Debe terminar en @campusucc.edu.co.</div>
-        <div class="field-error" id="email-error"><%= errors.email || '' %></div>
+        <div class="d-flex flex-column flex-md-row gap-2">
+          <input class="form-control <%= errors.email ? 'is-invalid' : '' %>" id="email" name="email" type="email" value="<%= values.email %>" <%= values.tieneCorreoInstitucional ? 'required' : 'disabled' %> aria-describedby="email-help email-error" data-domain="<%= emailDomain %>" <%= errors.email ? 'aria-invalid="true"' : '' %>>
+          <div class="form-check form-switch align-self-md-center">
+            <input class="form-check-input" id="sinCorreoInstitucional" name="sinCorreoInstitucional" type="checkbox" role="switch" <%= values.tieneCorreoInstitucional ? '' : 'checked' %> aria-controls="contact-alternative">
+            <label class="form-check-label" for="sinCorreoInstitucional">No tiene / no accede al correo institucional</label>
+          </div>
+        </div>
+        <div class="form-text" id="email-help">Debe terminar en @<%= emailDomain %>.</div>
+        <div class="field-error" id="email-error" role="alert"><%= errors.email || '' %></div>
+        <p class="form-text mt-2 mb-0" id="email-state" aria-live="polite"><%= values.tieneCorreoInstitucional ? '' : 'El caso se registrará sin correo institucional.' %></p>
+        <div id="contact-alternative" <%= values.tieneCorreoInstitucional ? 'hidden' : '' %>>
+          <label class="form-label mt-3" for="contactEmail">Correo de contacto alternativo <span class="text-muted">(opcional)</span></label>
+          <input class="form-control <%= errors.contactEmail ? 'is-invalid' : '' %>" id="contactEmail" name="contactEmail" type="email" value="<%= values.contactEmail %>" <%= values.tieneCorreoInstitucional ? 'disabled' : '' %> aria-describedby="contactEmail-error" <%= errors.contactEmail ? 'aria-invalid="true"' : '' %>>
+          <div class="field-error" id="contactEmail-error" role="alert"><%= errors.contactEmail || '' %></div>
+        </div>
       </div>
       <div class="mb-3">
         <label class="form-label" for="program">Carrera</label>
-        <select class="form-select" id="program" name="program" required aria-describedby="program-error" <%= errors.program ? 'aria-invalid=true' : '' %>>
+        <select class="form-select <%= errors.program ? 'is-invalid' : '' %>" id="program" name="program" required aria-describedby="program-error" <%= errors.program ? 'aria-invalid="true"' : '' %>>
           <option value="">Selecciona un programa</option>
           <% programs.forEach((program) => { %><option value="<%= program %>" <%= values.program === program ? 'selected' : '' %>><%= program %></option><% }) %>
         </select>
-        <div class="field-error" id="program-error"><%= errors.program || '' %></div>
+        <div class="field-error" id="program-error" role="alert"><%= errors.program || '' %></div>
       </div>
       <h2 class="h4 mt-4">Motivo</h2>
       <div class="mb-3">
         <label class="form-label" for="summary">Descripción</label>
-        <textarea class="form-control" id="summary" name="summary" rows="5" minlength="20" maxlength="1000" required aria-describedby="summary-count summary-error" <%= errors.summary ? 'aria-invalid=true' : '' %>><%= values.summary %></textarea>
+        <textarea class="form-control <%= errors.summary ? 'is-invalid' : '' %>" id="summary" name="summary" rows="5" minlength="20" maxlength="1000" required aria-describedby="summary-count summary-error" <%= errors.summary ? 'aria-invalid="true"' : '' %>><%= values.summary %></textarea>
         <div class="form-text" id="summary-count"><%= values.summary.length %> / 1000 caracteres</div>
-        <div class="field-error" id="summary-error"><%= errors.summary || '' %></div>
+        <div class="field-error" id="summary-error" role="alert"><%= errors.summary || '' %></div>
       </div>
-      <h2 class="h4 mt-4" id="markers-title">Marcadores críticos</h2>
-      <p class="text-muted">Selecciona al menos una señal para orientar el acompañamiento. No son diagnósticos.</p>
-      <div class="field-error" id="markers-error" role="alert"><%= errors.markers || '' %></div>
-      <% groups.forEach((group) => { %>
-        <fieldset class="marker-group">
-          <legend class="h6"><%= group.nombre %></legend>
-          <% group.marcadores.forEach((marker) => { %>
-            <div class="form-check mb-3">
-              <input class="form-check-input marker-checkbox" type="checkbox" name="markers" id="marker-<%= marker.id %>" value="<%= marker.id %>" <%= values.markers.includes(marker.id) ? 'checked' : '' %> aria-describedby="help-<%= marker.id %> markers-error">
-              <label class="form-check-label fw-semibold" for="marker-<%= marker.id %>"><%= marker.nombre %></label>
-              <div class="form-text" id="help-<%= marker.id %>"><%= marker.descripcion %></div>
-            </div>
+      <div class="mb-3">
+        <label class="form-label" for="observacionesAsesor">Observaciones del asesor <span class="text-muted">(opcional)</span></label>
+        <textarea class="form-control <%= errors.observacionesAsesor ? 'is-invalid' : '' %>" id="observacionesAsesor" name="observacionesAsesor" rows="3" maxlength="500" aria-describedby="observacionesAsesor-count observacionesAsesor-error" placeholder="Notas adicionales, contexto relevante o acuerdos con el estudiante…" <%= errors.observacionesAsesor ? 'aria-invalid="true"' : '' %>><%= values.observacionesAsesor %></textarea>
+        <div class="form-text" id="observacionesAsesor-count"><%= values.observacionesAsesor.length %> / 500 caracteres</div>
+        <div class="field-error" id="observacionesAsesor-error" role="alert"><%= errors.observacionesAsesor || '' %></div>
+      </div>
+      <section class="marker-selection mt-4" aria-labelledby="markers-title">
+        <div class="form-check form-switch">
+          <input class="form-check-input" id="markers-toggle" name="includeMarkers" type="checkbox" role="switch" <%= values.includeMarkers ? 'checked' : '' %> aria-controls="markers-panel" aria-expanded="<%= values.includeMarkers ? 'true' : 'false' %>">
+          <label class="form-check-label fw-semibold" for="markers-toggle">Añadir marcadores críticos</label>
+        </div>
+        <p class="text-muted mt-2 mb-0">Son señales para orientar el acompañamiento, no diagnósticos.</p>
+        <div id="markers-panel" <%= values.includeMarkers ? '' : 'hidden' %>>
+          <h2 class="h4 mt-3" id="markers-title">Marcadores críticos</h2>
+          <div class="field-error" id="markers-error" role="alert"><%= errors.markers || '' %></div>
+          <% groups.forEach((group) => { %>
+            <fieldset class="marker-group">
+              <legend class="h6"><%= group.nombre %></legend>
+              <% group.marcadores.forEach((marker) => { %>
+                <div class="form-check mb-3">
+                  <input class="form-check-input marker-checkbox" type="checkbox" name="markers" id="marker-<%= marker.id %>" value="<%= marker.id %>" <%= values.markers.includes(marker.id) ? 'checked' : '' %> aria-describedby="help-<%= marker.id %> markers-error">
+                  <label class="form-check-label fw-semibold" for="marker-<%= marker.id %>"><%= marker.nombre %></label>
+                  <div class="form-text" id="help-<%= marker.id %>"><%= marker.descripcion %></div>
+                </div>
+              <% }) %>
+            </fieldset>
           <% }) %>
-        </fieldset>
-      <% }) %>
+        </div>
+      </section>
       <div class="d-flex flex-wrap gap-3 mt-4">
         <button class="btn btn-primary-action" type="submit">Guardar caso</button>
         <a class="btn btn-filter-clear" href="/casos">Cancelar</a>

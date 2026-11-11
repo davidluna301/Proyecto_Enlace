@@ -28,4 +28,7 @@ export const env = {
   sessionSecret,
   isProduction,
   sessionMaxAgeMs: 30 * 60 * 1000,
+  institutionalEmailDomain:
+    process.env.INSTITUTIONAL_EMAIL_DOMAIN?.trim().toLowerCase() ||
+    "campusucc.edu.co",
 };

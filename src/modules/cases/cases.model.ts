@@ -8,6 +8,14 @@ export const statusLabels = {
   CERRADO: "Cerrado",
 } as const;
 
+export const statusIcons = {
+  REGISTRADO: "＋",
+  NUEVO: "●",
+  EN_SEGUIMIENTO: "↻",
+  EN_ESPERA: "◷",
+  CERRADO: "✓",
+} as const;
+
 export const urgencyLabels = {
   ALTA: "Alta",
   MEDIA: "Media",
@@ -32,14 +40,20 @@ export interface StudentCase {
   lastMovement: string;
   summary: string;
   events: CaseEvent[];
-  email?: string;
-  markers?: MarcadorId[];
+  email?: string | null;
+  tieneCorreoInstitucional: boolean;
+  contactEmail?: string;
+  observacionesAsesor?: string;
+  markers: MarcadorId[];
 }
 
 export interface NewCase {
   studentName: string;
-  email: string;
+  email: string | null;
+  tieneCorreoInstitucional: boolean;
+  contactEmail?: string;
   program: string;
   summary: string;
+  observacionesAsesor?: string;
   markers: MarcadorId[];
 }

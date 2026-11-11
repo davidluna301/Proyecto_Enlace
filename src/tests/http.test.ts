@@ -63,6 +63,8 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     });
     assert.equal(createForm.response.status, 200);
     assert.match(createForm.html, /Marcadores críticos/);
+    assert.match(createForm.html, /aria-expanded="false"/);
+    assert.match(createForm.html, /id="markers-panel" hidden/);
     assert.match(createForm.html, /aria-current="page"/);
     assert.match(createForm.html, /Navegación principal/);
     assert.doesNotMatch(createForm.html, /src="\/img\/logo\.png"/);
@@ -74,6 +76,7 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
         program: "Psicología",
         summary:
           "Descripción suficientemente detallada para registrar un caso.",
+        includeMarkers: "on",
       },
     });
     assert.equal(invalidCreate.response.status, 422);
@@ -84,7 +87,9 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
       email: "prueba@campusucc.edu.co",
       program: "Psicología",
       summary: "Descripción suficientemente detallada para registrar un caso.",
+      includeMarkers: "on",
       markers: "AUSENTISMO",
+      observacionesAsesor: "Se acordó una conversación de seguimiento.",
     };
     const created = await request("/casos", {
       cookie: advisor.cookie,
@@ -116,6 +121,7 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
       cookie: advisor.cookie,
     });
     assert.match(newDetail.html, /Ausentismo crónico o intermitente/);
+    assert.match(newDetail.html, /Se acordó una conversación de seguimiento/);
     const data = await request("/casos/data?estado=REGISTRADO&q=Estudiante", {
       cookie: advisor.cookie,
     });
@@ -133,6 +139,37 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     });
     assert.equal(duplicate.response.status, 422);
     assert.match(duplicate.html, /Ya existe un caso con este correo/);
+    const noInstitutionalEmailCase = await request("/casos", {
+      cookie: advisor.cookie,
+      form: {
+        studentName: "Estudiante sin correo",
+        email: "",
+        sinCorreoInstitucional: "on",
+        contactEmail: "contacto@example.com",
+        program: "Psicología",
+        summary: "Descripción del caso sin correo institucional.",
+      },
+    });
+    assert.equal(noInstitutionalEmailCase.response.status, 302);
+    const listWithoutEmail = await request("/casos", {
+      cookie: advisor.cookie,
+    });
+    assert.match(listWithoutEmail.html, /Sin correo institucional/);
+    assert.match(listWithoutEmail.html, /Sin marcadores registrados/);
+    const noEmailId = listWithoutEmail.html.match(/CASO-\d{4}-\d{4}/g)?.[0];
+    assert.ok(noEmailId);
+    const noEmailDetail = await request(`/casos/${noEmailId}`, {
+      cookie: advisor.cookie,
+    });
+    assert.match(noEmailDetail.html, /Sin correo institucional/);
+    assert.match(noEmailDetail.html, /contacto@example.com/);
+    assert.match(noEmailDetail.html, /Sin marcadores registrados/);
+    assert.doesNotMatch(noEmailDetail.html, /Observaciones del asesor/);
+    const auditAfterNoEmail = await readFile(
+      path.join(auditDirectory, "auditoria.jsonl"),
+      "utf8",
+    );
+    assert.match(auditAfterNoEmail, /"tieneCorreoInstitucional":false/);
     const cases = await request(
       "/cases?estado=NUEVO&programa=Ingenier%C3%ADa%20de%20Sistemas",
       {

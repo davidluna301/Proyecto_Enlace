@@ -1,7 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
-import { statusLabels, urgencyLabels } from "./cases.model";
+import { statusIcons, statusLabels, urgencyLabels } from "./cases.model";
 import { GRUPOS_MARCADORES } from "../../data/marcadores";
 import { PROGRAMAS } from "../../data/programas";
+import { env } from "../../config/env";
 import {
   DuplicateEmailError,
   validateCase,
@@ -35,6 +36,7 @@ export class CasesController {
         title: "Casos de estudiantes",
         ...listing,
         statusLabels,
+        statusIcons,
         urgencyLabels,
         created,
       });
@@ -71,13 +73,24 @@ export class CasesController {
       errors,
       programs: PROGRAMAS,
       groups: GRUPOS_MARCADORES,
+      emailDomain: env.institutionalEmailDomain,
     });
   }
 
   showCreate = (_req: Request, res: Response): void => {
     this.renderForm(
       res,
-      { studentName: "", email: "", program: "", summary: "", markers: [] },
+      {
+        studentName: "",
+        email: "",
+        tieneCorreoInstitucional: true,
+        contactEmail: "",
+        program: "",
+        summary: "",
+        observacionesAsesor: "",
+        includeMarkers: false,
+        markers: [],
+      },
       {},
     );
   };
@@ -99,9 +112,13 @@ export class CasesController {
     const values: CaseFormValues = {
       studentName: field("studentName"),
       email: field("email"),
+      tieneCorreoInstitucional: field("sinCorreoInstitucional") !== "on",
+      contactEmail: field("contactEmail"),
       program: field("program"),
       summary: field("summary"),
-      markers,
+      observacionesAsesor: field("observacionesAsesor"),
+      includeMarkers: field("includeMarkers") === "on",
+      markers: field("includeMarkers") === "on" ? markers : [],
     };
     const errors = validateCase(values);
     if (Object.keys(errors).length) {
@@ -112,6 +129,8 @@ export class CasesController {
     try {
       const created = await this.casesService.create(values);
       res.locals.createdCaseId = created.id;
+      res.locals.createdCaseHasInstitutionalEmail =
+        created.tieneCorreoInstitucional !== false;
       next();
     } catch (error) {
       if (error instanceof DuplicateEmailError) {
@@ -142,6 +161,7 @@ export class CasesController {
       res.render("cases/detail", {
         title: studentCase.studentName,
         studentCase,
+        statusIcons,
         statusLabels,
         urgencyLabels,
         groups: GRUPOS_MARCADORES.map((group) => ({
