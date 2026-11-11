@@ -1,0 +1,70 @@
+<section class="container py-5">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">Acompañamiento estudiantil</p>
+      <h1>Casos de estudiantes</h1>
+      <p class="text-muted mb-0">Cada caso es una oportunidad para estar más cerca.</p>
+    </div>
+    <span class="count-pill"><strong><%= cases.length %></strong> <%= cases.length === 1 ? 'caso' : 'casos' %></span>
+  </div>
+
+  <form class="filter-panel mt-4" action="/cases" method="get" role="search" aria-label="Buscar y filtrar casos">
+    <div class="filter-search">
+      <label class="form-label" for="buscar">Buscar estudiante o identificador</label>
+      <input class="form-control" id="buscar" name="buscar" type="search" placeholder="Ej. Valentina o EN-2026-001" value="<%= filters.search %>">
+    </div>
+    <div>
+      <label class="form-label" for="estado">Estado del caso</label>
+      <select class="form-select" id="estado" name="estado">
+        <option value="">Todos los estados</option>
+        <% Object.entries(statusLabels).forEach(([value, label]) => { %>
+          <option value="<%= value %>" <%= filters.status === value ? 'selected' : '' %>><%= label %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div>
+      <label class="form-label" for="programa">Programa</label>
+      <select class="form-select" id="programa" name="programa">
+        <option value="">Todos los programas</option>
+        <% programs.forEach((program) => { %>
+          <option value="<%= program %>" <%= filters.program === program ? 'selected' : '' %>><%= program %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="filter-actions">
+      <button class="btn btn-primary-action" type="submit">Aplicar filtros</button>
+      <a class="btn btn-filter-clear" href="/cases">Limpiar</a>
+    </div>
+  </form>
+
+  <% if (cases.length) { %>
+    <div class="case-grid mt-4">
+      <% cases.forEach((studentCase) => { %>
+        <article class="case-card">
+          <div class="case-card-top">
+            <span class="case-id"><%= studentCase.id %></span>
+            <span class="urgency-chip urgency-<%= studentCase.urgency.toLowerCase() %>">
+              <span aria-hidden="true"><%= studentCase.urgency === 'ALTA' ? '!' : studentCase.urgency === 'MEDIA' ? '◷' : '✓' %></span>
+              Urgencia <%= urgencyLabels[studentCase.urgency] %>
+            </span>
+          </div>
+          <h2><a href="/cases/<%= encodeURIComponent(studentCase.id) %>"><%= studentCase.studentName %></a></h2>
+          <p class="case-program"><%= studentCase.program %></p>
+          <span class="status-chip status-<%= studentCase.status.toLowerCase() %>"><%= statusLabels[studentCase.status] %></span>
+          <p class="case-summary"><%= studentCase.summary %></p>
+          <div class="case-card-footer">
+            <span>Último movimiento</span>
+            <time datetime="<%= studentCase.lastMovement %>"><%= formatDate(studentCase.lastMovement) %></time>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <section class="empty-state mt-4" aria-labelledby="empty-title">
+      <span class="empty-mark" aria-hidden="true">⌕</span>
+      <h2 id="empty-title">No encontramos casos con esos filtros</h2>
+      <p>Prueba con otro nombre, identificador o estado. Si buscabas empezar de nuevo, puedes ver todos los casos.</p>
+      <a class="btn btn-primary-action" href="/cases">Ver todos los casos</a>
+    </section>
+  <% } %>
+</section>

@@ -1,0 +1,27 @@
+<section class="container py-5">
+  <div class="welcome-panel">
+    <div>
+      <p class="eyebrow">Tu espacio de acompañamiento</p>
+      <h1>Hola, <%= currentUser.name.split(" ")[0] %>.</h1>
+      <p class="welcome-copy">Cada conversación cuenta. Aquí puedes revisar cómo va el proceso de tus estudiantes y encontrar el siguiente paso.</p>
+      <a class="btn btn-primary-action btn-lg mt-2" href="/cases">Ver casos de estudiantes <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="welcome-mark" aria-hidden="true"><span>EN</span><span class="welcome-mark-dot"></span></div>
+  </div>
+  <div class="row g-4 mt-2">
+    <div class="col-md-6">
+      <article class="info-card h-100">
+        <span class="info-icon" aria-hidden="true">♡</span>
+        <h2>Un espacio para escuchar</h2>
+        <p>Consulta cada historia con calma y acompaña a cada estudiante desde sus necesidades.</p>
+      </article>
+    </div>
+    <div class="col-md-6">
+      <article class="info-card h-100">
+        <span class="info-icon" aria-hidden="true">↗</span>
+        <h2>Avances a la vista</h2>
+        <p>Encuentra el estado del proceso, su nivel de atención y los pasos que ya se han dado.</p>
+      </article>
+    </div>
+  </div>
+</section>

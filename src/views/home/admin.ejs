@@ -1,0 +1,26 @@
+<section class="container py-5">
+  <div class="welcome-panel admin-panel">
+    <div>
+      <p class="eyebrow">Espacio de administración</p>
+      <h1>Hola, <%= currentUser.name.split(" ")[0] %>.</h1>
+      <p class="welcome-copy">El panel administrativo completo está en construcción. Desde aquí puedes consultar las cuentas de demostración disponibles.</p>
+      <span class="status-chip status-waiting">Próximamente</span>
+    </div>
+    <div class="welcome-mark" aria-hidden="true"><span>EN</span><span class="welcome-mark-dot"></span></div>
+  </div>
+  <section class="admin-users mt-5" aria-labelledby="users-title">
+    <p class="eyebrow">Acceso de demostración</p>
+    <h2 id="users-title">Usuarios disponibles</h2>
+    <div class="row g-3 mt-1">
+      <% users.forEach((user) => { %>
+        <div class="col-md-6">
+          <article class="user-card">
+            <span class="avatar" aria-hidden="true"><%= user.name.charAt(0) %></span>
+            <div><h3><%= user.name %></h3><p><%= user.email %></p></div>
+            <span class="role-chip"><%= user.role === 'ASESOR' ? 'Asesor' : 'Administrador' %></span>
+          </article>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+</section>

@@ -1,0 +1,46 @@
+<section class="container py-5 detail-container">
+  <a class="back-link" href="/cases">← Volver a los casos</a>
+  <article class="detail-card mt-4">
+    <header class="detail-heading">
+      <div>
+        <p class="eyebrow"><%= studentCase.id %> · <%= studentCase.program %></p>
+        <h1><%= studentCase.studentName %></h1>
+        <p class="detail-summary"><%= studentCase.summary %></p>
+      </div>
+      <div class="detail-badges">
+        <span class="status-chip status-<%= studentCase.status.toLowerCase() %>"><%= statusLabels[studentCase.status] %></span>
+        <span class="urgency-chip urgency-<%= studentCase.urgency.toLowerCase() %>">
+          <span aria-hidden="true"><%= studentCase.urgency === 'ALTA' ? '!' : studentCase.urgency === 'MEDIA' ? '◷' : '✓' %></span>
+          Urgencia <%= urgencyLabels[studentCase.urgency] %>
+        </span>
+      </div>
+    </header>
+
+    <section class="timeline-section" aria-labelledby="timeline-title">
+      <div class="section-title-row">
+        <div><p class="eyebrow">Lo que hemos recorrido</p><h2 id="timeline-title">Seguimiento del caso</h2></div>
+        <span class="event-count"><%= studentCase.events.length %> <%= studentCase.events.length === 1 ? 'momento' : 'momentos' %></span>
+      </div>
+      <ol class="timeline">
+        <% studentCase.events.forEach((event) => { %>
+          <li class="timeline-item">
+            <span class="timeline-dot" aria-hidden="true"></span>
+            <div class="timeline-content">
+              <div class="timeline-meta">
+                <h3><%= event.type %></h3>
+                <time datetime="<%= event.date %>"><%= formatDate(event.date) %></time>
+              </div>
+              <p><%= event.description %></p>
+            </div>
+          </li>
+        <% }) %>
+      </ol>
+    </section>
+
+    <aside class="next-step">
+      <span class="next-step-icon" aria-hidden="true">↗</span>
+      <div><h2>El siguiente paso</h2><p>Continúa la conversación y registra aquí el próximo avance de este acompañamiento.</p></div>
+      <span class="coming-soon">Próximamente</span>
+    </aside>
+  </article>
+</section>
