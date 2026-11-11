@@ -52,6 +52,9 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     });
     assert.equal(createForm.response.status, 200);
     assert.match(createForm.html, /Marcadores críticos/);
+    assert.match(createForm.html, /aria-current="page"/);
+    assert.match(createForm.html, /Navegación principal/);
+    assert.doesNotMatch(createForm.html, /src="\/img\/logo\.png"/);
     const invalidCreate = await request("/casos", {
       cookie: advisor.cookie,
       form: {
@@ -133,6 +136,9 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     const adminHome = await request("/home", { cookie: admin.cookie });
     assert.equal(adminHome.response.status, 200);
     assert.match(adminHome.html, /Usuarios disponibles/);
+    assert.match(adminHome.html, /href="\/home#usuarios"/);
+    assert.doesNotMatch(adminHome.html, /href="\/casos\/nuevo"/);
+    assert.doesNotMatch(adminHome.html, /src="\/img\/logo\.png"/);
     const forbidden = await request("/cases", { cookie: admin.cookie });
     assert.equal(forbidden.response.status, 403);
     assert.equal(
