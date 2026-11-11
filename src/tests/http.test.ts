@@ -47,6 +47,52 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     assert.equal(advisor.response.status, 302);
     assert.match(advisor.response.headers.get("set-cookie") ?? "", /HttpOnly/i);
     assert.ok(advisor.cookie);
+    const createForm = await request("/casos/nuevo", {
+      cookie: advisor.cookie,
+    });
+    assert.equal(createForm.response.status, 200);
+    assert.match(createForm.html, /Marcadores críticos/);
+    const invalidCreate = await request("/casos", {
+      cookie: advisor.cookie,
+      form: {
+        studentName: "Estudiante de prueba",
+        email: "prueba@otro.edu.co",
+        program: "Psicología",
+        summary:
+          "Descripción suficientemente detallada para registrar un caso.",
+      },
+    });
+    assert.equal(invalidCreate.response.status, 422);
+    assert.match(invalidCreate.html, /Estudiante de prueba/);
+    assert.match(invalidCreate.html, /Selecciona al menos un marcador válido/);
+    const validCase = {
+      studentName: "Estudiante de prueba",
+      email: "prueba@campusucc.edu.co",
+      program: "Psicología",
+      summary: "Descripción suficientemente detallada para registrar un caso.",
+      markers: "AUSENTISMO",
+    };
+    const created = await request("/casos", {
+      cookie: advisor.cookie,
+      form: validCase,
+    });
+    assert.equal(created.response.status, 302);
+    assert.equal(created.response.headers.get("location"), "/casos");
+    const newList = await request("/casos", { cookie: advisor.cookie });
+    assert.match(newList.html, /El caso se registró correctamente/);
+    assert.match(newList.html, /Estudiante de prueba/);
+    const newId = newList.html.match(/CASO-\d{4}-\d{4}/)?.[0];
+    assert.ok(newId);
+    const newDetail = await request(`/casos/${newId}`, {
+      cookie: advisor.cookie,
+    });
+    assert.match(newDetail.html, /Ausentismo crónico o intermitente/);
+    const duplicate = await request("/casos", {
+      cookie: advisor.cookie,
+      form: validCase,
+    });
+    assert.equal(duplicate.response.status, 422);
+    assert.match(duplicate.html, /Ya existe un caso con este correo/);
     const cases = await request(
       "/cases?estado=NUEVO&programa=Ingenier%C3%ADa%20de%20Sistemas",
       {
@@ -89,6 +135,15 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     assert.match(adminHome.html, /Usuarios disponibles/);
     const forbidden = await request("/cases", { cookie: admin.cookie });
     assert.equal(forbidden.response.status, 403);
+    assert.equal(
+      (await request("/casos/nuevo", { cookie: admin.cookie })).response.status,
+      403,
+    );
+    assert.equal(
+      (await request("/casos", { cookie: admin.cookie, form: validCase }))
+        .response.status,
+      403,
+    );
   } finally {
     await new Promise<void>((resolve, reject) =>
       server.close((error) => (error ? reject(error) : resolve())),

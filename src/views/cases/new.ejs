@@ -1,0 +1,60 @@
+<section class="container py-5 detail-container">
+  <a class="back-link" href="/casos">← Volver a los casos</a>
+  <div class="detail-card mt-4 p-4 p-md-5">
+    <p class="eyebrow">Acompañamiento estudiantil</p>
+    <h1>Registrar un caso</h1>
+    <p class="text-muted">Comparte la información necesaria para iniciar el acompañamiento.</p>
+    <% if (Object.keys(errors).length) { %>
+      <div class="alert alert-danger" role="alert">Revisa los campos indicados antes de continuar.</div>
+    <% } %>
+    <form action="/casos" method="post" id="case-create-form">
+      <h2 class="h4 mt-4">Datos del estudiante</h2>
+      <div class="mb-3">
+        <label class="form-label" for="studentName">Nombre del estudiante</label>
+        <input class="form-control" id="studentName" name="studentName" value="<%= values.studentName %>" minlength="3" maxlength="100" required aria-describedby="studentName-error" <%= errors.studentName ? 'aria-invalid=true' : '' %>>
+        <div class="field-error" id="studentName-error"><%= errors.studentName || '' %></div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="email">Correo institucional</label>
+        <input class="form-control" id="email" name="email" type="email" value="<%= values.email %>" pattern="[^@]+@campusucc[.]edu[.]co" title="Usa tu correo @campusucc.edu.co" required aria-describedby="email-help email-error" <%= errors.email ? 'aria-invalid=true' : '' %>>
+        <div class="form-text" id="email-help">Debe terminar en @campusucc.edu.co.</div>
+        <div class="field-error" id="email-error"><%= errors.email || '' %></div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="program">Carrera</label>
+        <select class="form-select" id="program" name="program" required aria-describedby="program-error" <%= errors.program ? 'aria-invalid=true' : '' %>>
+          <option value="">Selecciona un programa</option>
+          <% programs.forEach((program) => { %><option value="<%= program %>" <%= values.program === program ? 'selected' : '' %>><%= program %></option><% }) %>
+        </select>
+        <div class="field-error" id="program-error"><%= errors.program || '' %></div>
+      </div>
+      <h2 class="h4 mt-4">Motivo</h2>
+      <div class="mb-3">
+        <label class="form-label" for="summary">Descripción</label>
+        <textarea class="form-control" id="summary" name="summary" rows="5" minlength="20" maxlength="1000" required aria-describedby="summary-count summary-error" <%= errors.summary ? 'aria-invalid=true' : '' %>><%= values.summary %></textarea>
+        <div class="form-text" id="summary-count"><%= values.summary.length %> / 1000 caracteres</div>
+        <div class="field-error" id="summary-error"><%= errors.summary || '' %></div>
+      </div>
+      <h2 class="h4 mt-4" id="markers-title">Marcadores críticos</h2>
+      <p class="text-muted">Selecciona al menos una señal para orientar el acompañamiento. No son diagnósticos.</p>
+      <div class="field-error" id="markers-error" role="alert"><%= errors.markers || '' %></div>
+      <% groups.forEach((group) => { %>
+        <fieldset class="marker-group">
+          <legend class="h6"><%= group.nombre %></legend>
+          <% group.marcadores.forEach((marker) => { %>
+            <div class="form-check mb-3">
+              <input class="form-check-input marker-checkbox" type="checkbox" name="markers" id="marker-<%= marker.id %>" value="<%= marker.id %>" <%= values.markers.includes(marker.id) ? 'checked' : '' %> aria-describedby="help-<%= marker.id %> markers-error">
+              <label class="form-check-label fw-semibold" for="marker-<%= marker.id %>"><%= marker.nombre %></label>
+              <div class="form-text" id="help-<%= marker.id %>"><%= marker.descripcion %></div>
+            </div>
+          <% }) %>
+        </fieldset>
+      <% }) %>
+      <div class="d-flex flex-wrap gap-3 mt-4">
+        <button class="btn btn-primary-action" type="submit">Guardar caso</button>
+        <a class="btn btn-filter-clear" href="/casos">Cancelar</a>
+      </div>
+    </form>
+  </div>
+  <script src="/js/case-form.js" defer></script>
+</section>

@@ -1,4 +1,7 @@
+import type { MarcadorId } from "../../data/marcadores";
+
 export const statusLabels = {
+  REGISTRADO: "Registrado",
   NUEVO: "Nuevo",
   EN_SEGUIMIENTO: "En seguimiento",
   EN_ESPERA: "En espera",
@@ -29,4 +32,14 @@ export interface StudentCase {
   lastMovement: string;
   summary: string;
   events: CaseEvent[];
+  email?: string;
+  markers?: MarcadorId[];
+}
+
+export interface NewCase {
+  studentName: string;
+  email: string;
+  program: string;
+  summary: string;
+  markers: MarcadorId[];
 }
