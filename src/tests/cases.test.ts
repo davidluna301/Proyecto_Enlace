@@ -3,6 +3,7 @@ import test from "node:test";
 import type { StudentCase } from "../modules/cases/cases.model";
 import {
   CasesService,
+  validateCase,
   type CaseFilter,
   type CasesRepository,
 } from "../modules/cases/cases.service";
@@ -42,6 +43,7 @@ test("el servicio usa el repositorio inyectado para programas y filtros", async 
     program: "Programa externo",
     search: "  TEST-001  ",
   });
+
   assert.deepEqual(result.programs, ["Programa externo"]);
   assert.deepEqual(receivedFilter, {
     status: "NUEVO",
@@ -56,6 +58,30 @@ test("el servicio usa el repositorio inyectado para programas y filtros", async 
   );
   assert.equal(sample.events[0].type, "Segundo");
   assert.equal(await service.getById("missing"), null);
+});
+
+test("el registro valida límites, dominio, programa y marcadores", () => {
+  const valid = {
+    studentName: "Ana",
+    email: "ana@campusucc.edu.co",
+    program: "Psicología",
+    summary: "x".repeat(20),
+    markers: ["AUSENTISMO"],
+  };
+  assert.deepEqual(validateCase(valid), {});
+  assert.ok(validateCase({ ...valid, studentName: "ab" }).studentName);
+  assert.ok(
+    validateCase({ ...valid, studentName: "a".repeat(101) }).studentName,
+  );
+  assert.ok(
+    validateCase({ ...valid, email: "ana..uno@campusucc.edu.co" }).email,
+  );
+  assert.ok(validateCase({ ...valid, email: "ana@ucc.edu.co" }).email);
+  assert.ok(validateCase({ ...valid, program: "otro" }).program);
+  assert.ok(validateCase({ ...valid, summary: "x".repeat(19) }).summary);
+  assert.ok(validateCase({ ...valid, summary: "x".repeat(1001) }).summary);
+  assert.ok(validateCase({ ...valid, markers: [] }).markers);
+  assert.ok(validateCase({ ...valid, markers: ["INVENTADO"] }).markers);
 });
 
 test("el repositorio mock combina búsqueda, estado y programa", async () => {
