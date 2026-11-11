@@ -39,9 +39,10 @@ Para mantener el acceso de la demostración anterior, `asesor@enlace.edu.co` tam
 - Autorización por rol y rutas protegidas.
 - Inicio diferenciado para asesor y administrador.
 - Navegación lateral adaptable por rol; el asesor puede visitar `/casos` y registrar un caso en `/casos/nuevo`.
-- Registro en memoria con correo estudiantil `@campusucc.edu.co`, validación y al menos un marcador del [catálogo de investigación](./docs/investigacion/marcadores-desercion.md). Los casos y la comprobación de duplicados se reinician al detener el proceso.
+- Registro en memoria con validación en cliente y servidor. El dominio del correo estudiantil se configura en `INSTITUTIONAL_EMAIL_DOMAIN` (por defecto, `campusucc.edu.co`); también se puede registrar un caso sin correo institucional y proporcionar un correo alternativo opcional. Los casos y la comprobación de duplicados entre casos no cerrados se reinician al detener el proceso.
+- El nombre admite solo letras y espacios; la descripción tiene entre 20 y 1000 caracteres y las observaciones opcionales del asesor hasta 500. Los marcadores están desactivados por defecto; si se habilitan, se requiere al menos uno del [catálogo de investigación](./docs/investigacion/marcadores-desercion.md). Al apagarlos se limpia la selección.
 - Búsqueda y filtros por estado/programa en vivo, con primera carga renderizada en el servidor. Sin JavaScript se utiliza el botón «Buscar». «Limpiar» permanece visible para facilitar el restablecimiento.
-- Detalle de caso con cronología y marcadores agrupados por categoría.
+- Detalle de caso adaptable con datos del estudiante, cronología, marcadores agrupados por categoría y observaciones del asesor cuando existen; el resumen de estado aparece en un panel que se ubica primero en pantallas pequeñas.
 - Bootstrap 5, estilos y logos servidos desde `public/`; sin CDN ni fuentes remotas.
 
 ## Validación
@@ -60,3 +61,5 @@ Los casos y usuarios mock están en `src/data/`. El servicio de casos depende de
 Las cuentas y los casos son únicamente de demostración. La sesión usa el almacén en memoria predeterminado de Express, apropiado solo para este MVP local; antes de desplegar producción, se debe reemplazar por un almacén persistente y configurar secretos seguros.
 
 La bitácora local `logs/auditoria.jsonl` registra el identificador del asesor, la acción, el identificador del caso y la fecha, sin guardar el correo ni los marcadores. Está excluida de Git. Los marcadores son señales de acompañamiento, no diagnósticos; no se deben utilizar datos personales reales en este MVP.
+
+Para registrar estudiantes sin acceso a su correo institucional, el formulario lo hace opcional y ofrece un correo de contacto alternativo, también opcional (no se solicita teléfono). Esta decisión refleja la realidad operativa del asesor sin bloquear el registro ni pedir más datos de contacto de los necesarios. La selección de marcadores se limpia al desactivar el control y no se exige ninguno si permanece apagado.
