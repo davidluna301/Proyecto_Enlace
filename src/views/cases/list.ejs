@@ -42,7 +42,7 @@
   <p id="filter-loading" class="filter-loading mt-3" role="status" hidden>Actualizando casos…</p>
   <p id="filter-error" class="field-error" role="alert" hidden></p>
   <p class="visually-hidden" id="filter-announcement" aria-live="polite"></p>
-  <div id="case-results" data-urgency-alta="<%= urgencyLabels.ALTA %>" data-urgency-media="<%= urgencyLabels.MEDIA %>" data-urgency-baja="<%= urgencyLabels.BAJA %>">
+  <div id="case-results" data-urgency-alta="<%= urgencyLabels.ALTA %>" data-urgency-media="<%= urgencyLabels.MEDIA %>" data-urgency-baja="<%= urgencyLabels.BAJA %>" data-status-registrado="<%= statusIcons.REGISTRADO %>" data-status-nuevo="<%= statusIcons.NUEVO %>" data-status-en_seguimiento="<%= statusIcons.EN_SEGUIMIENTO %>" data-status-en_espera="<%= statusIcons.EN_ESPERA %>" data-status-cerrado="<%= statusIcons.CERRADO %>">
   <% if (cases.length) { %>
     <div class="case-grid mt-4">
       <% cases.forEach((studentCase) => { %>
@@ -56,7 +56,9 @@
           </div>
           <h2><a href="/casos/<%= encodeURIComponent(studentCase.id) %>"><%= studentCase.studentName %></a></h2>
           <p class="case-program"><%= studentCase.program %></p>
-          <span class="status-chip status-<%= studentCase.status.toLowerCase() %>"><%= statusLabels[studentCase.status] %></span>
+          <span class="status-chip status-<%= studentCase.status.toLowerCase() %>"><span aria-hidden="true"><%= statusIcons[studentCase.status] %></span><%= statusLabels[studentCase.status] %></span>
+          <% if (studentCase.tieneCorreoInstitucional === false) { %><span class="contact-status-chip">Sin correo institucional</span><% } %>
+          <% if (!studentCase.markers?.length) { %><p class="neutral-case-note">Sin marcadores registrados</p><% } %>
           <p class="case-summary"><%= studentCase.summary %></p>
           <div class="case-card-footer">
             <span>Último movimiento</span>

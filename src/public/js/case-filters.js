@@ -17,6 +17,14 @@
     MEDIA: [results.dataset.urgencyMedia, "◷"],
     BAJA: [results.dataset.urgencyBaja, "✓"],
   };
+  const statuses = Object.fromEntries(
+    ["REGISTRADO", "NUEVO", "EN_SEGUIMIENTO", "EN_ESPERA", "CERRADO"].map(
+      (status) => [
+        status,
+        results.dataset[`status-${status.toLowerCase()}`],
+      ],
+    ),
+  );
   const dateFormat = new Intl.DateTimeFormat("es-CO", {
     dateStyle: "long",
     timeStyle: "short",
@@ -58,15 +66,25 @@
     );
     time.dateTime = item.lastMovement;
     footer.append(node("span", "", "Último movimiento"), time);
+    const statusChip = node(
+      "span",
+      `status-chip status-${item.status.toLowerCase()}`,
+    );
+    const statusIcon = node("span", "", statuses[item.status]);
+    statusIcon.setAttribute("aria-hidden", "true");
+    statusChip.append(statusIcon, document.createTextNode(labels[item.status]));
+    const markers = Array.isArray(item.markers) ? item.markers : [];
     article.append(
       top,
       heading,
       node("p", "case-program", item.program),
-      node(
-        "span",
-        `status-chip status-${item.status.toLowerCase()}`,
-        labels[item.status],
-      ),
+      statusChip,
+      ...(item.tieneCorreoInstitucional === false
+        ? [node("span", "contact-status-chip", "Sin correo institucional")]
+        : []),
+      ...(markers.length
+        ? []
+        : [node("p", "neutral-case-note", "Sin marcadores registrados")]),
       node("p", "case-summary", item.summary),
       footer,
     );
