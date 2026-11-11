@@ -1,0 +1,47 @@
+{
+  "name": "enlace-mvp1",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MVP visual de la plataforma ENLACE UCC",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc && node dist/scripts/copy-assets.js",
+    "start": "node dist/server.js",
+    "test": "npm run build && node --test dist/tests/cases.test.js dist/tests/http.test.js",
+    "lint": "eslint .",
+    "format": "prettier --write README.md package.json package-lock.json tsconfig.json eslint.config.mjs \"src/**/*.ts\" src/public/css/styles.css",
+    "format:check": "prettier --check README.md package.json package-lock.json tsconfig.json eslint.config.mjs \"src/**/*.ts\" src/public/css/styles.css"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    }
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bootstrap": "^5.3.8",
+    "dotenv": "^16.6.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.18.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/bcrypt": "^5.0.2",
+    "@types/ejs": "^3.1.5",
+    "@types/express": "^5.0.3",
+    "@types/express-ejs-layouts": "^2.5.4",
+    "@types/express-session": "^1.18.2",
+    "@types/node": "^24.10.0",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4"
+  }
+}
