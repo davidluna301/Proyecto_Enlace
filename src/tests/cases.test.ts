@@ -31,6 +31,9 @@ test("el servicio usa el repositorio inyectado para programas y filtros", async 
     async getById(id) {
       return id === sample.id ? sample : null;
     },
+    async create() {
+      return sample;
+    },
   };
   const service = new CasesService(repository);
 

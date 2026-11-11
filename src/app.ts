@@ -73,6 +73,7 @@ export function createApp() {
     });
   });
   app.use("/cases", createCasesRouter(casesController));
+  app.use("/casos", createCasesRouter(casesController));
   app.use(notFoundHandler);
   app.use(errorHandler);
 
