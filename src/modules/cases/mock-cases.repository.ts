@@ -38,7 +38,14 @@ export class MockCasesRepository implements CasesRepository {
   }
 
   async create(input: NewCase): Promise<StudentCase> {
-    if (this.cases.some((item) => item.email?.toLowerCase() === input.email)) {
+    if (
+      input.email &&
+      this.cases.some(
+        (item) =>
+          item.status !== "CERRADO" &&
+          item.email?.toLowerCase() === input.email,
+      )
+    ) {
       throw new DuplicateEmailError("Ya existe un caso para este correo.");
     }
     const now = new Date();

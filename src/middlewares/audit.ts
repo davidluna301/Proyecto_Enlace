@@ -18,6 +18,10 @@ export function auditCaseCreation(
           action: "CASO_CREADO",
           actorId: req.session.userId,
           caseId: res.locals.createdCaseId,
+          metadata: {
+            tieneCorreoInstitucional:
+              res.locals.createdCaseHasInstitutionalEmail,
+          },
           timestamp: new Date().toISOString(),
         }) + "\n",
         { encoding: "utf8", mode: 0o600 },
