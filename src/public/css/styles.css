@@ -20,6 +20,19 @@
   --shadow-card: 0 12px 32px rgb(22 57 67 / 7%);
 }
 
+.field-error {
+  color: var(--color-danger-dark);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.marker-group {
+  margin: 1.25rem 0;
+  padding: 1rem 1.25rem 0;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
 * {
   box-sizing: border-box;
 }

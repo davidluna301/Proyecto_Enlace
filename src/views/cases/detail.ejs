@@ -16,6 +16,16 @@
       </div>
     </header>
 
+    <% if (groups.length) { %>
+      <section class="timeline-section" aria-labelledby="selected-markers-title">
+        <p class="eyebrow">Señales para orientar el acompañamiento</p>
+        <h2 id="selected-markers-title" class="h4">Marcadores críticos</h2>
+        <% groups.forEach((group) => { %>
+          <h3 class="h6 mt-3"><%= group.nombre %></h3>
+          <ul><% group.marcadores.forEach((marker) => { %><li><%= marker.nombre %></li><% }) %></ul>
+        <% }) %>
+      </section>
+    <% } %>
     <section class="timeline-section" aria-labelledby="timeline-title">
       <div class="section-title-row">
         <div><p class="eyebrow">Lo que hemos recorrido</p><h2 id="timeline-title">Seguimiento del caso</h2></div>
