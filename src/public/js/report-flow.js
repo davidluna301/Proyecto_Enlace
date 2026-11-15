@@ -421,12 +421,97 @@
   reviewed.addEventListener("change", () => {
     confirmButton.disabled = !reviewed.checked;
   });
-  confirmButton.addEventListener("click", () => {
-    confirmation.close();
-    downloadStatus.textContent =
-      "La generación del PDF estará disponible en el siguiente entregable.";
+  confirmButton.addEventListener("click", async () => {
+    let fileHandle;
+    confirmButton.disabled = true;
+    if (typeof window.showSaveFilePicker === "function") {
+      try {
+        fileHandle = await window.showSaveFilePicker({
+          suggestedName: suggestedFilename(),
+          types: [
+            {
+              description: "Documento PDF",
+              accept: { "application/pdf": [".pdf"] },
+            },
+          ],
+        });
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          errorMessage.textContent =
+            "No pudimos abrir el selector de archivos. Inténtalo de nuevo.";
+          errorMessage.hidden = false;
+        }
+        confirmButton.disabled = !reviewed.checked;
+        return;
+      }
+    }
+
+    confirmButton.textContent = "Generando reporte…";
+    downloadStatus.textContent = "Generando el PDF…";
     downloadStatus.hidden = false;
+    errorMessage.hidden = true;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch(
+        `/reportes/${encodeURIComponent(selectedCase.id)}/pdf`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/pdf",
+          },
+          signal: controller.signal,
+          body: JSON.stringify({
+            confirmado: true,
+            secciones: activeSectionIds(),
+          }),
+        },
+      );
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "No pudimos generar el reporte.");
+      }
+      const blob = await response.blob();
+      const disposition = response.headers.get("Content-Disposition") || "";
+      const filename =
+        disposition.match(/filename="([^"]+)"/)?.[1] || suggestedFilename();
+      if (fileHandle) {
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+      } else {
+        const url = URL.createObjectURL(blob);
+        const link = makeNode("a");
+        link.href = url;
+        link.download = filename;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+      confirmation.close();
+      downloadStatus.textContent = "El reporte se descargó correctamente.";
+      announcement.textContent = "El reporte se descargó correctamente.";
+    } catch (error) {
+      errorMessage.textContent =
+        error.name === "AbortError"
+          ? "La generación tardó demasiado. Inténtalo de nuevo."
+          : error.message ||
+            "No pudimos generar el reporte. Inténtalo de nuevo.";
+      errorMessage.hidden = false;
+      downloadStatus.hidden = true;
+    } finally {
+      window.clearTimeout(timeout);
+      confirmButton.textContent = "Confirmar y descargar";
+      confirmButton.disabled = !reviewed.checked;
+    }
   });
+
+  function suggestedFilename() {
+    const day = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    return `reporte-${selectedCase.id.replace(/[^A-Za-z0-9-]/g, "")}-${day}.pdf`;
+  }
 
   updateSectionCount();
 })();

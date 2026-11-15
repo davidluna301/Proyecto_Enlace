@@ -14,6 +14,9 @@ import { CasesService } from "./modules/cases/cases.service";
 import { createCasesRouter } from "./modules/cases/cases.routes";
 import { ReportSelectionController } from "./modules/reports/report-selection.controller";
 import { createReportSelectionRouter } from "./modules/reports/report-selection.routes";
+import { ReportPdfController } from "./modules/reports/report-pdf.controller";
+import { ReportPdfService } from "./modules/reports/report-pdf.service";
+import { createReportPdfRouter } from "./modules/reports/report-pdf.routes";
 
 export function createApp(options: { auditDirectory?: string } = {}) {
   const app = express();
@@ -22,6 +25,9 @@ export function createApp(options: { auditDirectory?: string } = {}) {
   const authController = new AuthController(authService);
   const casesController = new CasesController(casesService);
   const reportSelectionController = new ReportSelectionController(casesService);
+  const reportPdfController = new ReportPdfController(
+    new ReportPdfService(casesService, options.auditDirectory),
+  );
   const cookieName = "enlace.sid";
 
   app.set("view engine", "ejs");
@@ -29,6 +35,7 @@ export function createApp(options: { auditDirectory?: string } = {}) {
   app.set("layout", "layouts/main");
   app.use(expressLayouts);
   app.use(express.urlencoded({ extended: false, limit: "10kb" }));
+  app.use(express.json({ limit: "10kb" }));
   app.use(
     session({
       name: cookieName,
@@ -82,6 +89,7 @@ export function createApp(options: { auditDirectory?: string } = {}) {
   app.use("/cases", createCasesRouter(casesController, options.auditDirectory));
   app.use("/casos", createCasesRouter(casesController, options.auditDirectory));
   app.use("/reportes", createReportSelectionRouter(reportSelectionController));
+  app.use("/reportes", createReportPdfRouter(reportPdfController));
   app.use(notFoundHandler);
   app.use(errorHandler);
 
