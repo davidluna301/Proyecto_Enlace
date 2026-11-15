@@ -10,5 +10,6 @@ export function createReportSelectionRouter(
   router.use(requireAuth, requireRole("ASESOR"));
   router.get("/nuevo", controller.show);
   router.get("/casos", controller.search);
+  router.get("/casos/:caseId", controller.caseDetails);
   return router;
 }

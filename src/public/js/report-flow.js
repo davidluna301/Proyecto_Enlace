@@ -16,10 +16,16 @@
   const emptySelectionWarning = document.getElementById(
     "empty-selection-warning",
   );
+  const dateFormat = new Intl.DateTimeFormat("es-CO", {
+    dateStyle: "long",
+    timeStyle: "short",
+    timeZone: "America/Bogota",
+  });
   let selectedCase = null;
   let timer;
   let pending;
   let sequence = 0;
+  let caseSequence = 0;
 
   function makeNode(tagName, className, text) {
     const node = document.createElement(tagName);
@@ -62,9 +68,103 @@
       "[data-section-id]:checked",
     ).length;
     configCount.textContent = `Se incluirán ${activeCount} de ${sections.length} secciones.`;
+    document.getElementById("preview-count").textContent =
+      `Se incluirán ${activeCount} de ${sections.length} secciones.`;
     emptySelectionWarning.hidden = activeCount > 0;
     document.getElementById("toggle-all-sections").textContent =
       activeCount === sections.length ? "Desmarcar todas" : "Marcar todas";
+  }
+
+  function activeSectionIds() {
+    return Array.from(document.querySelectorAll("[data-section-id]"))
+      .filter((checkbox) => checkbox.checked)
+      .map((checkbox) => checkbox.dataset.sectionId);
+  }
+
+  function sectionText(sectionId) {
+    switch (sectionId) {
+      case "DATOS_ESTUDIANTE":
+        return [
+          `Nombre: ${selectedCase.studentName}`,
+          selectedCase.email
+            ? `Correo institucional: ${selectedCase.email}`
+            : "Sin correo institucional",
+          `Carrera: ${selectedCase.program}`,
+        ];
+      case "DESCRIPCION_CASO":
+        return [selectedCase.summary];
+      case "MARCADORES_CRITICOS":
+        return selectedCase.markers.length
+          ? selectedCase.markers.flatMap((group) => [
+              `${group.name}:`,
+              ...group.items.map((item) => `- ${item}`),
+            ])
+          : ["Sin marcadores registrados."];
+      case "OBSERVACIONES_ASESOR":
+        return [
+          selectedCase.observacionesAsesor ||
+            "No hay observaciones registradas.",
+        ];
+      case "ESTADO_URGENCIA":
+        return [
+          `Estado: ${statusLabels[selectedCase.status]}`,
+          `Urgencia: ${urgencyLabels[selectedCase.urgency]}`,
+        ];
+      case "FECHAS_CLAVE":
+        return [
+          `Creación: ${dateFormat.format(new Date(selectedCase.createdAt))}`,
+          `Último movimiento: ${dateFormat.format(new Date(selectedCase.lastMovement))}`,
+        ];
+      case "LINEA_TIEMPO":
+        return selectedCase.events.length
+          ? selectedCase.events.flatMap((item) => [
+              `${dateFormat.format(new Date(item.date))} - ${item.type}`,
+              item.description,
+              "",
+            ])
+          : ["No hay eventos registrados."];
+      default:
+        return [];
+    }
+  }
+
+  function renderPreview() {
+    const preview = document.getElementById("preview-sections");
+    preview.replaceChildren();
+    const selectedIds = new Set(activeSectionIds());
+    sections.forEach((section) => {
+      const included = selectedIds.has(section.id);
+      const block = makeNode(
+        "section",
+        `report-preview-section${included ? "" : " is-excluded"}`,
+      );
+      block.setAttribute("aria-describedby", `preview-state-${section.id}`);
+      const label = makeNode("label", "report-preview-toggle");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = included;
+      checkbox.setAttribute("aria-label", `Incluir ${section.nombre}`);
+      checkbox.addEventListener("change", () => {
+        document.querySelector(`[data-section-id="${section.id}"]`).checked =
+          checkbox.checked;
+        updateSectionCount();
+        renderPreview();
+      });
+      label.append(checkbox, document.createTextNode(section.nombre));
+      const state = makeNode(
+        "span",
+        "report-preview-state",
+        included ? "Se incluirá" : "No se incluirá (excluido)",
+      );
+      state.id = `preview-state-${section.id}`;
+      const heading = makeNode("h4", "", section.nombre);
+      const content = makeNode("div", "report-preview-content");
+      sectionText(section.id).forEach((line) => {
+        content.append(makeNode(line ? "p" : "div", "", line));
+      });
+      block.append(label, state, heading, content);
+      preview.append(block);
+    });
   }
 
   function renderCases(items, query) {
@@ -178,7 +278,7 @@
     }
   }
 
-  results.addEventListener("click", (event) => {
+  results.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-case-id]");
     if (!button) return;
     selectedCase = {
@@ -186,7 +286,29 @@
       studentName: button.dataset.caseName,
       status: button.dataset.caseStatus,
     };
+    const current = ++caseSequence;
+    continueButton.disabled = true;
+    selectedCaseLabel.textContent = "Cargando los datos del caso…";
     updateSelection();
+    try {
+      const response = await fetch(
+        `/reportes/casos/${encodeURIComponent(selectedCase.id)}`,
+        { headers: { Accept: "application/json" } },
+      );
+      if (!response.ok) throw new Error("case");
+      const details = await response.json();
+      if (current !== caseSequence) return;
+      selectedCase = details;
+      updateSelection();
+    } catch {
+      if (current !== caseSequence) return;
+      continueButton.disabled = true;
+      selectedCaseLabel.textContent =
+        "No pudimos cargar el caso. Vuelve a seleccionarlo.";
+      errorMessage.textContent =
+        "No pudimos cargar ese caso. Inténtalo de nuevo.";
+      errorMessage.hidden = false;
+    }
   });
 
   search.addEventListener("input", () => {
@@ -224,7 +346,17 @@
 
   document.querySelectorAll("[data-go-to]").forEach((button) => {
     button.addEventListener("click", () => {
-      goToStep(Number(button.dataset.goTo));
+      const target = Number(button.dataset.goTo);
+      if (target === 3 && !selectedCase?.events) return;
+      if (target === 3) {
+        document.getElementById("preview-generated-date").textContent =
+          `Generado el ${dateFormat.format(new Date())}`;
+        document.getElementById("preview-case-heading").textContent =
+          `Vista previa del caso: ${selectedCase.studentName} · ${selectedCase.id}`;
+        updateSectionCount();
+        renderPreview();
+      }
+      goToStep(target);
     });
   });
 
