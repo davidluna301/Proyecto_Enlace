@@ -3,6 +3,7 @@
   id="report-flow"
   data-status-labels="<%= JSON.stringify(statusLabels) %>"
   data-urgency-labels="<%= JSON.stringify(urgencyLabels) %>"
+  data-sections="<%= JSON.stringify(sections) %>"
 >
   <div class="page-heading">
     <div>
@@ -71,11 +72,37 @@
     <div>
       <p class="eyebrow">Paso 2 de 3</p>
       <h2 id="report-config-title" tabindex="-1">Configura el contenido</h2>
-      <p id="report-case-context"></p>
-      <p>La selección de secciones estará disponible en el siguiente entregable.</p>
+      <p>Elige las secciones que necesitas incluir.</p>
+    </div>
+    <div class="report-case-context" id="report-case-context"></div>
+    <div class="report-section-heading">
+      <h3>Secciones del reporte</h3>
+      <button class="btn btn-outline-secondary btn-sm" id="toggle-all-sections" type="button">Desmarcar todas</button>
+    </div>
+    <fieldset class="report-section-options">
+      <legend class="visually-hidden">Selecciona las secciones para incluir</legend>
+      <% sections.forEach((section) => { %>
+        <label class="report-section-option" for="section-<%= section.id %>">
+          <input class="form-check-input" id="section-<%= section.id %>" type="checkbox" data-section-id="<%= section.id %>" checked>
+          <span><strong><%= section.nombre %></strong><small><%= section.descripcionCorta %></small></span>
+        </label>
+      <% }) %>
+    </fieldset>
+    <p class="report-selection-count" id="configuration-count" aria-live="polite"></p>
+    <p class="report-soft-warning" id="empty-selection-warning" role="status" hidden>No has seleccionado secciones. El reporte descargado estará prácticamente vacío.</p>
+    <div class="report-navigation">
+      <button class="btn btn-outline-secondary" type="button" data-go-to="1">Volver</button>
+      <button class="btn btn-primary-action" type="button" data-go-to="3">Previsualizar</button>
+    </div>
+  </section>
+  <section class="report-step-panel mt-4" data-step="3" aria-labelledby="report-preview-title" hidden>
+    <div>
+      <p class="eyebrow">Paso 3 de 3</p>
+      <h2 id="report-preview-title" tabindex="-1">Previsualizar</h2>
+      <p>La vista previa se añadirá en el siguiente entregable.</p>
     </div>
     <div class="report-navigation">
-      <button class="btn btn-outline-secondary" type="button" data-go-to="1">Volver a seleccionar</button>
+      <button class="btn btn-outline-secondary" type="button" data-go-to="2">Volver</button>
     </div>
   </section>
   <script src="/js/report-flow.js" defer></script>

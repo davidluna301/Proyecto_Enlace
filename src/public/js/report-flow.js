@@ -4,6 +4,7 @@
 
   const statusLabels = JSON.parse(root.dataset.statusLabels);
   const urgencyLabels = JSON.parse(root.dataset.urgencyLabels);
+  const sections = JSON.parse(root.dataset.sections);
   const search = document.getElementById("report-search");
   const results = document.getElementById("report-case-results");
   const searchLoading = document.getElementById("report-search-loading");
@@ -11,6 +12,10 @@
   const continueButton = document.getElementById("report-continue");
   const errorMessage = document.getElementById("report-error");
   const announcement = document.getElementById("report-announcement");
+  const configCount = document.getElementById("configuration-count");
+  const emptySelectionWarning = document.getElementById(
+    "empty-selection-warning",
+  );
   let selectedCase = null;
   let timer;
   let pending;
@@ -34,6 +39,32 @@
     selectedCaseLabel.textContent = selectedCase
       ? `Caso seleccionado: ${selectedCase.studentName} · ${selectedCase.id}`
       : "Selecciona un caso para continuar.";
+  }
+
+  function goToStep(stepNumber) {
+    document.querySelectorAll("[data-step]").forEach((panel) => {
+      panel.hidden = Number(panel.dataset.step) !== stepNumber;
+    });
+    document.querySelectorAll("[data-step-indicator]").forEach((step) => {
+      const current = Number(step.dataset.stepIndicator) === stepNumber;
+      step.classList.toggle("is-current", current);
+      if (current) step.setAttribute("aria-current", "step");
+      else step.removeAttribute("aria-current");
+    });
+    document
+      .querySelector(`[data-step="${stepNumber}"] h2`)
+      .focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function updateSectionCount() {
+    const activeCount = document.querySelectorAll(
+      "[data-section-id]:checked",
+    ).length;
+    configCount.textContent = `Se incluirán ${activeCount} de ${sections.length} secciones.`;
+    emptySelectionWarning.hidden = activeCount > 0;
+    document.getElementById("toggle-all-sections").textContent =
+      activeCount === sections.length ? "Desmarcar todas" : "Marcar todas";
   }
 
   function renderCases(items, query) {
@@ -169,17 +200,33 @@
 
   continueButton.addEventListener("click", () => {
     if (!selectedCase) return;
-    document.querySelector('[data-step="1"]').hidden = true;
-    document.querySelector('[data-step="2"]').hidden = false;
     document.getElementById("report-case-context").textContent =
-      `Caso seleccionado: ${selectedCase.studentName} · ${statusLabels[selectedCase.status]}`;
-    document.getElementById("report-config-title").focus();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+      `${selectedCase.studentName} · ${selectedCase.id} · ${statusLabels[selectedCase.status]}`;
+    goToStep(2);
   });
 
-  document.querySelector('[data-go-to="1"]').addEventListener("click", () => {
-    document.querySelector('[data-step="2"]').hidden = true;
-    document.querySelector('[data-step="1"]').hidden = false;
-    document.getElementById("report-case-title").focus();
+  document.querySelectorAll("[data-section-id]").forEach((checkbox) => {
+    checkbox.addEventListener("change", updateSectionCount);
   });
+
+  document
+    .getElementById("toggle-all-sections")
+    .addEventListener("click", () => {
+      const checkboxes = Array.from(
+        document.querySelectorAll("[data-section-id]"),
+      );
+      const shouldCheck = checkboxes.some((checkbox) => !checkbox.checked);
+      checkboxes.forEach((checkbox) => {
+        checkbox.checked = shouldCheck;
+      });
+      updateSectionCount();
+    });
+
+  document.querySelectorAll("[data-go-to]").forEach((button) => {
+    button.addEventListener("click", () => {
+      goToStep(Number(button.dataset.goTo));
+    });
+  });
+
+  updateSectionCount();
 })();
