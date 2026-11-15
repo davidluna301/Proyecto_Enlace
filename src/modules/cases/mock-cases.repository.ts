@@ -13,12 +13,14 @@ export class MockCasesRepository implements CasesRepository {
     const search = filter.search?.trim().toLocaleLowerCase("es-CO");
     return this.cases
       .filter((studentCase) => {
+        if (filter.advisorId && studentCase.advisorId !== filter.advisorId)
+          return false;
         if (filter.status && studentCase.status !== filter.status) return false;
         if (filter.program && studentCase.program !== filter.program)
           return false;
         if (
           search &&
-          !`${studentCase.studentName} ${studentCase.id}`
+          !`${studentCase.studentName} ${studentCase.email ?? ""} ${studentCase.contactEmail ?? ""} ${studentCase.id}`
             .toLocaleLowerCase("es-CO")
             .includes(search)
         ) {

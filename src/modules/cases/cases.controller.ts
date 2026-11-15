@@ -20,6 +20,7 @@ export class CasesController {
       status: text(req.query.estado),
       program: text(req.query.carrera || req.query.programa),
       search: text(req.query.q || req.query.buscar),
+      advisorId: req.session.userId,
     };
   }
 
@@ -127,7 +128,10 @@ export class CasesController {
       return;
     }
     try {
-      const created = await this.casesService.create(values);
+      const created = await this.casesService.create(
+        values,
+        req.session.userId ?? "",
+      );
       res.locals.createdCaseId = created.id;
       res.locals.createdCaseHasInstitutionalEmail =
         created.tieneCorreoInstitucional !== false;
@@ -151,7 +155,10 @@ export class CasesController {
   ): Promise<void> => {
     try {
       const id = typeof req.params.id === "string" ? req.params.id : "";
-      const studentCase = await this.casesService.getById(id);
+      const studentCase = await this.casesService.getByIdForAdvisor(
+        id,
+        req.session.userId ?? "",
+      );
       if (!studentCase) {
         res
           .status(404)

@@ -12,6 +12,8 @@ import { CasesController } from "./modules/cases/cases.controller";
 import { MockCasesRepository } from "./modules/cases/mock-cases.repository";
 import { CasesService } from "./modules/cases/cases.service";
 import { createCasesRouter } from "./modules/cases/cases.routes";
+import { ReportSelectionController } from "./modules/reports/report-selection.controller";
+import { createReportSelectionRouter } from "./modules/reports/report-selection.routes";
 
 export function createApp(options: { auditDirectory?: string } = {}) {
   const app = express();
@@ -19,6 +21,7 @@ export function createApp(options: { auditDirectory?: string } = {}) {
   const casesService = new CasesService(new MockCasesRepository());
   const authController = new AuthController(authService);
   const casesController = new CasesController(casesService);
+  const reportSelectionController = new ReportSelectionController(casesService);
   const cookieName = "enlace.sid";
 
   app.set("view engine", "ejs");
@@ -78,6 +81,7 @@ export function createApp(options: { auditDirectory?: string } = {}) {
   });
   app.use("/cases", createCasesRouter(casesController, options.auditDirectory));
   app.use("/casos", createCasesRouter(casesController, options.auditDirectory));
+  app.use("/reportes", createReportSelectionRouter(reportSelectionController));
   app.use(notFoundHandler);
   app.use(errorHandler);
 
