@@ -66,6 +66,12 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     assert.match(createForm.html, /aria-expanded="false"/);
     assert.match(createForm.html, /id="markers-panel" hidden/);
     assert.match(createForm.html, /aria-current="page"/);
+    assert.match(createForm.html, /href="\/reportes\/nuevo"/);
+    assert.match(createForm.html, /Generar reporte/);
+    assert.doesNotMatch(
+      createForm.html,
+      /href="\/reportes\/nuevo" aria-current="page"/,
+    );
     assert.match(createForm.html, /Navegación principal/);
     assert.doesNotMatch(createForm.html, /src="\/img\/logo\.png"/);
     const invalidCreate = await request("/casos", {
