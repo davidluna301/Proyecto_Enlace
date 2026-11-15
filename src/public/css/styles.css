@@ -1129,6 +1129,76 @@ h3 {
   }
 }
 
+.report-download-status {
+  color: var(--color-primary-dark);
+  font-weight: 650;
+}
+
+.report-confirmation {
+  width: min(94vw, 640px);
+  max-height: 90vh;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 30%);
+}
+
+.report-confirmation::backdrop {
+  background: rgb(17 24 39 / 62%);
+}
+
+.report-confirmation-content {
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.report-warning-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.report-warning-heading > span {
+  color: var(--color-danger-dark);
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+
+.report-warning-heading h2 {
+  font-size: 1.35rem;
+}
+
+.report-confirmation-summary {
+  max-height: 220px;
+  overflow: auto;
+  padding: 0.85rem 1rem;
+  background: var(--color-surface);
+  border-radius: 8px;
+}
+
+.report-confirmation-summary h3 {
+  font-size: 1rem;
+}
+
+.report-confirmation-summary ul {
+  margin-bottom: 0.65rem;
+}
+
+.report-confirmation-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  cursor: pointer;
+}
+
+.report-confirmation-check .form-check-input {
+  flex: 0 0 auto;
+}
+
+.report-confirmation .report-navigation {
+  justify-content: flex-end;
+}
+
 .report-steps {
   display: flex;
   justify-content: space-between;

@@ -7,7 +7,10 @@ import {
 } from "../cases/cases.model";
 import type { CasesService } from "../cases/cases.service";
 import { GRUPOS_MARCADORES } from "../../data/marcadores";
-import { SECCIONES_REPORTE } from "./report-sections.constants";
+import {
+  SECCIONES_REPORTE,
+  SENSITIVE_DATA_WARNING,
+} from "./report-sections.constants";
 
 function caseSummary(studentCase: StudentCase) {
   return {
@@ -36,6 +39,7 @@ export class ReportSelectionController {
         title: "Generar reporte",
         cases: cases.slice(0, 10),
         sections: SECCIONES_REPORTE,
+        warning: SENSITIVE_DATA_WARNING,
         statusLabels,
         statusIcons,
         urgencyLabels,
