@@ -103,6 +103,25 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     };
     assert.equal(reportResults.total, 1);
     assert.equal(reportResults.items[0].id, "EN-2026-001");
+    const reportCase = await request("/reportes/casos/EN-2026-001", {
+      cookie: advisor.cookie,
+    });
+    assert.equal(reportCase.response.status, 200);
+    const reportCaseBody = JSON.parse(reportCase.html) as {
+      id: string;
+      events: { type: string }[];
+      advisorId?: string;
+    };
+    assert.equal(reportCaseBody.id, "EN-2026-001");
+    assert.ok(reportCaseBody.events.length);
+    assert.equal(reportCaseBody.advisorId, undefined);
+    assert.equal(
+      (await request("/reportes/casos/no-existe", { cookie: advisor.cookie }))
+        .response.status,
+      404,
+    );
+    assert.match(reportEntry.html, /id="preview-sections"/);
+    assert.match(reportEntry.html, /logolink\.png/);
     assert.equal((await request("/reportes/casos")).response.status, 302);
     assert.doesNotMatch(createForm.html, /src="\/img\/logo\.png"/);
     const invalidCreate = await request("/casos", {

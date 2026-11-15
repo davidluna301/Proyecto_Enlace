@@ -98,9 +98,18 @@
   <section class="report-step-panel mt-4" data-step="3" aria-labelledby="report-preview-title" hidden>
     <div>
       <p class="eyebrow">Paso 3 de 3</p>
-      <h2 id="report-preview-title" tabindex="-1">Previsualizar</h2>
-      <p>La vista previa se añadirá en el siguiente entregable.</p>
+      <h2 id="report-preview-title" tabindex="-1">Previsualiza tu reporte</h2>
+      <p>Las secciones excluidas permanecen visibles aquí para revisar la selección, pero no se incluirán en el PDF.</p>
     </div>
+    <p class="report-selection-count" id="preview-count" aria-live="polite"></p>
+    <p class="report-preview-case" id="preview-case-heading"></p>
+    <article class="report-paper" id="report-preview">
+      <header class="report-paper-header">
+        <img src="/img/logolink.png" alt="ENLACE UCC">
+        <div><h3>Reporte de acompañamiento</h3><p id="preview-generated-date"></p></div>
+      </header>
+      <div id="preview-sections"></div>
+    </article>
     <div class="report-navigation">
       <button class="btn btn-outline-secondary" type="button" data-go-to="2">Volver</button>
     </div>
