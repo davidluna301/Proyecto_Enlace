@@ -12,6 +12,7 @@ import { MockCasesRepository } from "../modules/cases/mock-cases.repository";
 test("el servicio usa el repositorio inyectado para programas y filtros", async () => {
   const sample: StudentCase = {
     id: "TEST-001",
+    advisorId: "usr-asesor-01",
     studentName: "Estudiante de prueba",
     program: "Programa externo",
     status: "NUEVO",
@@ -54,6 +55,14 @@ test("el servicio usa el repositorio inyectado para programas y filtros", async 
   });
 
   const detail = await service.getById("TEST-001");
+  assert.equal(
+    await service.getByIdForAdvisor("TEST-001", "otro-asesor"),
+    null,
+  );
+  assert.equal(
+    (await service.getByIdForAdvisor("TEST-001", "usr-asesor-01"))?.id,
+    "TEST-001",
+  );
   assert.deepEqual(
     detail?.events.map((event) => event.type),
     ["Primero", "Segundo"],

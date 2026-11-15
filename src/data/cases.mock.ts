@@ -3,6 +3,7 @@ import type { StudentCase } from "../modules/cases/cases.model";
 export const mockCases: StudentCase[] = [
   {
     id: "EN-2026-001",
+    advisorId: "usr-asesor-01",
     studentName: "Valentina Gómez",
     program: "Psicología",
     status: "EN_SEGUIMIENTO",
@@ -34,6 +35,7 @@ export const mockCases: StudentCase[] = [
   },
   {
     id: "EN-2026-002",
+    advisorId: "usr-asesor-01",
     studentName: "Juan Sebastián López",
     program: "Ingeniería de Sistemas",
     status: "NUEVO",
@@ -53,6 +55,7 @@ export const mockCases: StudentCase[] = [
   },
   {
     id: "EN-2026-003",
+    advisorId: "usr-asesor-01",
     studentName: "Laura Camila Torres",
     program: "Derecho",
     status: "EN_ESPERA",
@@ -79,6 +82,7 @@ export const mockCases: StudentCase[] = [
   },
   {
     id: "EN-2026-004",
+    advisorId: "usr-asesor-01",
     studentName: "Samuel Andrés Herrera",
     program: "Administración de Empresas",
     status: "EN_SEGUIMIENTO",
@@ -103,6 +107,7 @@ export const mockCases: StudentCase[] = [
   },
   {
     id: "EN-2026-005",
+    advisorId: "usr-asesor-01",
     studentName: "Isabella Martínez",
     program: "Enfermería",
     status: "NUEVO",
@@ -122,6 +127,7 @@ export const mockCases: StudentCase[] = [
   },
   {
     id: "EN-2026-006",
+    advisorId: "usr-asesor-01",
     studentName: "Mateo Alejandro Ruiz",
     program: "Ingeniería Industrial",
     status: "CERRADO",
@@ -146,6 +152,7 @@ export const mockCases: StudentCase[] = [
   },
   {
     id: "EN-2026-007",
+    advisorId: "usr-asesor-01",
     studentName: "Mariana Alejandra Castro",
     program: "Psicología",
     status: "EN_ESPERA",
@@ -170,6 +177,7 @@ export const mockCases: StudentCase[] = [
   },
   {
     id: "EN-2026-008",
+    advisorId: "usr-asesor-01",
     studentName: "Nicolás Felipe Moreno",
     program: "Comunicación Social",
     status: "EN_SEGUIMIENTO",
@@ -194,6 +202,7 @@ export const mockCases: StudentCase[] = [
   },
   {
     id: "EN-2026-009",
+    advisorId: "usr-asesor-01",
     studentName: "Sofía Valeria Pérez",
     program: "Contaduría Pública",
     status: "EN_ESPERA",
@@ -217,6 +226,7 @@ export const mockCases: StudentCase[] = [
   },
   {
     id: "EN-2026-010",
+    advisorId: "usr-asesor-01",
     studentName: "Samuel David Ortiz",
     program: "Ingeniería de Sistemas",
     status: "CERRADO",

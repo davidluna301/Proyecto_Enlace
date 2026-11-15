@@ -73,6 +73,30 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
       /href="\/reportes\/nuevo" aria-current="page"/,
     );
     assert.match(createForm.html, /Navegación principal/);
+    const reportEntry = await request("/reportes/nuevo", {
+      cookie: advisor.cookie,
+    });
+    assert.equal(reportEntry.response.status, 200);
+    assert.match(reportEntry.html, /Selecciona un caso/);
+    assert.match(
+      reportEntry.html,
+      /href="\/reportes\/nuevo" aria-current="page"/,
+    );
+    assert.doesNotMatch(
+      reportEntry.html,
+      /href="\/casos\/nuevo" aria-current="page"/,
+    );
+    const reportSearch = await request("/reportes/casos?q=EN-2026-001", {
+      cookie: advisor.cookie,
+    });
+    assert.equal(reportSearch.response.status, 200);
+    const reportResults = JSON.parse(reportSearch.html) as {
+      items: { id: string }[];
+      total: number;
+    };
+    assert.equal(reportResults.total, 1);
+    assert.equal(reportResults.items[0].id, "EN-2026-001");
+    assert.equal((await request("/reportes/casos")).response.status, 302);
     assert.doesNotMatch(createForm.html, /src="\/img\/logo\.png"/);
     const invalidCreate = await request("/casos", {
       cookie: advisor.cookie,
@@ -219,6 +243,11 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     assert.match(adminHome.html, /href="\/home#usuarios"/);
     assert.doesNotMatch(adminHome.html, /href="\/casos\/nuevo"/);
     assert.doesNotMatch(adminHome.html, /src="\/img\/logo\.png"/);
+    assert.equal(
+      (await request("/reportes/nuevo", { cookie: admin.cookie })).response
+        .status,
+      403,
+    );
     const forbidden = await request("/cases", { cookie: admin.cookie });
     assert.equal(forbidden.response.status, 403);
     assert.equal(

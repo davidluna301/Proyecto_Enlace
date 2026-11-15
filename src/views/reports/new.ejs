@@ -1,0 +1,82 @@
+<section
+  class="container py-5 report-flow"
+  id="report-flow"
+  data-status-labels="<%= JSON.stringify(statusLabels) %>"
+  data-urgency-labels="<%= JSON.stringify(urgencyLabels) %>"
+>
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">Acompañamiento estudiantil</p>
+      <h1>Generar reporte</h1>
+      <p class="text-muted mb-0">Selecciona un caso para comenzar.</p>
+    </div>
+  </div>
+  <ol class="report-steps mt-4" aria-label="Pasos para generar el reporte">
+    <li class="is-current" data-step-indicator="1" aria-current="step"><span>1</span> Seleccionar caso</li>
+    <li data-step-indicator="2"><span>2</span> Configurar contenido</li>
+    <li data-step-indicator="3"><span>3</span> Previsualizar</li>
+  </ol>
+  <div class="report-alert" id="report-error" role="alert" hidden></div>
+  <p class="visually-hidden" id="report-announcement" aria-live="polite"></p>
+
+  <section class="report-step-panel mt-4" data-step="1" aria-labelledby="report-case-title">
+    <div>
+      <p class="eyebrow">Paso 1 de 3</p>
+      <h2 id="report-case-title" tabindex="-1">Selecciona un caso</h2>
+      <p>Busca por nombre del estudiante, correo o identificador del caso.</p>
+    </div>
+    <div class="report-search">
+      <label class="form-label" for="report-search">Buscar caso</label>
+      <input class="form-control" id="report-search" type="search" autocomplete="off" placeholder="Ej. Valentina, correo o EN-2026-001">
+      <span class="form-text">Se muestran únicamente casos de tu ámbito.</span>
+    </div>
+    <p class="report-loading" id="report-search-loading" role="status" hidden>Buscando casos…</p>
+    <div class="report-case-results" id="report-case-results" aria-label="Resultados de casos">
+      <% if (cases.length) { %>
+        <% cases.forEach((studentCase) => { %>
+          <button
+            class="report-case-option"
+            type="button"
+            data-case-id="<%= studentCase.id %>"
+            data-case-name="<%= studentCase.studentName %>"
+            data-case-program="<%= studentCase.program %>"
+            data-case-status="<%= studentCase.status %>"
+            data-case-urgency="<%= studentCase.urgency %>"
+            aria-pressed="false"
+          >
+            <span class="report-case-top">
+              <span class="case-id"><%= studentCase.id %></span>
+              <span class="urgency-chip urgency-<%= studentCase.urgency.toLowerCase() %>"><span aria-hidden="true"><%= studentCase.urgency === 'ALTA' ? '!' : studentCase.urgency === 'MEDIA' ? '◷' : '✓' %></span> Urgencia <%= urgencyLabels[studentCase.urgency] %></span>
+            </span>
+            <strong><%= studentCase.studentName %></strong>
+            <span><%= studentCase.program %></span>
+            <span class="status-chip status-<%= studentCase.status.toLowerCase() %>"><span aria-hidden="true"><%= statusIcons[studentCase.status] %></span><%= statusLabels[studentCase.status] %></span>
+          </button>
+        <% }) %>
+      <% } else { %>
+        <div class="report-empty">
+          <h3>No tienes casos disponibles</h3>
+          <p>Registra un caso para poder generar un reporte.</p>
+          <a class="btn btn-primary-action" href="/casos/nuevo">Registrar un caso</a>
+        </div>
+      <% } %>
+    </div>
+    <div class="report-navigation">
+      <span class="text-muted" id="selected-case-label">Selecciona un caso para continuar.</span>
+      <button class="btn btn-primary-action" id="report-continue" type="button" disabled>Continuar</button>
+    </div>
+  </section>
+
+  <section class="report-step-panel mt-4" data-step="2" aria-labelledby="report-config-title" hidden>
+    <div>
+      <p class="eyebrow">Paso 2 de 3</p>
+      <h2 id="report-config-title" tabindex="-1">Configura el contenido</h2>
+      <p id="report-case-context"></p>
+      <p>La selección de secciones estará disponible en el siguiente entregable.</p>
+    </div>
+    <div class="report-navigation">
+      <button class="btn btn-outline-secondary" type="button" data-go-to="1">Volver a seleccionar</button>
+    </div>
+  </section>
+  <script src="/js/report-flow.js" defer></script>
+</section>

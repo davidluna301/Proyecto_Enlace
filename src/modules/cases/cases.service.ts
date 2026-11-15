@@ -9,6 +9,7 @@ import {
 } from "./cases.model";
 
 export interface CaseFilter {
+  advisorId?: string;
   status?: CaseStatus;
   program?: string;
   search?: string;
@@ -101,6 +102,7 @@ export interface CaseQuery {
   status: string;
   program: string;
   search: string;
+  advisorId?: string;
 }
 
 function isCaseStatus(value: string): value is CaseStatus {
@@ -115,11 +117,13 @@ export class CasesService {
   }
 
   async listWithFilters(query: CaseQuery) {
-    const allCases = await this.repo.list();
+    const scope = query.advisorId ? { advisorId: query.advisorId } : undefined;
+    const allCases = await this.repo.list(scope);
     const programs = [...new Set(allCases.map((item) => item.program))].sort(
       (left, right) => left.localeCompare(right, "es-CO"),
     );
     const filters = {
+      ...(scope ?? {}),
       status: isCaseStatus(query.status) ? query.status : undefined,
       program: programs.includes(query.program) ? query.program : undefined,
       search: query.search.trim(),
@@ -145,7 +149,16 @@ export class CasesService {
     };
   }
 
-  create(values: CaseFormValues): Promise<StudentCase> {
+  async getByIdForAdvisor(
+    id: string,
+    advisorId: string,
+  ): Promise<StudentCase | null> {
+    const studentCase = await this.getById(id);
+    return studentCase?.advisorId === advisorId ? studentCase : null;
+  }
+
+  create(values: CaseFormValues, advisorId: string): Promise<StudentCase> {
+    if (!advisorId) throw new Error("Se requiere un asesor autenticado.");
     const errors = validateCase(values);
     if (Object.keys(errors).length)
       throw new Error("No se puede crear un caso con datos inválidos.");
@@ -158,6 +171,7 @@ export class CasesService {
       ? values.email.trim().toLowerCase()
       : null;
     return this.repo.create({
+      advisorId,
       studentName: values.studentName.trim(),
       email,
       tieneCorreoInstitucional: values.tieneCorreoInstitucional,

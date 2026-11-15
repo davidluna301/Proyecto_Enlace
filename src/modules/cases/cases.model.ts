@@ -33,6 +33,7 @@ export interface CaseEvent {
 
 export interface StudentCase {
   id: string;
+  advisorId: string;
   studentName: string;
   program: string;
   status: CaseStatus;
@@ -48,6 +49,7 @@ export interface StudentCase {
 }
 
 export interface NewCase {
+  advisorId: string;
   studentName: string;
   email: string | null;
   tieneCorreoInstitucional: boolean;
