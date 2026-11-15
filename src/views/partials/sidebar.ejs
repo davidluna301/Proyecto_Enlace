@@ -9,7 +9,8 @@
       <a class="sidebar-link <%= currentPath === '/home' ? 'active' : '' %>" href="/home" <%- currentPath === '/home' ? 'aria-current="page"' : '' %>><span aria-hidden="true">⌂</span> Inicio</a>
       <% if (currentUser.role === 'ASESOR') { %>
         <a class="sidebar-link <%= (currentPath.startsWith('/casos') || currentPath.startsWith('/cases')) && !currentPath.endsWith('/nuevo') ? 'active' : '' %>" href="/casos" <%- (currentPath === '/casos' || currentPath === '/cases') ? 'aria-current="page"' : '' %>><span aria-hidden="true">▤</span> Casos</a>
-        <a class="sidebar-link <%= currentPath.endsWith('/nuevo') ? 'active' : '' %>" href="/casos/nuevo" <%- currentPath.endsWith('/nuevo') ? 'aria-current="page"' : '' %>><span aria-hidden="true">＋</span> Nuevo caso</a>
+        <a class="sidebar-link <%= currentPath.startsWith('/reportes') ? 'active' : '' %>" href="/reportes/nuevo" <%- currentPath.startsWith('/reportes') ? 'aria-current="page"' : '' %>><span aria-hidden="true">▧</span> Generar reporte</a>
+        <a class="sidebar-link <%= currentPath === '/casos/nuevo' || currentPath === '/cases/nuevo' ? 'active' : '' %>" href="/casos/nuevo" <%- currentPath === '/casos/nuevo' || currentPath === '/cases/nuevo' ? 'aria-current="page"' : '' %>><span aria-hidden="true">＋</span> Nuevo caso</a>
       <% } else { %>
         <a class="sidebar-link" href="/home#usuarios"><span aria-hidden="true">♙</span> Usuarios</a>
       <% } %>
