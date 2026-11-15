@@ -6,6 +6,7 @@ import {
   type StudentCase,
 } from "../cases/cases.model";
 import type { CasesService } from "../cases/cases.service";
+import { SECCIONES_REPORTE } from "./report-sections.constants";
 
 function caseSummary(studentCase: StudentCase) {
   return {
@@ -33,6 +34,7 @@ export class ReportSelectionController {
       res.render("reports/new", {
         title: "Generar reporte",
         cases: cases.slice(0, 10),
+        sections: SECCIONES_REPORTE,
         statusLabels,
         statusIcons,
         urgencyLabels,

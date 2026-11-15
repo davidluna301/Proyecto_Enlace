@@ -80,6 +80,13 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     assert.match(reportEntry.html, /Selecciona un caso/);
     assert.match(
       reportEntry.html,
+      /data-section-id="DATOS_ESTUDIANTE" checked/,
+    );
+    assert.match(reportEntry.html, /data-section-id="LINEA_TIEMPO" checked/);
+    assert.match(reportEntry.html, /Desmarcar todas/);
+    assert.match(reportEntry.html, /empty-selection-warning/);
+    assert.match(
+      reportEntry.html,
       /href="\/reportes\/nuevo" aria-current="page"/,
     );
     assert.doesNotMatch(
