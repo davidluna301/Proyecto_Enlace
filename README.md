@@ -43,6 +43,8 @@ Para mantener el acceso de la demostración anterior, `asesor@enlace.edu.co` tam
 - El nombre admite solo letras y espacios; la descripción tiene entre 20 y 1000 caracteres y las observaciones opcionales del asesor hasta 500. Los marcadores están desactivados por defecto; si se habilitan, se requiere al menos uno del [catálogo de investigación](./docs/investigacion/marcadores-desercion.md). Al apagarlos se limpia la selección.
 - Búsqueda y filtros por estado/programa en vivo, con primera carga renderizada en el servidor. Sin JavaScript se utiliza el botón «Buscar». «Limpiar» permanece visible para facilitar el restablecimiento.
 - Detalle de caso adaptable con datos del estudiante, cronología, marcadores agrupados por categoría y observaciones del asesor cuando existen; el resumen de estado aparece en un panel que se ubica primero en pantallas pequeñas.
+- Flujo de reportes exclusivo para asesores en `/reportes/nuevo`, ubicado en el sidebar entre «Casos» y «Nuevo caso». Incluye búsqueda por nombre, correo o identificador, configuración de siete secciones, vista previa sincronizada y confirmación de información sensible. El endpoint `POST /reportes/:casoId/pdf` verifica el rol, el ámbito del asesor y las secciones y genera el archivo en memoria con PDFKit, sin almacenarlo en el servidor.
+- Chrome/Edge pueden usar el selector local de archivos para elegir la ubicación. En navegadores sin esa API, se usa la descarga estándar con `Content-Disposition`. La bitácora registra asesor, caso, secciones y fecha sin guardar el contenido del reporte.
 - Bootstrap 5, estilos y logos servidos desde `public/`; sin CDN ni fuentes remotas.
 
 ## Validación
@@ -55,6 +57,8 @@ npm run format:check
 ```
 
 Los casos y usuarios mock están en `src/data/`. El servicio de casos depende de la interfaz `CasesRepository`; el servidor inyecta `MockCasesRepository` para facilitar una futura implementación PostgreSQL sin acoplarla a las rutas ni a las vistas.
+
+La propiedad `advisorId` de cada caso define el ámbito de acceso. Los datos mock actuales pertenecen al asesor de demostración; una futura implementación PostgreSQL debe conservar el filtrado por asesor en sus consultas. Los PDF se construyen localmente en memoria con PDFKit y utilizan el logo local; no requieren servicios cloud ni binarios de navegador.
 
 ## Nota de seguridad
 

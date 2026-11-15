@@ -7,6 +7,14 @@ import path from "node:path";
 import test from "node:test";
 import { createApp } from "../app";
 
+function pdfTextHex(pdf: string): string {
+  return Array.from(pdf.matchAll(/\[([^\]]*)\]\s*TJ/g), ([, run]) =>
+    Array.from(run.matchAll(/<([0-9a-f]+)>/gi), ([, text]) => text).join(""),
+  )
+    .join("\n")
+    .toLowerCase();
+}
+
 test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", async () => {
   const auditDirectory = await mkdtemp(
     path.join(tmpdir(), "enlace-audit-test-"),
@@ -18,21 +26,35 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
 
   async function request(
     path: string,
-    options: { cookie?: string; form?: Record<string, string> } = {},
+    options: {
+      cookie?: string;
+      form?: Record<string, string>;
+      json?: Record<string, unknown>;
+    } = {},
   ) {
     const headers: Record<string, string> = {};
     if (options.cookie) headers.cookie = options.cookie;
     if (options.form)
       headers["content-type"] = "application/x-www-form-urlencoded";
+    if (options.json) headers["content-type"] = "application/json";
     const response = await fetch(`${base}${path}`, {
-      method: options.form ? "POST" : "GET",
+      method: options.form || options.json ? "POST" : "GET",
       headers,
-      body: options.form ? new URLSearchParams(options.form) : undefined,
+      body: options.form
+        ? new URLSearchParams(options.form)
+        : options.json
+          ? JSON.stringify(options.json)
+          : undefined,
       redirect: "manual",
     });
+    const body = Buffer.from(await response.arrayBuffer());
     return {
       response,
-      html: await response.text(),
+      html: body.toString(
+        response.headers.get("content-type")?.includes("application/pdf")
+          ? "latin1"
+          : "utf8",
+      ),
       cookie: response.headers.get("set-cookie")?.split(";")[0],
     };
   }
@@ -126,6 +148,69 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     assert.match(reportEntry.html, /role="dialog" aria-modal="true"/);
     assert.match(reportEntry.html, /He revisado la información/);
     assert.match(reportEntry.html, /id="confirm-download"[^>]+disabled/);
+    const unconfirmedReport = await request("/reportes/EN-2026-001/pdf", {
+      cookie: advisor.cookie,
+      json: {
+        confirmado: false,
+        secciones: ["DATOS_ESTUDIANTE"],
+      },
+    });
+    assert.equal(unconfirmedReport.response.status, 400);
+    const invalidReport = await request("/reportes/EN-2026-001/pdf", {
+      cookie: advisor.cookie,
+      json: {
+        confirmado: true,
+        secciones: ["METADATOS_INTERNOS"],
+      },
+    });
+    assert.equal(invalidReport.response.status, 400);
+    const generatedReport = await request("/reportes/EN-2026-001/pdf", {
+      cookie: advisor.cookie,
+      json: {
+        confirmado: true,
+        secciones: ["ESTADO_URGENCIA"],
+      },
+    });
+    assert.equal(generatedReport.response.status, 200);
+    assert.match(
+      generatedReport.response.headers.get("content-type") ?? "",
+      /application\/pdf/,
+    );
+    assert.match(
+      generatedReport.response.headers.get("content-disposition") ?? "",
+      /reporte-EN-2026-001-\d{8}\.pdf/,
+    );
+    assert.match(generatedReport.html, /^%PDF-/);
+    const reportTextHex = pdfTextHex(generatedReport.html);
+    assert.ok(
+      reportTextHex.includes(
+        Buffer.from("Estado y urgencia", "latin1").toString("hex"),
+      ),
+    );
+    assert.ok(
+      !reportTextHex.includes(
+        Buffer.from("Descripción del caso", "latin1").toString("hex"),
+      ),
+    );
+    const reportAudit = await readFile(
+      path.join(auditDirectory, "auditoria.jsonl"),
+      "utf8",
+    );
+    const reportEntryAudit = JSON.parse(
+      reportAudit.trim().split("\n").at(-1) ?? "{}",
+    ) as {
+      action: string;
+      actorId: string;
+      caseId: string;
+      metadata: { sections: string[] };
+      timestamp: string;
+    };
+    assert.equal(reportEntryAudit.action, "REPORTE_GENERADO");
+    assert.equal(reportEntryAudit.actorId, "usr-asesor-01");
+    assert.equal(reportEntryAudit.caseId, "EN-2026-001");
+    assert.deepEqual(reportEntryAudit.metadata.sections, ["ESTADO_URGENCIA"]);
+    assert.ok(!Number.isNaN(Date.parse(reportEntryAudit.timestamp)));
+    assert.doesNotMatch(reportAudit, /La estudiante solicita orientación/);
     assert.equal((await request("/reportes/casos")).response.status, 302);
     assert.doesNotMatch(createForm.html, /src="\/img\/logo\.png"/);
     const invalidCreate = await request("/casos", {
@@ -166,12 +251,20 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
       path.join(auditDirectory, "auditoria.jsonl"),
       "utf8",
     );
-    const entry = JSON.parse(audit.trim()) as {
-      action: string;
-      actorId: string;
-      caseId: string;
-      timestamp: string;
-    };
+    const entry = audit
+      .trim()
+      .split("\n")
+      .map(
+        (line) =>
+          JSON.parse(line) as {
+            action: string;
+            actorId: string;
+            caseId: string;
+            timestamp: string;
+          },
+      )
+      .find((record) => record.action === "CASO_CREADO");
+    assert.ok(entry);
     assert.equal(entry.action, "CASO_CREADO");
     assert.equal(entry.actorId, "usr-asesor-01");
     assert.equal(entry.caseId, newId);
@@ -276,6 +369,18 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     assert.equal(
       (await request("/reportes/nuevo", { cookie: admin.cookie })).response
         .status,
+      403,
+    );
+    assert.equal(
+      (
+        await request("/reportes/EN-2026-001/pdf", {
+          cookie: admin.cookie,
+          json: {
+            confirmado: true,
+            secciones: ["DATOS_ESTUDIANTE"],
+          },
+        })
+      ).response.status,
       403,
     );
     const forbidden = await request("/cases", { cookie: admin.cookie });
