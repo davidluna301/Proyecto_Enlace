@@ -112,7 +112,37 @@
     </article>
     <div class="report-navigation">
       <button class="btn btn-outline-secondary" type="button" data-go-to="2">Volver</button>
+      <button class="btn btn-primary-action" id="open-confirmation" type="button">Descargar reporte (PDF)</button>
     </div>
   </section>
+  <p class="report-download-status" id="report-download-status" role="status" hidden></p>
+
+  <dialog class="report-confirmation" id="report-confirmation" role="dialog" aria-modal="true" aria-labelledby="confirmation-title" aria-describedby="confirmation-warning">
+    <div class="report-confirmation-content">
+      <div class="report-warning-heading">
+        <span aria-hidden="true">⚠</span>
+        <h2 id="confirmation-title">Confirmar generación de reporte</h2>
+      </div>
+      <p id="confirmation-warning"><%= warning %></p>
+      <div class="report-confirmation-summary">
+        <h3>Secciones que se incluirán</h3>
+        <ul id="confirmation-included"></ul>
+        <details id="confirmation-excluded-container">
+          <summary>Secciones excluidas</summary>
+          <ul id="confirmation-excluded"></ul>
+        </details>
+      </div>
+      <label class="report-confirmation-check" for="report-reviewed">
+        <input class="form-check-input" id="report-reviewed" type="checkbox">
+        <span>He revisado la información y confirmo que el reporte contiene únicamente los datos necesarios.</span>
+      </label>
+      <div class="report-navigation">
+        <button class="btn btn-outline-secondary" id="cancel-confirmation" type="button">Cancelar</button>
+        <button class="btn btn-primary-action" id="confirm-download" type="button" disabled>
+          Confirmar y descargar
+        </button>
+      </div>
+    </div>
+  </dialog>
   <script src="/js/report-flow.js" defer></script>
 </section>

@@ -16,6 +16,10 @@
   const emptySelectionWarning = document.getElementById(
     "empty-selection-warning",
   );
+  const confirmation = document.getElementById("report-confirmation");
+  const reviewed = document.getElementById("report-reviewed");
+  const confirmButton = document.getElementById("confirm-download");
+  const downloadStatus = document.getElementById("report-download-status");
   const dateFormat = new Intl.DateTimeFormat("es-CO", {
     dateStyle: "long",
     timeStyle: "short",
@@ -26,6 +30,7 @@
   let pending;
   let sequence = 0;
   let caseSequence = 0;
+  let confirmationTrigger;
 
   function makeNode(tagName, className, text) {
     const node = document.createElement(tagName);
@@ -165,6 +170,28 @@
       block.append(label, state, heading, content);
       preview.append(block);
     });
+  }
+
+  function openConfirmation() {
+    const included = document.getElementById("confirmation-included");
+    const excluded = document.getElementById("confirmation-excluded");
+    const excludedContainer = document.getElementById(
+      "confirmation-excluded-container",
+    );
+    const activeIds = new Set(activeSectionIds());
+    included.replaceChildren();
+    excluded.replaceChildren();
+    sections.forEach((section) => {
+      const item = makeNode("li", "", section.nombre);
+      (activeIds.has(section.id) ? included : excluded).append(item);
+    });
+    if (!activeIds.size) included.append(makeNode("li", "", "Ninguna"));
+    excludedContainer.hidden = excluded.childElementCount === 0;
+    reviewed.checked = false;
+    confirmButton.disabled = true;
+    confirmationTrigger = document.activeElement;
+    confirmation.showModal();
+    reviewed.focus();
   }
 
   function renderCases(items, query) {
@@ -358,6 +385,47 @@
       }
       goToStep(target);
     });
+  });
+
+  document
+    .getElementById("open-confirmation")
+    .addEventListener("click", openConfirmation);
+  document
+    .getElementById("cancel-confirmation")
+    .addEventListener("click", () => confirmation.close());
+  confirmation.addEventListener("close", () => {
+    if (confirmationTrigger instanceof HTMLElement) confirmationTrigger.focus();
+  });
+  confirmation.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      confirmation.close();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const focusable = Array.from(
+      confirmation.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((element) => !element.hidden);
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+  reviewed.addEventListener("change", () => {
+    confirmButton.disabled = !reviewed.checked;
+  });
+  confirmButton.addEventListener("click", () => {
+    confirmation.close();
+    downloadStatus.textContent =
+      "La generación del PDF estará disponible en el siguiente entregable.";
+    downloadStatus.hidden = false;
   });
 
   updateSectionCount();

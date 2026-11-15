@@ -122,6 +122,10 @@ test("login, casos, RBAC y cierre de sesión funcionan de extremo a extremo", as
     );
     assert.match(reportEntry.html, /id="preview-sections"/);
     assert.match(reportEntry.html, /logolink\.png/);
+    assert.match(reportEntry.html, /Confirmar generación de reporte/);
+    assert.match(reportEntry.html, /role="dialog" aria-modal="true"/);
+    assert.match(reportEntry.html, /He revisado la información/);
+    assert.match(reportEntry.html, /id="confirm-download"[^>]+disabled/);
     assert.equal((await request("/reportes/casos")).response.status, 302);
     assert.doesNotMatch(createForm.html, /src="\/img\/logo\.png"/);
     const invalidCreate = await request("/casos", {
