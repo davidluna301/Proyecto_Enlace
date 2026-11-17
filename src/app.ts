@@ -27,6 +27,7 @@ import { createReportesRouter } from "./modules/reportes/reportes.routes";
 
 export function createApp(options: { auditDirectory?: string } = {}) {
   const app = express();
+  app.set("trust proxy", 1);
   const authService = new AuthService();
   const authController = new AuthController(authService);
   const casesService = new CasesService(new MockCasesRepository());
