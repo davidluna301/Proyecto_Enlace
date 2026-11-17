@@ -1,0 +1,588 @@
+<%# views/qr/index.ejs – Dashboard QR del semestre ENLACE UCC %>
+<div class="dashboard-wrapper">
+
+  <%# ── Header Principal ── %>
+  <div class="cal-top-header">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge bg-primary-subtle text-primary fw-semibold px-2 py-1">📲 PORTAL Y ACCESO ESTUDIANTIL</span>
+        <span class="semester-badge--active-pulse">
+          <span class="semester-pulse-dot"></span> Semestre 2026-2 Activo
+        </span>
+      </div>
+      <h1 class="cal-page-title">Código QR del Semestre</h1>
+      <p class="cal-page-subtitle">
+        Comparte y proyecta el código QR institucional para que los estudiantes de la UCC agenden sus citas de bienestar de 2:00 PM a 4:00 PM.
+      </p>
+    </div>
+    <div class="cal-header-buttons">
+      <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="abrirPortalNuevaPestana()">
+        🚀 Abrir portal estudiantil
+      </button>
+      <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="descargarQR()">
+        📥 Descargar QR PNG
+      </button>
+    </div>
+  </div>
+
+  <%# ── Layout: Columna QR + Columna Estadísticas e Instrucciones ── %>
+  <div class="qr-dashboard-grid">
+
+    <%# ── Tarjeta Principal del QR ── %>
+    <div class="qr-card-main">
+      <div class="qr-card-header text-center">
+        <span class="badge bg-primary rounded-pill mb-2 px-3 py-1">ENLACE UCC · BIENESTAR</span>
+        <h2 class="qr-card-title">Escanea para agendar tu cita</h2>
+        <p class="text-muted small mb-0">Atención personalizada de 2:00 PM a 4:00 PM</p>
+      </div>
+
+      <%# Contenedor del QR %>
+      <div class="qr-display-box">
+        <div id="qrcode-container" class="qrcode-wrapper">
+          <!-- QRCode.js inyectará el canvas/img aquí -->
+        </div>
+        <div class="qr-target-url-box mt-3 w-100">
+          <label class="small text-muted fw-bold text-uppercase d-block mb-1">Enlace directo al portal:</label>
+          <div class="input-group input-group-sm">
+            <input type="text" id="qr-url-input" class="form-control font-monospace" readonly value="">
+            <button class="btn btn-outline-primary" type="button" onclick="copiarEnlacePortal()" title="Copiar enlace">
+              📋 Copiar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <%# Token y Metadatos del Semestre %>
+      <div class="qr-token-card mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="fw-bold small text-muted text-uppercase">🔑 Token del semestre:</span>
+          <button class="btn btn-sm btn-link p-0 text-decoration-none fw-semibold" onclick="copiarToken()">
+            Copiar token
+          </button>
+        </div>
+        <div class="token-code-display mb-2" id="semester-token-display">
+          <code>2026-2-UCC-ENLACE-SEC</code>
+        </div>
+        <div class="qr-meta-list">
+          <div class="qr-meta-item">
+            <span class="text-muted">📅 Vigencia:</span>
+            <strong>Agosto 2026 – Diciembre 2026</strong>
+          </div>
+          <div class="qr-meta-item">
+            <span class="text-muted">⏰ Franja horaria:</span>
+            <strong>Lunes a Viernes · 2:00 PM – 4:00 PM</strong>
+          </div>
+          <div class="qr-meta-item">
+            <span class="text-muted">🏢 Modalidades:</span>
+            <strong>Virtual (Meet) y Presencial (Bloque B)</strong>
+          </div>
+        </div>
+      </div>
+
+      <%# Botones de Acción %>
+      <div class="qr-action-buttons mt-3 w-100 d-flex gap-2">
+        <button class="btn btn-primary btn-sm flex-grow-1 rounded-pill shadow-sm" onclick="descargarQR()">
+          📥 Descargar QR (PNG)
+        </button>
+        <button class="btn btn-outline-secondary btn-sm flex-grow-1 rounded-pill" onclick="imprimirAfiche()">
+          🖨️ Imprimir cartel
+        </button>
+      </div>
+    </div>
+
+    <%# ── Columna Derecha: Estadísticas del Semestre e Instrucciones ── %>
+    <div class="qr-side-column">
+
+      <%# KPIs de Citas del Semestre %>
+      <div class="qr-kpi-grid">
+        <div class="qr-kpi-card qr-kpi-card--blue">
+          <div class="qr-kpi-icon">📋</div>
+          <div>
+            <div class="qr-kpi-val" id="stat-total">128</div>
+            <div class="qr-kpi-lbl">Citas agendadas</div>
+            <small class="text-primary fw-bold">Semestre 2026-2</small>
+          </div>
+        </div>
+
+        <div class="qr-kpi-card qr-kpi-card--green">
+          <div class="qr-kpi-icon">✅</div>
+          <div>
+            <div class="qr-kpi-val" id="stat-completadas">94</div>
+            <div class="qr-kpi-lbl">Atendidas / Completadas</div>
+            <small class="text-success fw-bold">73.4% efectividad</small>
+          </div>
+        </div>
+
+        <div class="qr-kpi-card qr-kpi-card--orange">
+          <div class="qr-kpi-icon">⏳</div>
+          <div>
+            <div class="qr-kpi-val" id="stat-pendientes">26</div>
+            <div class="qr-kpi-lbl">Próximas / Pendientes</div>
+            <small class="text-warning fw-bold">En horario 2PM-4PM</small>
+          </div>
+        </div>
+
+        <div class="qr-kpi-card qr-kpi-card--purple">
+          <div class="qr-kpi-icon">🔄</div>
+          <div>
+            <div class="qr-kpi-val" id="stat-canceladas">8</div>
+            <div class="qr-kpi-lbl">Reagendadas / Ajustadas</div>
+            <small class="text-secondary fw-bold">Notificadas a tiempo</small>
+          </div>
+        </div>
+      </div>
+
+      <%# Desglose de Modalidad y Facultades %>
+      <div class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="fs-6 fw-bold mb-0">📊 Distribución de citas del semestre</h3>
+          <span class="badge bg-light text-dark border">Tiempo real</span>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <span class="small text-muted fw-semibold d-block mb-1">Modalidad solicitada:</span>
+            <div class="d-flex justify-content-between small mb-1">
+              <span>💻 Virtual (Meet): <strong>62%</strong></span>
+              <span>🏢 Presencial: <strong>38%</strong></span>
+            </div>
+            <div class="progress" style="height: 10px;">
+              <div class="progress-bar bg-primary" role="progressbar" style="width: 62%" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100"></div>
+              <div class="progress-bar bg-success" role="progressbar" style="width: 38%" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <span class="small text-muted fw-semibold d-block mb-1">Programa con mayor demanda:</span>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-info-subtle text-info-emphasis rounded-pill px-3 py-1 fw-bold">
+                Psicología (32%)
+              </span>
+              <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-2 py-1">
+                Ing. Sistemas (25%)
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%# Instrucciones para Estudiantes %>
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <span style="font-size:1.3rem;">💡</span>
+          <h3 class="fs-6 fw-bold mb-0">Instrucciones para los estudiantes</h3>
+        </div>
+        <p class="text-muted small mb-3">
+          Puedes proyectar este paso a paso en pantallas del campus, incluirlo en inducciones o imprimirlo para las carteleras de cada facultad:
+        </p>
+
+        <div class="student-steps-grid">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <strong>Escanea el código QR</strong>
+              <p class="small text-muted mb-0">Con la cámara de tu smartphone o lector QR desde cualquier cartelera del campus.</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <strong>Ingresa tus datos UCC</strong>
+              <p class="small text-muted mb-0">Digita tu ID institucional, carrera, semestre y correo institucional @campusucc.edu.co.</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <strong>Elige fecha y modalidad</strong>
+              <p class="small text-muted mb-0">Selecciona tu cita dentro del horario oficial de 2:00 PM a 4:00 PM (Presencial o Virtual).</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <strong>Confirmación inmediata</strong>
+              <p class="small text-muted mb-0">Recibirás los detalles de tu cita y enlace de conexión directamente en tu correo.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<%# ── Toast de feedback ── %>
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 10000;">
+  <div id="qrToast" class="toast align-items-center text-bg-success border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="qrToastMsg">
+        ✅ Enlace copiado al portapapeles.
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+    </div>
+  </div>
+</div>
+
+<%# CDN oficial de QRCode.js %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+// ── Configuración Dinámica del QR ──
+let qrCodeInstance = null;
+const semesterToken = '2026-2-UCC-ENLACE-SEC';
+
+function getPortalUrl() {
+  const loc = window.location;
+  return `${loc.protocol}//${loc.host}/portal-estudiante?token=${semesterToken}`;
+}
+
+function inicializarQR() {
+  const url = getPortalUrl();
+  const inputEl = document.getElementById('qr-url-input');
+  if (inputEl) inputEl.value = url;
+
+  const container = document.getElementById('qrcode-container');
+  container.innerHTML = '';
+
+  // Generar código QR en alta calidad (240x240)
+  qrCodeInstance = new QRCode(container, {
+    text: url,
+    width: 240,
+    height: 240,
+    colorDark: '#0e6577',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+// ── Descargar QR en formato PNG ──
+function descargarQR() {
+  const canvas = document.querySelector('#qrcode-container canvas');
+  if (!canvas) {
+    // Si QRCode.js renderizó una imagen en vez de canvas
+    const img = document.querySelector('#qrcode-container img');
+    if (img && img.src) {
+      const link = document.createElement('a');
+      link.download = `QR-ENLACE-UCC-${semesterToken}.png`;
+      link.href = img.src;
+      link.click();
+      mostrarToast('✅ Código QR descargado exitosamente.');
+      return;
+    }
+    mostrarToast('⚠️ El código QR aún se está generando, intenta en un segundo.');
+    return;
+  }
+
+  // Crear un canvas decorado en alta definición con membrete ENLACE UCC
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width = 600;
+  exportCanvas.height = 760;
+  const ctx = exportCanvas.getContext('2d');
+
+  // Fondo blanco con esquinas redondeadas
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 600, 760);
+
+  // Barra superior institucional
+  ctx.fillStyle = '#0e6577';
+  ctx.fillRect(0, 0, 600, 110);
+
+  // Título institucional
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 26px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('ENLACE UCC · BIENESTAR', 300, 50);
+
+  ctx.font = '16px Inter, sans-serif';
+  ctx.fillText('Agenda tu Cita de Acompañamiento', 300, 85);
+
+  // Dibujar QR centrado
+  ctx.drawImage(canvas, 120, 150, 360, 360);
+
+  // Textos inferiores
+  ctx.fillStyle = '#1f2933';
+  ctx.font = 'bold 20px Inter, sans-serif';
+  ctx.fillText('Horario: Lunes a Viernes · 2:00 PM – 4:00 PM', 300, 560);
+
+  ctx.fillStyle = '#64748b';
+  ctx.font = '15px Inter, sans-serif';
+  ctx.fillText('Modalidad Presencial y Virtual (Meet)', 300, 595);
+
+  ctx.font = 'bold 14px monospace';
+  ctx.fillStyle = '#0e6577';
+  ctx.fillText(`Token: ${semesterToken}`, 300, 635);
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '13px Inter, sans-serif';
+  ctx.fillText('Universidad Cooperativa de Colombia · Espacio Confidencial', 300, 690);
+
+  // Descarga del archivo PNG
+  const link = document.createElement('a');
+  link.download = `AFICHE-QR-ENLACE-${semesterToken}.png`;
+  link.href = exportCanvas.toDataURL('image/png');
+  link.click();
+
+  mostrarToast('✅ Afiche con QR descargado en alta resolución (PNG).');
+}
+
+// ── Imprimir afiche para carteleras ──
+function imprimirAfiche() {
+  window.print();
+}
+
+// ── Copiar Enlace y Token ──
+function copiarEnlacePortal() {
+  const url = getPortalUrl();
+  navigator.clipboard.writeText(url).then(() => {
+    mostrarToast('✅ Enlace al portal estudiantil copiado al portapapeles.');
+  });
+}
+
+function copiarToken() {
+  navigator.clipboard.writeText(semesterToken).then(() => {
+    mostrarToast('✅ Token del semestre copiado al portapapeles.');
+  });
+}
+
+function abrirPortalNuevaPestana() {
+  window.open('/portal-estudiante', '_blank');
+}
+
+function mostrarToast(msg) {
+  const toastEl = document.getElementById('qrToast');
+  document.getElementById('qrToastMsg').textContent = msg;
+  const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+  toast.show();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  inicializarQR();
+});
+</script>
+
+<style>
+/* ── Estilos Premium del Dashboard QR ── */
+.qr-dashboard-grid {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 1.75rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 992px) {
+  .qr-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tarjeta Principal del QR */
+.qr-card-main {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeSlideIn 0.4s ease;
+}
+
+.qr-card-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: 0.25rem;
+}
+
+.qr-display-box {
+  background: linear-gradient(135deg, #f0fdfa 0%, #e8f5f7 100%);
+  border: 2px dashed var(--color-primary);
+  border-radius: 18px;
+  padding: 1.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.qrcode-wrapper {
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(14, 101, 119, 0.15);
+  display: inline-block;
+}
+
+.qrcode-wrapper canvas,
+.qrcode-wrapper img {
+  display: block;
+  border-radius: 8px;
+}
+
+/* Tarjeta del Token */
+.qr-token-card {
+  width: 100%;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+}
+
+.token-code-display code {
+  display: block;
+  background: #ffffff;
+  border: 1.5px dashed var(--color-primary);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.qr-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  border-top: 1px solid #edf2f7;
+  padding-top: 0.6rem;
+}
+
+.qr-meta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Columna Derecha */
+.qr-side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* KPIs de Citas */
+.qr-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.qr-kpi-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.qr-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+.qr-kpi-card--blue { border-left: 4px solid #3b82f6; }
+.qr-kpi-card--green { border-left: 4px solid #22c55e; }
+.qr-kpi-card--orange { border-left: 4px solid #f97316; }
+.qr-kpi-card--purple { border-left: 4px solid #a855f7; }
+
+.qr-kpi-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.qr-kpi-val {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+
+.qr-kpi-lbl {
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+/* Pasos para estudiantes */
+.student-steps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .student-steps-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.step-card {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  transition: background 0.15s;
+}
+
+.step-card:hover {
+  background: #f0fdfa;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-content strong {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+/* Modo Impresión de Afiche */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .qr-card-main, .qr-card-main * {
+    visibility: visible;
+  }
+  .qr-card-main {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none;
+    border: none;
+  }
+  .qr-action-buttons, .cal-header-buttons, .sidebar, .mobile-header, .site-footer {
+    display: none !important;
+  }
+}
+</style>
