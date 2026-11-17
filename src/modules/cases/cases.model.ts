@@ -1,0 +1,87 @@
+import type { MarcadorId } from "../../data/marcadores";
+
+export const statusLabels = {
+  REGISTRADO: "Registrado",
+  NUEVO: "Nuevo",
+  EN_SEGUIMIENTO: "En seguimiento",
+  EN_ESPERA: "En espera",
+  CERRADO: "Cerrado",
+} as const;
+
+export const statusIcons = {
+  REGISTRADO: "＋",
+  NUEVO: "●",
+  EN_SEGUIMIENTO: "↻",
+  EN_ESPERA: "◷",
+  CERRADO: "✓",
+} as const;
+
+export const urgencyLabels = {
+  ALTA: "Alta",
+  MEDIA: "Media",
+  BAJA: "Baja",
+} as const;
+
+export type CaseStatus = keyof typeof statusLabels;
+export type Urgency = keyof typeof urgencyLabels;
+
+export type RiskLevel =
+  | "BAJO"
+  | "MODERADO"
+  | "MEDIO_ALTO"
+  | "ALTO"
+  | "CRITICO";
+
+export const riskEmojis: Record<RiskLevel, string> = {
+  BAJO: "😊",
+  MODERADO: "😐",
+  MEDIO_ALTO: "😟",
+  ALTO: "😰",
+  CRITICO: "💀",
+};
+
+export const riskLabels: Record<RiskLevel, string> = {
+  BAJO: "Bajo",
+  MODERADO: "Moderado",
+  MEDIO_ALTO: "Medio-Alto",
+  ALTO: "Alto",
+  CRITICO: "Crítico",
+};
+
+export interface CaseEvent {
+  date: string;
+  type: string;
+  description: string;
+}
+
+export interface StudentCase {
+  id: string;
+  advisorId: string;
+  studentName: string;
+  program: string;
+  semester?: string;
+  riskLevel?: RiskLevel;
+  riskDescription?: string;
+  status: CaseStatus;
+  urgency: Urgency;
+  lastMovement: string;
+  summary: string;
+  events: CaseEvent[];
+  email?: string | null;
+  tieneCorreoInstitucional: boolean;
+  contactEmail?: string;
+  observacionesAsesor?: string;
+  markers: MarcadorId[];
+}
+
+export interface NewCase {
+  advisorId: string;
+  studentName: string;
+  email: string | null;
+  tieneCorreoInstitucional: boolean;
+  contactEmail?: string;
+  program: string;
+  summary: string;
+  observacionesAsesor?: string;
+  markers: MarcadorId[];
+}

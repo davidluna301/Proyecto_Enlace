@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title %> | ENLACE UCC</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+    <% if (currentUser) { %>
+      <header class="mobile-header d-lg-none">
+        <button class="btn menu-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir navegación">☰</button>
+        <a href="/home"><img src="/img/logolink.png" alt="ENLACE"></a>
+      </header>
+      <%- include('../partials/sidebar') %>
+    <% } %>
+    <main id="contenido" class="<%= currentUser ? 'page-shell authenticated-content' : 'login-shell' %>">
+      <%- body %>
+    </main>
+    <% if (currentUser) { %>
+      <footer class="site-footer authenticated-footer">
+        <div class="container d-flex justify-content-between flex-wrap gap-2">
+          <span>ENLACE UCC · Acompañamiento que conecta</span>
+          <span>Vista de demostración</span>
+        </div>
+      </footer>
+    <% } %>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

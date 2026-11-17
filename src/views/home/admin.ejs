@@ -1,0 +1,161 @@
+<%# views/home/admin.ejs – Dashboard Administrador ENLACE %>
+<div class="dashboard-wrapper">
+
+  <%# ── Bienvenida Admin ── %>
+  <div class="welcome-hero welcome-hero--admin">
+    <div class="welcome-hero__text">
+      <p class="eyebrow">🛡️ Panel de Administración</p>
+      <h1>Hola, <%= currentUser.name.split(" ")[0] %>.</h1>
+      <p class="welcome-copy">Gestiona la plataforma ENLACE: agrega asesores, controla semestres y monitorea todo el sistema en tiempo real.</p>
+    </div>
+    <div class="welcome-hero__badge welcome-hero__badge--admin" aria-hidden="true"><span>ADM</span></div>
+  </div>
+
+  <%# ── KPI Cards ── %>
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-card--blue">
+      <div class="kpi-card__icon">👥</div>
+      <div>
+        <div class="kpi-card__value">4</div>
+        <div class="kpi-card__label">Asesores activos</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-card--green">
+      <div class="kpi-card__icon">🎓</div>
+      <div>
+        <div class="kpi-card__value">245</div>
+        <div class="kpi-card__label">Estudiantes en plataforma</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-card--orange">
+      <div class="kpi-card__icon">📋</div>
+      <div>
+        <div class="kpi-card__value">87</div>
+        <div class="kpi-card__label">Citas este semestre</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-card--purple">
+      <div class="kpi-card__icon">📊</div>
+      <div>
+        <div class="kpi-card__value">42</div>
+        <div class="kpi-card__label">Casos en seguimiento</div>
+      </div>
+    </div>
+  </div>
+
+  <%# ── Fila: Gestión asesores + Acciones ── %>
+  <div class="dash-row">
+
+    <%# Lista de asesores %>
+    <div class="dash-card dash-card--lg">
+      <div class="dash-card__header">
+        <h2>👥 Asesores en la plataforma</h2>
+        <button class="btn-primary-sm" id="btn-add-asesor" onclick="document.getElementById('modal-add-asesor').style.display='flex'">+ Agregar asesor</button>
+      </div>
+      <div class="users-table-wrapper">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Casos</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>María Fernanda Ríos</strong></td>
+              <td>asesor@ucc.edu.co</td>
+              <td>12</td>
+              <td><span class="status-badge status-badge--active">Activo</span></td>
+              <td>
+                <button class="btn-icon" title="Editar contraseña">🔑</button>
+                <button class="btn-icon" title="Ver dashboard">📊</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Jhon Álvarez Mora</strong></td>
+              <td>jhon.alvarez@ucc.edu.co</td>
+              <td>8</td>
+              <td><span class="status-badge status-badge--active">Activo</span></td>
+              <td>
+                <button class="btn-icon" title="Editar contraseña">🔑</button>
+                <button class="btn-icon" title="Ver dashboard">📊</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Patricia Morales</strong></td>
+              <td>p.morales@ucc.edu.co</td>
+              <td>15</td>
+              <td><span class="status-badge status-badge--active">Activo</span></td>
+              <td>
+                <button class="btn-icon" title="Editar contraseña">🔑</button>
+                <button class="btn-icon" title="Ver dashboard">📊</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <% if (typeof users !== 'undefined' && users && users.length) { %>
+  <section class="admin-users mt-5" id="usuarios" aria-labelledby="users-title">
+    <p class="eyebrow">Acceso de demostración</p>
+    <h2 id="users-title">Usuarios disponibles</h2>
+    <div class="row g-3 mt-1">
+      <% users.forEach((user) => { %>
+        <div class="col-md-6">
+          <article class="user-card">
+            <span class="avatar" aria-hidden="true"><%= user.name.charAt(0) %></span>
+            <div><h3><%= user.name %></h3><p><%= user.email %></p></div>
+            <span class="role-chip"><%= user.role === 'ASESOR' ? 'Asesor' : 'Administrador' %></span>
+          </article>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+
+</div>
+
+<%# ── Modal: Agregar asesor ── %>
+<div id="modal-add-asesor" class="modal-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>➕ Agregar nuevo asesor</h3>
+      <button class="modal-close" onclick="document.getElementById('modal-add-asesor').style.display='none'">✕</button>
+    </div>
+    <form class="modal-form" onsubmit="handleAddAsesor(event)">
+      <div class="form-group">
+        <label for="new-name">Nombre completo</label>
+        <input type="text" id="new-name" class="form-input" placeholder="Ej: Ana María López" required>
+      </div>
+      <div class="form-group">
+        <label for="new-email">Correo institucional</label>
+        <input type="email" id="new-email" class="form-input" placeholder="correo@ucc.edu.co" required>
+      </div>
+      <div class="form-group">
+        <label for="new-pass">Contraseña inicial</label>
+        <input type="password" id="new-pass" class="form-input" placeholder="Mínimo 8 caracteres" required minlength="8">
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn-primary-sm">Crear asesor</button>
+        <button type="button" class="btn-outline-sm" onclick="document.getElementById('modal-add-asesor').style.display='none'">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function handleAddAsesor(e) {
+  e.preventDefault();
+  const name = document.getElementById('new-name').value;
+  const email = document.getElementById('new-email').value;
+  alert('✅ Asesor "' + name + '" (' + email + ') agregado exitosamente.\n\nEn producción esto llamará a POST /api/admin/psychologists');
+  document.getElementById('modal-add-asesor').style.display = 'none';
+  e.target.reset();
+}
+</script>

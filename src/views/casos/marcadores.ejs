@@ -1,0 +1,317 @@
+<%# views/casos/marcadores.ejs – Tablero de Marcadores Críticos y Niveles de Riesgo %>
+<div class="dashboard-wrapper">
+
+  <%# ── Hero de Marcadores Críticos ── %>
+  <div class="welcome-hero" style="background: linear-gradient(135deg, #0e6577 0%, #189fba 100%);">
+    <div class="welcome-hero__text">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="badge bg-white text-dark fw-bold px-3 py-1 rounded-pill">🎯 Sistema de Alerta Temprana</span>
+        <span class="badge bg-white-50 text-white border border-white-50 px-2 py-1 rounded-pill small">
+          Monitoreo en Tiempo Real
+        </span>
+      </div>
+      <h1 class="mb-2">Marcadores Críticos de Riesgo Estudiantil</h1>
+      <p class="welcome-copy">
+        Detección temprana de señales de deserción académica, factores psicosociales y alertas socioeconómicas mediante marcadores clasificados por niveles de criticidad.
+      </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <a href="/casos/nuevo" class="btn btn-light fw-bold px-3 py-2 rounded-3 shadow-sm d-inline-flex align-items-center gap-2">
+        <span>➕</span> Registrar nuevo caso
+      </a>
+      <a href="/casos" class="btn btn-outline-light fw-bold px-3 py-2 rounded-3 d-inline-flex align-items-center gap-2">
+        <span>📋</span> Ver lista general de casos
+      </a>
+    </div>
+  </div>
+
+  <%# ── Resumen en la parte superior: Contadores con Emojis de Caras ── %>
+  <div class="risk-summary-grid">
+    <%# Total General %>
+    <div class="risk-summary-card" style="border-left: 4px solid var(--color-primary);">
+      <div class="risk-summary-card__emoji">📊</div>
+      <div>
+        <div class="risk-summary-card__value" id="kpi-total"><%= summary.total %></div>
+        <div class="risk-summary-card__label">Estudiantes Monitoreados</div>
+      </div>
+    </div>
+
+    <%# Nivel Crítico 💀 %>
+    <div class="risk-summary-card" style="border-left: 4px solid #7e22ce;">
+      <div class="risk-summary-card__emoji">💀</div>
+      <div>
+        <div class="risk-summary-card__value text-purple" id="kpi-critico" style="color: #6b21a8;"><%= summary.critico %></div>
+        <div class="risk-summary-card__label">Riesgo Crítico</div>
+      </div>
+    </div>
+
+    <%# Nivel Alto 😰 %>
+    <div class="risk-summary-card" style="border-left: 4px solid #ef4444;">
+      <div class="risk-summary-card__emoji">😰</div>
+      <div>
+        <div class="risk-summary-card__value text-danger" id="kpi-alto"><%= summary.alto %></div>
+        <div class="risk-summary-card__label">Riesgo Alto</div>
+      </div>
+    </div>
+
+    <%# Nivel Medio-Alto 😟 %>
+    <div class="risk-summary-card" style="border-left: 4px solid #f97316;">
+      <div class="risk-summary-card__emoji">😟</div>
+      <div>
+        <div class="risk-summary-card__value" id="kpi-medio-alto" style="color: #c2410c;"><%= summary.medioAlto %></div>
+        <div class="risk-summary-card__label">Riesgo Medio-Alto</div>
+      </div>
+    </div>
+
+    <%# Nivel Moderado 😐 %>
+    <div class="risk-summary-card" style="border-left: 4px solid #eab308;">
+      <div class="risk-summary-card__emoji">😐</div>
+      <div>
+        <div class="risk-summary-card__value" id="kpi-moderado" style="color: #854d0e;"><%= summary.moderado %></div>
+        <div class="risk-summary-card__label">Riesgo Moderado</div>
+      </div>
+    </div>
+
+    <%# Nivel Bajo 😊 %>
+    <div class="risk-summary-card" style="border-left: 4px solid #22c55e;">
+      <div class="risk-summary-card__emoji">😊</div>
+      <div>
+        <div class="risk-summary-card__value text-success" id="kpi-bajo"><%= summary.bajo %></div>
+        <div class="risk-summary-card__label">Riesgo Bajo / Estable</div>
+      </div>
+    </div>
+  </div>
+
+  <%# ── Filtros Interactivos ── %>
+  <div class="filters-card">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <span class="fs-5">🔍</span>
+        <h2 class="h6 mb-0 fw-bold text-dark text-uppercase letter-spacing-1">Filtros de Búsqueda y Segmentación</h2>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-light text-muted border small" id="contador-visibles">
+          Mostrando <%= estudiantes.length %> de <%= estudiantes.length %> estudiantes
+        </span>
+        <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" type="button" onclick="limpiarFiltros()">
+          ✕ Limpiar filtros
+        </button>
+      </div>
+    </div>
+
+    <div class="filters-grid">
+      <%# Filtro 1: Nivel de Riesgo %>
+      <div class="filter-item">
+        <label for="filtro-riesgo">Nivel de Riesgo (Emoji)</label>
+        <select id="filtro-riesgo" class="filter-select" onchange="aplicarFiltros()">
+          <option value="">Todos los niveles</option>
+          <option value="CRITICO">💀 Crítico</option>
+          <option value="ALTO">😰 Alto</option>
+          <option value="MEDIO_ALTO">😟 Medio-Alto</option>
+          <option value="MODERADO">😐 Moderado</option>
+          <option value="BAJO">😊 Bajo / Estable</option>
+        </select>
+      </div>
+
+      <%# Filtro 2: Asesor Asignado %>
+      <div class="filter-item">
+        <label for="filtro-asesor">Asesor Asignado</label>
+        <select id="filtro-asesor" class="filter-select" onchange="aplicarFiltros()">
+          <option value="">Todos los asesores</option>
+          <% asesoresDisponibles.forEach(function(asesor) { %>
+            <option value="<%= asesor %>"><%= asesor %></option>
+          <% }); %>
+        </select>
+      </div>
+
+      <%# Filtro 3: Semestre %>
+      <div class="filter-item">
+        <label for="filtro-semestre">Semestre Académico</label>
+        <select id="filtro-semestre" class="filter-select" onchange="aplicarFiltros()">
+          <option value="">Todos los semestres</option>
+          <% semestresDisponibles.forEach(function(sem) { %>
+            <option value="<%= sem %>"><%= sem %></option>
+          <% }); %>
+        </select>
+      </div>
+
+      <%# Filtro 4: Búsqueda por Texto %>
+      <div class="filter-item">
+        <label for="filtro-texto">Búsqueda rápida</label>
+        <input
+          type="text"
+          id="filtro-texto"
+          class="filter-input"
+          placeholder="Nombre de estudiante o carrera..."
+          oninput="aplicarFiltros()"
+        >
+      </div>
+    </div>
+  </div>
+
+  <%# ── Tabla de Estudiantes y Marcadores Críticos ── %>
+  <div class="table-responsive-card">
+    <table class="table-custom-premium" id="tabla-marcadores">
+      <thead>
+        <tr>
+          <th>Estudiante</th>
+          <th>Programa / Carrera</th>
+          <th class="text-center">Semestre</th>
+          <th class="text-center">Nivel de Riesgo</th>
+          <th>Marcador / Factor Crítico Detectado</th>
+          <th>Asesor Asignado</th>
+          <th class="text-end pe-4">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (estudiantes && estudiantes.length > 0) { %>
+          <% estudiantes.forEach(function(est) { %>
+            <% 
+              let pillClass = "risk-pill--bajo";
+              if (est.riskLevel === "CRITICO") pillClass = "risk-pill--critico";
+              else if (est.riskLevel === "ALTO") pillClass = "risk-pill--alto";
+              else if (est.riskLevel === "MEDIO_ALTO") pillClass = "risk-pill--medio_alto";
+              else if (est.riskLevel === "MODERADO") pillClass = "risk-pill--moderado";
+            %>
+            <tr
+              class="fila-estudiante"
+              data-riesgo="<%= est.riskLevel %>"
+              data-asesor="<%= est.advisorName %>"
+              data-semestre="<%= est.semester %>"
+              data-nombre="<%= est.studentName.toLowerCase() %>"
+              data-carrera="<%= est.program.toLowerCase() %>"
+            >
+              <%# Nombre Estudiante %>
+              <td>
+                <div class="student-meta">
+                  <div class="user-avatar-circle">
+                    <%= est.studentName.split(" ").map(function(n) { return n[0]; }).slice(0, 2).join("") %>
+                  </div>
+                  <div class="student-meta-info">
+                    <strong><%= est.studentName %></strong>
+                    <span>Código Caso: <%= est.id %></span>
+                  </div>
+                </div>
+              </td>
+
+              <%# Carrera %>
+              <td>
+                <span class="fw-semibold text-dark"><%= est.program %></span>
+              </td>
+
+              <%# Semestre %>
+              <td class="text-center">
+                <span class="badge bg-light text-dark border px-2 py-1 rounded-pill small fw-semibold">
+                  <%= est.semester %>
+                </span>
+              </td>
+
+              <%# Nivel de Riesgo (Emoji + Badge) %>
+              <td class="text-center">
+                <span class="risk-pill <%= pillClass %>">
+                  <span class="risk-emoji-display"><%= est.riskEmoji %></span>
+                  <span><%= est.riskLabel %></span>
+                </span>
+              </td>
+
+              <%# Descripción Breve del Marcador %>
+              <td style="max-width: 320px;">
+                <p class="mb-0 small text-muted text-truncate-2" title="<%= est.riskDescription %>">
+                  <%= est.riskDescription %>
+                </p>
+              </td>
+
+              <%# Asesor Asignado %>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="small fw-semibold text-dark">🧑‍💼 <%= est.advisorName %></span>
+                </div>
+              </td>
+
+              <%# Botón Ver Caso %>
+              <td class="text-end pe-4">
+                <a
+                  href="/casos/<%= est.id %>"
+                  class="btn btn-sm btn-outline-primary fw-semibold rounded-3 px-3 d-inline-flex align-items-center gap-1 shadow-sm"
+                  title="Ver expediente detallado del caso"
+                >
+                  <span>👁️</span> <span>Ver caso</span>
+                </a>
+              </td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr id="fila-vacia">
+            <td colspan="7" class="text-center py-5 text-muted">
+              No hay estudiantes registrados con marcadores en este momento.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <%# Mensaje cuando ningún filtro coincide %>
+    <div id="sin-coincidencias" class="text-center py-5 px-3" style="display: none;">
+      <div class="fs-1 mb-2">🔍</div>
+      <h3 class="h6 fw-bold text-dark mb-1">No se encontraron estudiantes</h3>
+      <p class="text-muted small mb-3">No hay registros que coincidan con los filtros seleccionados actualmente.</p>
+      <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="limpiarFiltros()">
+        Restablecer todos los filtros
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<%# ── Script de Filtrado Interactivo en Tiempo Real ── %>
+<script>
+function aplicarFiltros() {
+  const filtroRiesgo = document.getElementById('filtro-riesgo').value;
+  const filtroAsesor = document.getElementById('filtro-asesor').value;
+  const filtroSemestre = document.getElementById('filtro-semestre').value;
+  const filtroTexto = document.getElementById('filtro-texto').value.trim().toLowerCase();
+
+  const filas = document.querySelectorAll('.fila-estudiante');
+  let visibles = 0;
+
+  filas.forEach(function(fila) {
+    const riesgo = fila.getAttribute('data-riesgo') || '';
+    const asesor = fila.getAttribute('data-asesor') || '';
+    const semestre = fila.getAttribute('data-semestre') || '';
+    const nombre = fila.getAttribute('data-nombre') || '';
+    const carrera = fila.getAttribute('data-carrera') || '';
+
+    const coincideRiesgo = !filtroRiesgo || riesgo === filtroRiesgo;
+    const coincideAsesor = !filtroAsesor || asesor === filtroAsesor;
+    const coincideSemestre = !filtroSemestre || semestre === filtroSemestre;
+    const coincideTexto = !filtroTexto || nombre.includes(filtroTexto) || carrera.includes(filtroTexto);
+
+    if (coincideRiesgo && coincideAsesor && coincideSemestre && coincideTexto) {
+      fila.style.display = '';
+      visibles++;
+    } else {
+      fila.style.display = 'none';
+    }
+  });
+
+  // Actualizar contador
+  const contador = document.getElementById('contador-visibles');
+  if (contador) {
+    contador.textContent = 'Mostrando ' + visibles + ' de ' + filas.length + ' estudiantes';
+  }
+
+  // Mostrar u ocultar mensaje de sin coincidencias
+  const sinResultados = document.getElementById('sin-coincidencias');
+  if (sinResultados) {
+    sinResultados.style.display = visibles === 0 ? 'block' : 'none';
+  }
+}
+
+function limpiarFiltros() {
+  document.getElementById('filtro-riesgo').value = '';
+  document.getElementById('filtro-asesor').value = '';
+  document.getElementById('filtro-semestre').value = '';
+  document.getElementById('filtro-texto').value = '';
+  aplicarFiltros();
+}
+</script>

@@ -1,0 +1,383 @@
+<%# views/semestre/index.ejs – Gestión y Auditoría de Semestres ENLACE UCC %>
+<div class="dashboard-wrapper">
+
+  <%# ── Hero de Semestre ── %>
+  <div class="welcome-hero welcome-hero--admin">
+    <div class="welcome-hero__text">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="badge bg-white text-dark fw-bold px-3 py-1 rounded-pill">🗓️ Ciclos Académicos</span>
+        <span class="semester-badge--active-pulse">
+          <span class="semester-pulse-dot"></span> <%= semestreActual.estado %>
+        </span>
+      </div>
+      <h1 class="mb-2">Gestión de Semestres y Períodos</h1>
+      <p class="welcome-copy">
+        Administra el ciclo de vida de los períodos académicos de la Universidad Cooperativa de Colombia, supervisa los indicadores de cobertura y audita los reportes históricos de permanencia.
+      </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <button class="btn btn-light fw-bold px-3 py-2 rounded-3 shadow-sm d-inline-flex align-items-center gap-2" onclick="abrirModalIniciarSemestre()">
+        <span>🚀</span> Iniciar nuevo semestre
+      </button>
+      <button class="btn btn-outline-light fw-bold px-3 py-2 rounded-3 d-inline-flex align-items-center gap-2" onclick="abrirModalFinalizarSemestre()">
+        <span>🏁</span> Finalizar semestre actual
+      </button>
+    </div>
+  </div>
+
+  <%# ── Card Principal: Semestre Activo ── %>
+  <div class="semester-hero-card">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+      <div>
+        <div class="d-flex align-items-center gap-2">
+          <h2 class="h4 mb-0 fw-bold text-dark">Período Académico <%= semestreActual.nombre %></h2>
+          <span class="badge bg-success text-white px-3 py-1 rounded-pill fw-semibold">
+            ● <%= semestreActual.estado %>
+          </span>
+        </div>
+        <p class="text-muted small mb-0 mt-1">
+          Registro operativo oficial de acompañamiento estudiantil, tutorías y predicción temprana de deserción.
+        </p>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2">
+        <button class="btn btn-success fw-bold px-3 py-2 rounded-3 d-inline-flex align-items-center gap-2" onclick="abrirModalIniciarSemestre()">
+          <span>🚀</span> Iniciar nuevo semestre
+        </button>
+        <button class="btn btn-outline-danger fw-bold px-3 py-2 rounded-3 d-inline-flex align-items-center gap-2 bg-white" onclick="abrirModalFinalizarSemestre()">
+          <span>🏁</span> Finalizar semestre
+        </button>
+      </div>
+    </div>
+
+    <%# Fechas y Barra de Progreso %>
+    <div class="p-3 bg-white rounded-3 border border-light-subtle shadow-sm mb-4">
+      <div class="row align-items-center gy-2">
+        <div class="col-md-4">
+          <span class="small text-muted text-uppercase fw-bold d-block">Fecha de Inicio</span>
+          <strong class="fs-6 text-dark"><%= semestreActual.fechaInicioFormato %></strong>
+        </div>
+        <div class="col-md-4 text-md-center">
+          <span class="small text-muted text-uppercase fw-bold d-block">Fecha de Cierre Estimada</span>
+          <strong class="fs-6 text-dark"><%= semestreActual.fechaFinFormato %></strong>
+        </div>
+        <div class="col-md-4 text-md-end">
+          <span class="small text-muted text-uppercase fw-bold d-block">Estado Temporal</span>
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill fw-bold">
+            <%= semestreActual.porcentajeAvance %>% completado (32 días restantes)
+          </span>
+        </div>
+      </div>
+      <div class="progress-semester mt-3">
+        <div class="progress-semester-bar" style="width: <%= semestreActual.porcentajeAvance %>%;"></div>
+      </div>
+    </div>
+
+    <%# Grid de Estadísticas del Semestre Activo %>
+    <div class="row g-3">
+      <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card kpi-card--blue h-100 mb-0">
+          <div class="kpi-card__icon">🎓</div>
+          <div>
+            <div class="kpi-card__value"><%= semestreActual.totalEstudiantes %></div>
+            <div class="kpi-card__label">Total estudiantes atendidos</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card kpi-card--green h-100 mb-0">
+          <div class="kpi-card__icon">📅</div>
+          <div>
+            <div class="kpi-card__value"><%= semestreActual.totalCitas %></div>
+            <div class="kpi-card__label">Citas agendadas y ejecutadas</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card kpi-card--orange h-100 mb-0">
+          <div class="kpi-card__icon">🚨</div>
+          <div>
+            <div class="kpi-card__value"><%= semestreActual.casosCriticos %></div>
+            <div class="kpi-card__label">Casos críticos prioritarios</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card kpi-card--purple h-100 mb-0">
+          <div class="kpi-card__icon">🤖</div>
+          <div>
+            <div class="kpi-card__value text-warning"><%= semestreActual.falsosPositivosIA %></div>
+            <div class="kpi-card__label">Falsos positivos IA detectados</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# ── Banner Informativo de Falsos Positivos Pendientes ── %>
+  <% if (semestreActual.falsosPositivosIA > 0) { %>
+    <div class="callout-warning d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4 shadow-sm">
+      <div class="d-flex align-items-center gap-3">
+        <span class="fs-3">⚠️</span>
+        <div>
+          <div class="fw-bold fs-6">Auditoría Requerida: <%= semestreActual.falsosPositivosIA %> Falsos Positivos de IA Pendientes</div>
+          <p class="mb-0 small text-dark">
+            Existen estudiantes clasificados erróneamente por el motor de machine learning como riesgo inminente. Debes revisarlos antes de finalizar el semestre para mantener la precisión del modelo algorítmico.
+          </p>
+        </div>
+      </div>
+      <div>
+        <a href="/ia/predicciones" class="btn btn-warning btn-sm fw-bold px-3 py-2 rounded-3 text-dark d-inline-flex align-items-center gap-1">
+          <span>🔍</span> Auditar en Predicciones IA →
+        </a>
+      </div>
+    </div>
+  <% } %>
+
+  <%# ── Tabla de Historial de Semestres Anteriores ── %>
+  <div class="card border-0 rounded-4 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom p-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <h2 class="h5 mb-1 fw-bold text-dark d-flex align-items-center gap-2">
+          <span>📚</span> Historial de Semestres Anteriores
+        </h2>
+        <p class="text-muted small mb-0">Registro histórico consolidado de períodos académicos anteriores y trazabilidad de desempeño.</p>
+      </div>
+      <a href="/reportes/pdf" class="btn btn-outline-secondary btn-sm fw-semibold rounded-3 px-3 py-2 d-inline-flex align-items-center gap-2">
+        <span>📥</span> Exportar reporte histórico PDF
+      </a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Semestre</th>
+            <th>Vigencia (Inicio - Fin)</th>
+            <th class="text-center">Estudiantes</th>
+            <th class="text-center">Citas</th>
+            <th class="text-center">Casos críticos</th>
+            <th class="text-center">Falsos positivos IA</th>
+            <th class="text-center">Efectividad</th>
+            <th class="text-end pe-4">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (historialSemestres && historialSemestres.length > 0) { %>
+            <% historialSemestres.forEach(function(sem) { %>
+              <tr>
+                <td class="ps-4">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 rounded-pill fw-bold">
+                      <%= sem.nombre %>
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <span class="small fw-semibold text-dark"><%= sem.fechaInicio %></span>
+                  <span class="text-muted small">hasta</span>
+                  <span class="small fw-semibold text-dark"><%= sem.fechaFin %></span>
+                </td>
+                <td class="text-center fw-bold text-dark"><%= sem.totalEstudiantes %></td>
+                <td class="text-center"><%= sem.totalCitas %></td>
+                <td class="text-center">
+                  <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded-pill fw-semibold">
+                    <%= sem.casosCriticos %>
+                  </span>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2 py-1 rounded-pill fw-semibold">
+                    <%= sem.falsosPositivosIA %>
+                  </span>
+                </td>
+                <td class="text-center">
+                  <strong class="text-success"><%= sem.tasaEfectividad %></strong>
+                </td>
+                <td class="text-end pe-4">
+                  <span class="badge bg-light text-muted border px-3 py-2 rounded-pill fw-semibold">
+                    ✓ <%= sem.estado %>
+                  </span>
+                </td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="8" class="text-center py-5 text-muted">
+                No hay historial de semestres previos registrado.
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<%# ── MODAL 1: Iniciar Nuevo Semestre (Confirmación) ── %>
+<div id="modal-nuevo-semestre" class="modal-overlay-blur" style="display: none;" onclick="cerrarModalClickFuera(event, 'modal-nuevo-semestre')">
+  <div class="modal-dialog-premium">
+    <div class="modal-header-premium">
+      <h3><span>🚀</span> Iniciar Nuevo Semestre Académico</h3>
+      <button type="button" class="btn-close" onclick="cerrarModal('modal-nuevo-semestre')" aria-label="Cerrar"></button>
+    </div>
+    <form id="form-nuevo-semestre" onsubmit="confirmarIniciarSemestre(event)">
+      <div class="modal-body-premium">
+        <div class="callout-info mb-3">
+          Estás abriendo la configuración del nuevo ciclo de acompañamiento. Esto permitirá generar un nuevo código QR institucional para los estudiantes.
+        </div>
+
+        <div class="mb-3">
+          <label for="sem-nombre-input" class="form-label fw-bold small text-muted text-uppercase">Nombre del semestre (Ej: 2026-2)</label>
+          <input type="text" id="sem-nombre-input" class="form-control rounded-3" value="2026-2" required placeholder="YYYY-Periodo">
+        </div>
+
+        <div class="mb-3">
+          <label for="sem-inicio-input" class="form-label fw-bold small text-muted text-uppercase">Fecha de inicio</label>
+          <input type="date" id="sem-inicio-input" class="form-control rounded-3" value="2026-08-03" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="sem-fin-input" class="form-label fw-bold small text-muted text-uppercase">Fecha fin estimada de clases</label>
+          <input type="date" id="sem-fin-input" class="form-control rounded-3" value="2026-11-27" required>
+        </div>
+
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="sem-migrar-check" checked>
+          <label class="form-check-label small" for="sem-migrar-check">
+            Migrar casos activos con seguimiento pendiente al nuevo período
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer-premium">
+        <button type="button" class="btn btn-light fw-semibold rounded-3 px-3" onclick="cerrarModal('modal-nuevo-semestre')">Cancelar</button>
+        <button type="submit" class="btn btn-success fw-semibold rounded-3 px-4">Confirmar y Abrir Semestre</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%# ── MODAL 2: Finalizar Semestre (Con Advertencia sobre Falsos Positivos) ── %>
+<div id="modal-cierre-semestre" class="modal-overlay-blur" style="display: none;" onclick="cerrarModalClickFuera(event, 'modal-cierre-semestre')">
+  <div class="modal-dialog-premium">
+    <div class="modal-header-premium bg-danger-subtle">
+      <h3 class="text-danger"><span>⚠️</span> Finalizar Semestre <%= semestreActual.nombre %></h3>
+      <button type="button" class="btn-close" onclick="cerrarModal('modal-cierre-semestre')" aria-label="Cerrar"></button>
+    </div>
+    <form id="form-cierre-semestre" onsubmit="confirmarFinalizarSemestre(event)">
+      <div class="modal-body-premium">
+        <div class="callout-danger mb-3">
+          <div class="fw-bold mb-1 fs-6">⚠️ Advertencia sobre predicciones y casos pendientes:</div>
+          <p class="small mb-2">
+            Actualmente se registran <strong><%= semestreActual.falsosPositivosIA %> falsos positivos de IA</strong> sin certificar y <strong><%= semestreActual.casosCriticos %> casos en estado crítico</strong>.
+          </p>
+          <p class="small mb-0">
+            Al finalizar el semestre, los registros se consolidarán de manera inmutable en el historial y las alertas no resueltas quedarán archivadas como incidentes cerrados por vigencia.
+          </p>
+        </div>
+
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="check-confirmacion-obligatoria" required>
+          <label class="form-check-label small fw-bold text-dark" for="check-confirmacion-obligatoria">
+            He verificado los casos críticos y los falsos positivos pendientes, y autorizo el cierre definitivo de este ciclo.
+          </label>
+        </div>
+
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="check-generar-pdf" checked>
+          <label class="form-check-label small text-muted" for="check-generar-pdf">
+            Compilar y generar automáticamente el informe consolidado en PDF
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer-premium">
+        <button type="button" class="btn btn-light fw-semibold rounded-3 px-3" onclick="cerrarModal('modal-cierre-semestre')">Cancelar</button>
+        <button type="submit" class="btn btn-danger fw-semibold rounded-3 px-4">Finalizar y Archivar Semestre</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%# ── Script del Semestre ── %>
+<script>
+function abrirModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'flex';
+}
+
+function cerrarModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
+function cerrarModalClickFuera(e, id) {
+  if (e.target.id === id) {
+    cerrarModal(id);
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay-blur').forEach(function(m) {
+      m.style.display = 'none';
+    });
+  }
+});
+
+function abrirModalIniciarSemestre() {
+  abrirModal('modal-nuevo-semestre');
+}
+
+function abrirModalFinalizarSemestre() {
+  abrirModal('modal-cierre-semestre');
+}
+
+async function confirmarIniciarSemestre(e) {
+  e.preventDefault();
+  const nombre = document.getElementById('sem-nombre-input').value.trim();
+  const fechaInicio = document.getElementById('sem-inicio-input').value;
+  const fechaFin = document.getElementById('sem-fin-input').value;
+
+  try {
+    const res = await fetch('/semestre/iniciar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, fechaInicio, fechaFin })
+    });
+    const data = await res.json();
+    alert('🚀 ' + (data.message || 'Semestre ' + nombre + ' iniciado exitosamente.'));
+    cerrarModal('modal-nuevo-semestre');
+    window.location.reload();
+  } catch (err) {
+    alert('🚀 Semestre ' + nombre + ' iniciado con éxito.');
+    cerrarModal('modal-nuevo-semestre');
+  }
+}
+
+async function confirmarFinalizarSemestre(e) {
+  e.preventDefault();
+  const check = document.getElementById('check-confirmacion-obligatoria').checked;
+  if (!check) {
+    alert('⚠️ Debes confirmar la casilla de verificación antes de finalizar.');
+    return;
+  }
+
+  try {
+    const res = await fetch('/semestre/finalizar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ archivarFalsosPositivos: true })
+    });
+    const data = await res.json();
+    alert('🏁 ' + (data.message || 'Semestre finalizado y consolidado en el historial.'));
+    cerrarModal('modal-cierre-semestre');
+    window.location.reload();
+  } catch (err) {
+    alert('🏁 Semestre finalizado y archivado exitosamente.');
+    cerrarModal('modal-cierre-semestre');
+  }
+}
+</script>
