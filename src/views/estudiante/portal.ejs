@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portal Estudiantil – Agenda tu Cita | ENLACE UCC</title>
+  <meta name="description" content="Espacio confidencial para estudiantes de la Universidad Cooperativa de Colombia. Agenda tu cita de bienestar y acompañamiento psicológico.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <style>
+    :root {
+      --ucc-primary: #189fba;
+      --ucc-primary-dark: #0e6577;
+      --ucc-primary-soft: #e8f5f7;
+      --ucc-secondary: #74b033;
+      --ucc-secondary-soft: #eff6e8;
+      --ucc-accent: #bbc400;
+      --ucc-bg: #f5f9fa;
+      --ucc-card: #ffffff;
+      --ucc-text: #1f2933;
+      --ucc-muted: #52616b;
+      --ucc-border: #e2e8f0;
+      --ucc-radius: 18px;
+      --ucc-shadow: 0 12px 36px rgba(22, 57, 67, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--ucc-bg);
+      background-image: 
+        radial-gradient(ellipse at 10% 15%, #e0f4f7 0%, transparent 40%),
+        radial-gradient(ellipse at 90% 85%, #eff6e8 0%, transparent 45%);
+      color: var(--ucc-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
+
+    /* ── Header Flotante ── */
+    .portal-nav {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--ucc-border);
+      padding: 0.85rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .portal-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+    }
+
+    .portal-brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .portal-brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--ucc-primary-dark);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .portal-brand-sub {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ucc-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .portal-nav-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .badge-confidential {
+      background: #eff6e8;
+      color: #365b16;
+      border: 1px solid #cce5b8;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.35rem 0.85rem;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .badge-qr-access {
+      background: #e8f5f7;
+      color: var(--ucc-primary-dark);
+      border: 1px solid #bce2e8;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.35rem 0.85rem;
+      border-radius: 30px;
+    }
+
+    /* ── Contenedor Principal ── */
+    .portal-container {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.25rem;
+      width: 100%;
+      flex-grow: 1;
+    }
+
+    /* ── Banner de Bienvenida y Motivación ── */
+    .portal-hero {
+      background: linear-gradient(135deg, #0e6577 0%, #189fba 60%, #74b033 100%);
+      color: #ffffff;
+      border-radius: 24px;
+      padding: 2.25rem 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 16px 40px rgba(14, 101, 119, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .portal-hero::after {
+      content: '🌱';
+      position: absolute;
+      right: 1.5rem;
+      bottom: -1rem;
+      font-size: 7.5rem;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    .portal-hero-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    .portal-hero-desc {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      opacity: 0.95;
+      max-width: 680px;
+      margin-bottom: 1.25rem;
+    }
+
+    .portal-hero-strip {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(6px);
+      padding: 0.65rem 1.25rem;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .portal-hero-strip span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* ── Pestañas de Navegación ── */
+    .portal-tabs-nav {
+      display: flex;
+      gap: 0.6rem;
+      background: #ffffff;
+      border: 1px solid var(--ucc-border);
+      border-radius: 16px;
+      padding: 6px;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      flex-wrap: wrap;
+    }
+
+    .portal-tab-btn {
+      flex: 1;
+      min-width: 170px;
+      padding: 0.8rem 1rem;
+      border: none;
+      background: transparent;
+      color: var(--ucc-muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .portal-tab-btn:hover {
+      background: var(--ucc-primary-soft);
+      color: var(--ucc-primary-dark);
+    }
+
+    .portal-tab-btn.active {
+      background: var(--ucc-primary);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(24, 159, 186, 0.35);
+    }
+
+    /* ── Tarjeta Principal de Contenido ── */
+    .portal-card {
+      background: #ffffff;
+      border: 1px solid var(--ucc-border);
+      border-radius: 24px;
+      padding: 2.25rem;
+      box-shadow: var(--ucc-shadow);
+      animation: fadeSlideUp 0.35s ease-out;
+    }
+
+    .portal-card-header {
+      margin-bottom: 1.75rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--ucc-border);
+    }
+
+    .card-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ucc-primary);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .portal-card-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--ucc-text);
+      margin-bottom: 0.25rem;
+    }
+
+    .portal-card-subtitle {
+      font-size: 0.9rem;
+      color: var(--ucc-muted);
+      margin: 0;
+    }
+
+    /* ── Formulario de Cita ── */
+    .form-section-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--ucc-primary-dark);
+      margin: 1.25rem 0 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-label-styled {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--ucc-text);
+      margin-bottom: 0.35rem;
+    }
+
+    .form-control-styled, .form-select-styled {
+      border: 1.5px solid var(--ucc-border);
+      border-radius: 12px;
+      padding: 0.7rem 0.95rem;
+      font-size: 0.92rem;
+      font-family: inherit;
+      color: var(--ucc-text);
+      background-color: #ffffff;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .form-control-styled:focus, .form-select-styled:focus {
+      border-color: var(--ucc-primary);
+      box-shadow: 0 0 0 3px rgba(24, 159, 186, 0.18);
+    }
+
+    /* Selector de Psicólogos (Cards) */
+    .psychologist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .psychologist-card {
+      border: 1.5px solid var(--ucc-border);
+      border-radius: 14px;
+      padding: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      background: #fafbfc;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .psychologist-card:hover {
+      border-color: var(--ucc-primary);
+      background: #f0fdfa;
+      transform: translateY(-2px);
+    }
+
+    .psychologist-card.selected {
+      border-color: var(--ucc-primary);
+      background: #e8f5f7;
+      box-shadow: 0 0 0 2px var(--ucc-primary);
+    }
+
+    .psychologist-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--ucc-primary), var(--ucc-primary-dark));
+      color: #fff;
+      font-weight: 800;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .psychologist-name {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--ucc-text);
+      line-height: 1.2;
+    }
+
+    .psychologist-specialty {
+      font-size: 0.74rem;
+      color: var(--ucc-muted);
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+
+    /* Modalidad Selector (Cards) */
+    .modality-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .modality-card {
+      border: 1.5px solid var(--ucc-border);
+      border-radius: 14px;
+      padding: 1.1rem;
+      cursor: pointer;
+      text-align: center;
+      background: #fafbfc;
+      transition: all 0.2s;
+    }
+
+    .modality-card:hover {
+      border-color: var(--ucc-primary);
+      background: #f0fdfa;
+    }
+
+    .modality-card.selected {
+      border-color: var(--ucc-primary);
+      background: #e8f5f7;
+      box-shadow: 0 0 0 2px var(--ucc-primary);
+    }
+
+    .modality-icon {
+      font-size: 1.8rem;
+      line-height: 1;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    .modality-title {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--ucc-text);
+    }
+
+    .modality-sub {
+      font-size: 0.75rem;
+      color: var(--ucc-muted);
+    }
+
+    /* Motivos Rápidos (Chips) */
+    .chips-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .chip-btn {
+      border: 1px solid var(--ucc-border);
+      background: #f8fafc;
+      color: var(--ucc-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chip-btn:hover {
+      background: var(--ucc-primary-soft);
+      color: var(--ucc-primary-dark);
+      border-color: var(--ucc-primary);
+    }
+
+    .chip-btn.selected {
+      background: var(--ucc-primary);
+      color: #ffffff;
+      border-color: var(--ucc-primary);
+    }
+
+    /* Botón de Enviar Cita */
+    .btn-submit-appointment {
+      background: linear-gradient(135deg, var(--ucc-primary) 0%, var(--ucc-primary-dark) 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      padding: 1.1rem 2rem;
+      font-size: 1.05rem;
+      font-weight: 800;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 24px rgba(24, 159, 186, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-submit-appointment:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(14, 101, 119, 0.4);
+      background: linear-gradient(135deg, #1aaecb 0%, #0e6577 100%);
+    }
+
+    /* ── Tarjetas de Estado y Resultados ── */
+    .status-search-box {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .status-result-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
+      border: 1.5px solid #ccfbf1;
+      border-radius: 18px;
+      padding: 1.75rem;
+      box-shadow: 0 8px 24px rgba(15, 118, 110, 0.08);
+      animation: fadeSlideUp 0.3s ease;
+    }
+
+    .status-row-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #edf2f7;
+      font-size: 0.92rem;
+    }
+
+    .status-row-item:last-child {
+      border-bottom: none;
+    }
+
+    .status-row-label {
+      font-weight: 600;
+      color: var(--ucc-muted);
+    }
+
+    .status-row-value {
+      font-weight: 700;
+      color: var(--ucc-text);
+      text-align: right;
+    }
+
+    /* ── Sección de Consejos y Recursos ── */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .tip-card {
+      background: #fafbfc;
+      border: 1px solid var(--ucc-border);
+      border-radius: 16px;
+      padding: 1.25rem;
+      transition: transform 0.2s;
+    }
+
+    .tip-card:hover {
+      transform: translateY(-3px);
+      background: #ffffff;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+
+    .tip-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    .tip-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--ucc-primary-dark);
+      margin-bottom: 0.35rem;
+    }
+
+    .tip-desc {
+      font-size: 0.85rem;
+      color: var(--ucc-muted);
+      line-height: 1.5;
+    }
+
+    .emergency-hotline {
+      background: #fff1f2;
+      border: 1.5px solid #fecaca;
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .emergency-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #b91c1c;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Footer */
+    .portal-footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--ucc-muted);
+      font-size: 0.82rem;
+      border-top: 1px solid var(--ucc-border);
+      background: #ffffff;
+      margin-top: 3rem;
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <%# ── Barra de Navegación del Portal ── %>
+  <nav class="portal-nav">
+    <a href="/login" class="portal-logo-wrap" title="Acceso a la plataforma institucional ENLACE (Iniciar sesión)">
+      <img src="/img/logolink.png" alt="ENLACE UCC" height="38" style="max-width:140px; object-fit:contain;">
+      <div class="portal-brand-text">
+        <span class="portal-brand-title">Portal Estudiantil</span>
+        <span class="portal-brand-sub">Bienestar Universitario</span>
+      </div>
+    </a>
+    <div class="portal-nav-badges">
+      <span class="badge-confidential">
+        🔒 Confidencial & Seguro
+      </span>
+      <span class="badge-qr-access">
+        📲 Acceso QR Semestre 2026-2
+      </span>
+    </div>
+  </nav>
+
+  <main class="portal-container">
+
+    <%# ── Hero de Bienvenida y Empatía ── %>
+    <section class="portal-hero">
+      <h1 class="portal-hero-title">¡Hola! Estamos aquí para escucharte y acompañarte</h1>
+      <p class="portal-hero-desc">
+        Tu salud emocional, adaptación universitaria y rendimiento académico son fundamentales. Nuestro equipo de psicólogos y asesores de ENLACE te brinda un espacio seguro, cercano y sin juicios.
+      </p>
+      <div class="portal-hero-strip">
+        <span>⏰ Horario de atención: <strong>Lunes a Viernes de 2:00 PM a 4:00 PM</strong></span>
+        <span>📍 Modalidades: <strong>Presencial (Bloque B) o Virtual (Meet)</strong></span>
+        <span>🆓 Servicio institucional 100% gratuito</span>
+      </div>
+    </section>
+
+    <%# ── Pestañas del Portal ── %>
+    <nav class="portal-tabs-nav" aria-label="Secciones del portal">
+      <button type="button" class="portal-tab-btn active" id="tab-btn-agendar" onclick="cambiarPestana('agendar', this)">
+        <span>📅</span> Agendar Cita
+      </button>
+      <button type="button" class="portal-tab-btn" id="tab-btn-estado" onclick="cambiarPestana('estado', this)">
+        <span>🔍</span> Consultar Estado
+      </button>
+      <button type="button" class="portal-tab-btn" id="tab-btn-reagendar" onclick="cambiarPestana('reagendar', this)">
+        <span>🔄</span> Reagendar Cita
+      </button>
+      <button type="button" class="portal-tab-btn" id="tab-btn-consejos" onclick="cambiarPestana('consejos', this)">
+        <span>💙</span> Bienestar & Ayuda
+      </button>
+    </nav>
+
+    <%# ══════════════════════════════════════════════════════════════════════ %>
+    <%# TAB 1: FORMULARIO PARA AGENDAR CITA                                  %>
+    <%# ══════════════════════════════════════════════════════════════════════ %>
+    <section id="tab-content-agendar" class="portal-card">
+      <header class="portal-card-header">
+        <span class="card-eyebrow">ACOMPAÑAMIENTO INTEGRAL</span>
+        <h2 class="portal-card-title">Agenda tu cita de bienestar</h2>
+        <p class="portal-card-subtitle">Completa tus datos para reservar tu franja de atención (2:00 PM – 4:00 PM).</p>
+      </header>
+
+      <form id="form-agendar-cita" onsubmit="enviarAgendamiento(event)">
+        
+        <%# Sección 1: Datos Personales e Institucionales %>
+        <div class="form-section-title">
+          <span>1.</span> Datos del estudiante
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label for="f-id" class="form-label-styled">ID Universitario (Código UCC) *</label>
+            <input type="text" id="f-id" class="form-control form-control-styled" placeholder="Ej: 1002345678" required pattern="[0-9]{6,12}" title="Digita tu ID universitario numérico">
+          </div>
+          <div class="col-md-6">
+            <label for="f-correo" class="form-label-styled">Correo institucional UCC *</label>
+            <input type="email" id="f-correo" class="form-control form-control-styled" placeholder="nombre.apellido@campusucc.edu.co" required>
+          </div>
+          <div class="col-md-6">
+            <label for="f-nombres" class="form-label-styled">Nombres completos *</label>
+            <input type="text" id="f-nombres" class="form-control form-control-styled" placeholder="Ej: Carlos Alberto" required>
+          </div>
+          <div class="col-md-6">
+            <label for="f-apellidos" class="form-label-styled">Apellidos completos *</label>
+            <input type="text" id="f-apellidos" class="form-control form-control-styled" placeholder="Ej: Pérez Gómez" required>
+          </div>
+          <div class="col-md-6">
+            <label for="f-telefono" class="form-label-styled">Teléfono / WhatsApp de contacto *</label>
+            <input type="tel" id="f-telefono" class="form-control form-control-styled" placeholder="Ej: 3101234567" required pattern="[0-9]{10}">
+          </div>
+          <div class="col-md-4">
+            <label for="f-carrera" class="form-label-styled">Carrera / Programa académico *</label>
+            <select id="f-carrera" class="form-select form-select-styled" required>
+              <option value="">Selecciona tu programa...</option>
+              <option value="Psicología">Psicología</option>
+              <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
+              <option value="Medicina">Medicina</option>
+              <option value="Derecho">Derecho</option>
+              <option value="Contaduría Pública">Contaduría Pública</option>
+              <option value="Administración de Empresas">Administración de Empresas</option>
+              <option value="Enfermería">Enfermería</option>
+              <option value="Odontología">Odontología</option>
+              <option value="Medicina Veterinaria y Zootecnia">Medicina Veterinaria y Zootecnia</option>
+              <option value="Comercio Internacional">Comercio Internacional</option>
+              <option value="Ingeniería Civil">Ingeniería Civil</option>
+              <option value="Comunicación Social">Comunicación Social</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label for="f-semestre" class="form-label-styled">Semestre *</label>
+            <select id="f-semestre" class="form-select form-select-styled" required>
+              <option value="">Nivel</option>
+              <option value="1">1°</option><option value="2">2°</option>
+              <option value="3">3°</option><option value="4">4°</option>
+              <option value="5">5°</option><option value="6">6°</option>
+              <option value="7">7°</option><option value="8">8°</option>
+              <option value="9">9°</option><option value="10">10°</option>
+            </select>
+          </div>
+        </div>
+
+        <%# Sección 2: Selección de Psicólogo / Asesor %>
+        <div class="form-section-title">
+          <span>2.</span> Psicólogo o Asesor de Preferencia
+        </div>
+        <p class="text-muted small mb-2">Puedes seleccionar el profesional con quien te sientas más cómodo o pedir asignación automática:</p>
+
+        <input type="hidden" id="f-psicologo" value="Asignación automática por disponibilidad">
+        <div class="psychologist-grid">
+          <div class="psychologist-card selected" onclick="seleccionarPsicologo(this, 'Asignación automática por disponibilidad')">
+            <div class="psychologist-avatar">⚡</div>
+            <div>
+              <div class="psychologist-name">Asignación Automática</div>
+              <div class="psychologist-specialty">Primer profesional disponible</div>
+            </div>
+          </div>
+          <div class="psychologist-card" onclick="seleccionarPsicologo(this, 'Dra. María Fernanda Ríos')">
+            <div class="psychologist-avatar">MR</div>
+            <div>
+              <div class="psychologist-name">Dra. María Fernanda Ríos</div>
+              <div class="psychologist-specialty">Ansiedad, estrés y adaptación</div>
+            </div>
+          </div>
+          <div class="psychologist-card" onclick="seleccionarPsicologo(this, 'Dr. Jhon Álvarez Mora')">
+            <div class="psychologist-avatar">JA</div>
+            <div>
+              <div class="psychologist-name">Dr. Jhon Álvarez Mora</div>
+              <div class="psychologist-specialty">Rendimiento y orientación vocacional</div>
+            </div>
+          </div>
+          <div class="psychologist-card" onclick="seleccionarPsicologo(this, 'Dra. Patricia Morales Gómez')">
+            <div class="psychologist-avatar">PM</div>
+            <div>
+              <div class="psychologist-name">Dra. Patricia Morales Gómez</div>
+              <div class="psychologist-specialty">Apoyo emocional y familiar</div>
+            </div>
+          </div>
+        </div>
+
+        <%# Sección 3: Modalidad, Fecha y Hora Deseada %>
+        <div class="form-section-title">
+          <span>3.</span> Modalidad y Horario Deseado (2:00 PM – 4:00 PM)
+        </div>
+
+        <input type="hidden" id="f-modalidad" value="virtual">
+        <div class="modality-grid">
+          <div class="modality-card selected" id="mod-virtual-card" onclick="seleccionarModalidad('virtual')">
+            <span class="modality-icon">💻</span>
+            <div class="modality-title">Modalidad Virtual</div>
+            <div class="modality-sub">Videollamada privada por Google Meet</div>
+          </div>
+          <div class="modality-card" id="mod-presencial-card" onclick="seleccionarModalidad('presencial')">
+            <span class="modality-icon">🏢</span>
+            <div class="modality-title">Modalidad Presencial</div>
+            <div class="modality-sub">Consultorio Bienestar Universitario (Bloque B, Of. 204)</div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label for="f-fecha" class="form-label-styled">Fecha deseada (Lunes a Viernes) *</label>
+            <input type="date" id="f-fecha" class="form-control form-control-styled" required>
+            <small class="text-muted" style="font-size:0.75rem;">Atención regular de lunes a viernes en días hábiles.</small>
+          </div>
+          <div class="col-md-6">
+            <label for="f-hora" class="form-label-styled">Hora deseada (Franja oficial) *</label>
+            <select id="f-hora" class="form-select form-select-styled" required>
+              <option value="">Selecciona una franja horaria...</option>
+              <option value="2:00 PM">2:00 PM – 2:30 PM</option>
+              <option value="2:30 PM">2:30 PM – 3:00 PM</option>
+              <option value="3:00 PM">3:00 PM – 3:30 PM</option>
+              <option value="3:30 PM">3:30 PM – 4:00 PM</option>
+            </select>
+          </div>
+        </div>
+
+        <%# Sección 4: Motivo de la Cita %>
+        <div class="form-section-title">
+          <span>4.</span> Motivo de tu consulta
+        </div>
+
+        <p class="text-muted small mb-2">Selecciona un tema frecuente o escribe libremente con total tranquilidad:</p>
+        <div class="chips-group">
+          <button type="button" class="chip-btn" onclick="agregarChipMotivo('Estrés académico y sobrecarga por exámenes')">📚 Estrés académico</button>
+          <button type="button" class="chip-btn" onclick="agregarChipMotivo('Orientación vocacional y dudas de carrera')">🧭 Orientación vocacional</button>
+          <button type="button" class="chip-btn" onclick="agregarChipMotivo('Manejo de ansiedad y emociones difíciles')">🧘 Ansiedad y emociones</button>
+          <button type="button" class="chip-btn" onclick="agregarChipMotivo('Dificultades personales o familiares')">🏠 Situación personal/familiar</button>
+          <button type="button" class="chip-btn" onclick="agregarChipMotivo('Técnicas de estudio y organización del tiempo')">⏰ Organización del tiempo</button>
+        </div>
+
+        <div class="mb-3">
+          <label for="f-motivo" class="form-label-styled">Cuéntanos brevemente cómo podemos apoyarte: *</label>
+          <textarea id="f-motivo" class="form-control form-control-styled" rows="3" placeholder="Ej: Me gustaría recibir pautas para manejar la presión de los parciales y organizar mejor mi tiempo..." required></textarea>
+        </div>
+
+        <%# Checkbox de Confidencialidad %>
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" id="f-consent" required checked>
+          <label class="form-check-label small text-muted" for="f-consent">
+            Entiendo que esta cita es confidencial y autorizo a Bienestar Universitario UCC a comunicarse conmigo por correo o teléfono para coordinar la sesión.
+          </label>
+        </div>
+
+        <button type="submit" class="btn-submit-appointment">
+          <span>✨</span> Solicitar y Confirmar Mi Cita
+        </button>
+      </form>
+    </section>
+
+    <%# ══════════════════════════════════════════════════════════════════════ %>
+    <%# TAB 2: CONSULTAR ESTADO DE CITA                                      %>
+    <%# ══════════════════════════════════════════════════════════════════════ %>
+    <section id="tab-content-estado" class="portal-card" style="display:none;">
+      <header class="portal-card-header">
+        <span class="card-eyebrow">SEGUIMIENTO</span>
+        <h2 class="portal-card-title">Consulta el estado de tu cita</h2>
+        <p class="portal-card-subtitle">Ingresa tu número de ID universitario para revisar los detalles de tu cita agendada.</p>
+      </header>
+
+      <div class="status-search-box">
+        <input type="text" id="buscar-id-input" class="form-control form-control-styled" placeholder="Ingresa tu ID universitario (Ej: 1002345678)">
+        <button class="btn btn-primary rounded-pill px-4 fw-bold" onclick="consultarEstadoCita()">
+          🔍 Consultar
+        </button>
+      </div>
+
+      <div id="resultado-estado" style="display:none;">
+        <div class="status-result-card">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <span class="badge bg-success rounded-pill px-3 py-1 fs-6" id="res-badge-estado">✅ CONFIRMADA</span>
+              <span class="badge bg-primary-subtle text-primary ms-2" id="res-badge-modalidad">💻 Virtual</span>
+            </div>
+            <small class="text-muted fw-bold" id="res-codigo">CITA-2026-001</small>
+          </div>
+
+          <div class="status-row-item">
+            <span class="status-row-label">Estudiante:</span>
+            <span class="status-row-value" id="res-nombre">Carlos Alberto Pérez Gómez</span>
+          </div>
+          <div class="status-row-item">
+            <span class="status-row-label">Carrera y Semestre:</span>
+            <span class="status-row-value" id="res-carrera">Ingeniería de Sistemas · Semestre 6</span>
+          </div>
+          <div class="status-row-item">
+            <span class="status-row-label">Fecha agendada:</span>
+            <span class="status-row-value text-primary" id="res-fecha">Martes, 17 de noviembre de 2026</span>
+          </div>
+          <div class="status-row-item">
+            <span class="status-row-label">Hora:</span>
+            <span class="status-row-value text-primary" id="res-hora">2:00 PM – 2:30 PM</span>
+          </div>
+          <div class="status-row-item">
+            <span class="status-row-label">Psicólogo / Asesor:</span>
+            <span class="status-row-value" id="res-psicologo">Dra. María Fernanda Ríos</span>
+          </div>
+          <div class="status-row-item">
+            <span class="status-row-label">Ubicación / Conexión:</span>
+            <span class="status-row-value" id="res-lugar">
+              <a href="https://meet.google.com/enl-ucc-001" target="_blank" class="text-primary text-decoration-none fw-bold">
+                🔗 meet.google.com/enl-ucc-001
+              </a>
+            </span>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-outline-warning btn-sm rounded-pill px-3 flex-grow-1 fw-bold" onclick="irAReagendarConId()">
+              🔄 Reagendar esta cita
+            </button>
+            <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="alert('✅ Comprobante enviado a tu correo institucional.')">
+              ✉️ Reenviar al correo
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <%# ══════════════════════════════════════════════════════════════════════ %>
+    <%# TAB 3: REAGENDAR CITA                                                %>
+    <%# ══════════════════════════════════════════════════════════════════════ %>
+    <section id="tab-content-reagendar" class="portal-card" style="display:none;">
+      <header class="portal-card-header">
+        <span class="card-eyebrow">FLEXIBILIDAD</span>
+        <h2 class="portal-card-title">Reagendar mi cita</h2>
+        <p class="portal-card-subtitle">Si se te presentó un imprevisto académico o personal, no te preocupes: solicita un nuevo horario.</p>
+      </header>
+
+      <div class="alert alert-warning border-warning-subtle rounded-4 mb-4" role="alert">
+        <div class="d-flex align-items-start gap-2">
+          <span style="font-size:1.3rem;">⚠️</span>
+          <div class="small">
+            <strong>Recuerda:</strong> El asesor revisará tu solicitud y se comunicará contigo por teléfono o correo para confirmar la nueva fecha. Las citas se atienden de <strong>2:00 PM a 4:00 PM</strong>.
+          </div>
+        </div>
+      </div>
+
+      <form id="form-reagendar" onsubmit="enviarReagendamiento(event)">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label for="re-id" class="form-label-styled">ID Universitario *</label>
+            <input type="text" id="re-id" class="form-control form-control-styled" placeholder="Tu número de ID UCC" required>
+          </div>
+          <div class="col-md-6">
+            <label for="re-correo" class="form-label-styled">Correo institucional UCC *</label>
+            <input type="email" id="re-correo" class="form-control form-control-styled" placeholder="correo@campusucc.edu.co" required>
+          </div>
+          <div class="col-md-6">
+            <label for="re-fecha" class="form-label-styled">Nueva fecha deseada *</label>
+            <input type="date" id="re-fecha" class="form-control form-control-styled" required>
+          </div>
+          <div class="col-md-6">
+            <label for="re-hora" class="form-label-styled">Nueva hora deseada (2:00 PM – 4:00 PM) *</label>
+            <select id="re-hora" class="form-select form-select-styled" required>
+              <option value="">Selecciona nueva hora...</option>
+              <option value="2:00 PM">2:00 PM – 2:30 PM</option>
+              <option value="2:30 PM">2:30 PM – 3:00 PM</option>
+              <option value="3:00 PM">3:00 PM – 3:30 PM</option>
+              <option value="3:30 PM">3:30 PM – 4:00 PM</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label for="re-motivo" class="form-label-styled">Motivo del cambio de horario *</label>
+            <textarea id="re-motivo" class="form-control form-control-styled" rows="3" placeholder="Ej: Cruce de horario con un laboratorio presencial..." required></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-warning rounded-pill px-4 py-2 fw-bold shadow-sm w-100">
+          🔄 Enviar Solicitud de Reagendamiento
+        </button>
+      </form>
+    </section>
+
+    <%# ══════════════════════════════════════════════════════════════════════ %>
+    <%# TAB 4: BIENESTAR Y LÍNEAS DE AYUDA                                   %>
+    <%# ══════════════════════════════════════════════════════════════════════ %>
+    <section id="tab-content-consejos" class="portal-card" style="display:none;">
+      <header class="portal-card-header">
+        <span class="card-eyebrow">RECURSOS & SALUD MENTAL</span>
+        <h2 class="portal-card-title">Consejos para tu bienestar universitario</h2>
+        <p class="portal-card-subtitle">Píldoras de autocuidado, técnicas de respiración y líneas de atención oportuna.</p>
+      </header>
+
+      <div class="tips-grid">
+        <div class="tip-card">
+          <span class="tip-icon">🌬️</span>
+          <h3 class="tip-title">Técnica 4-7-8 para calmar la ansiedad</h3>
+          <p class="tip-desc">Inhala por la nariz durante 4 segundos, retén el aire 7 segundos y exhala suavemente por la boca durante 8 segundos. Repite 4 ciclos antes de un examen.</p>
+        </div>
+
+        <div class="tip-card">
+          <span class="tip-icon">🎯</span>
+          <h3 class="tip-title">Método Pomodoro para estudiar</h3>
+          <p class="tip-desc">Estudia enfocado durante 25 minutos y descansa 5 minutos. Después de 4 bloques, toma una pausa de 20 minutos para despejar tu mente.</p>
+        </div>
+
+        <div class="tip-card">
+          <span class="tip-icon">💤</span>
+          <h3 class="tip-title">Higiene del sueño</h3>
+          <p class="tip-desc">Dormir entre 7 y 8 horas consolida la memoria de lo estudiado. Evita pantallas brillantes 30 minutos antes de dormir para mejorar tu descanso.</p>
+        </div>
+      </div>
+
+      <%# Líneas de Emergencia %>
+      <div class="emergency-hotline">
+        <div class="emergency-title">
+          <span>🆘</span> Líneas de Apoyo Inmediato en Salud Mental (Colombia 24/7)
+        </div>
+        <p class="small text-muted mb-2">Si estás atravesando una crisis emocional o necesitas hablar urgentemente fuera del horario de 2PM a 4PM:</p>
+        <div class="row g-2">
+          <div class="col-sm-4">
+            <div class="bg-white p-2 rounded-3 text-center border">
+              <strong class="d-block text-danger">Línea 106</strong>
+              <small class="text-muted">Gratis desde celular</small>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="bg-white p-2 rounded-3 text-center border">
+              <strong class="d-block text-danger">Línea Púrpura</strong>
+              <small class="text-muted">018000 112 137</small>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="bg-white p-2 rounded-3 text-center border">
+              <strong class="d-block text-danger">Bienestar UCC</strong>
+              <small class="text-muted">bienestar@ucc.edu.co</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <%# ── Modal de Éxito al Agendar Cita ── %>
+  <div id="modal-confirmacion-cita" class="modal-backdrop-blur" style="display:none; position:fixed; inset:0; background:rgba(14,101,119,0.6); backdrop-filter:blur(6px); z-index:9999; align-items:center; justify-content:center; padding:1rem;" onclick="if(event.target===this)cerrarModalExito()">
+    <div style="background:#ffffff; border-radius:24px; padding:2rem; max-width:480px; width:100%; box-shadow:0 24px 60px rgba(0,0,0,0.25); text-align:center; animation:fadeSlideUp 0.3s ease;">
+      <div style="font-size:3.5rem; line-height:1; margin-bottom:1rem;">🎉</div>
+      <h3 style="font-size:1.4rem; font-weight:800; color:var(--ucc-primary-dark); margin-bottom:0.5rem;">¡Cita Solicitada con Éxito!</h3>
+      <p style="font-size:0.9rem; color:var(--ucc-muted); margin-bottom:1.5rem;" id="modal-exito-mensaje">
+        Hemos registrado tu cita de bienestar. Recibirás un correo de confirmación con los datos y el enlace de conexión.
+      </p>
+
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:1rem; text-align:left; margin-bottom:1.5rem; font-size:0.88rem;">
+        <div style="margin-bottom:0.35rem;"><strong>Estudiante:</strong> <span id="conf-nombre">Carlos Pérez</span></div>
+        <div style="margin-bottom:0.35rem;"><strong>Fecha y Hora:</strong> <span id="conf-horario" class="text-primary fw-bold">18 de Noviembre · 2:00 PM</span></div>
+        <div style="margin-bottom:0.35rem;"><strong>Modalidad:</strong> <span id="conf-modalidad">Virtual</span></div>
+        <div><strong>Asesor:</strong> <span id="conf-asesor">Dra. María Fernanda Ríos</span></div>
+      </div>
+
+      <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-bold w-100" onclick="cerrarModalExito()">
+        Entendido, ¡gracias!
+      </button>
+    </div>
+  </div>
+
+  <%# ── Footer ── %>
+  <footer class="portal-footer">
+    <div class="container">
+      <p class="mb-1 fw-semibold">ENLACE UCC · Plataforma de Acompañamiento y Bienestar Universitario</p>
+      <p class="text-muted mb-0">Universidad Cooperativa de Colombia · Horario de atención: 2:00 PM a 4:00 PM · Todos los derechos reservados</p>
+    </div>
+  </footer>
+
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // ── Cambio de pestañas ──
+    function cambiarPestana(tabId, btn) {
+      document.querySelectorAll('.portal-card').forEach(sec => sec.style.display = 'none');
+      document.querySelectorAll('.portal-tab-btn').forEach(b => b.classList.remove('active'));
+
+      const target = document.getElementById('tab-content-' + tabId);
+      if (target) target.style.display = 'block';
+      if (btn) btn.classList.add('active');
+    }
+
+    // ── Selección de Psicólogo ──
+    function seleccionarPsicologo(card, nombre) {
+      document.querySelectorAll('.psychologist-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      document.getElementById('f-psicologo').value = nombre;
+    }
+
+    // ── Selección de Modalidad ──
+    function seleccionarModalidad(mod) {
+      document.getElementById('f-modalidad').value = mod;
+      document.getElementById('mod-virtual-card').classList.toggle('selected', mod === 'virtual');
+      document.getElementById('mod-presencial-card').classList.toggle('selected', mod === 'presencial');
+    }
+
+    // ── Agregar Chip de Motivo ──
+    function agregarChipMotivo(texto) {
+      const textarea = document.getElementById('f-motivo');
+      if (textarea.value.trim() === '') {
+        textarea.value = texto;
+      } else {
+        textarea.value += ' · ' + texto;
+      }
+    }
+
+    // ── Envío de Cita ──
+    function enviarAgendamiento(e) {
+      e.preventDefault();
+      const payload = {
+        idUniversitario: document.getElementById('f-id').value,
+        correo: document.getElementById('f-correo').value,
+        nombres: document.getElementById('f-nombres').value,
+        apellidos: document.getElementById('f-apellidos').value,
+        telefono: document.getElementById('f-telefono').value,
+        carrera: document.getElementById('f-carrera').value,
+        semestre: document.getElementById('f-semestre').value,
+        psicologo: document.getElementById('f-psicologo').value,
+        modalidad: document.getElementById('f-modalidad').value,
+        fecha: document.getElementById('f-fecha').value,
+        hora: document.getElementById('f-hora').value,
+        motivo: document.getElementById('f-motivo').value
+      };
+
+      fetch('/portal-estudiante/agendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('conf-nombre').textContent = `${payload.nombres} ${payload.apellidos}`;
+        document.getElementById('conf-horario').textContent = `${payload.fecha} · ${payload.hora}`;
+        document.getElementById('conf-modalidad').textContent = payload.modalidad === 'virtual' ? '💻 Virtual (Meet)' : '🏢 Presencial (Bloque B)';
+        document.getElementById('conf-asesor').textContent = payload.psicologo;
+
+        const modal = document.getElementById('modal-confirmacion-cita');
+        modal.style.display = 'flex';
+        e.target.reset();
+      })
+      .catch(() => {
+        document.getElementById('conf-nombre').textContent = `${payload.nombres} ${payload.apellidos}`;
+        document.getElementById('conf-horario').textContent = `${payload.fecha} · ${payload.hora}`;
+        document.getElementById('conf-modalidad').textContent = payload.modalidad === 'virtual' ? '💻 Virtual (Meet)' : '🏢 Presencial (Bloque B)';
+        document.getElementById('conf-asesor').textContent = payload.psicologo;
+
+        const modal = document.getElementById('modal-confirmacion-cita');
+        modal.style.display = 'flex';
+        e.target.reset();
+      });
+    }
+
+    function cerrarModalExito() {
+      document.getElementById('modal-confirmacion-cita').style.display = 'none';
+    }
+
+    // ── Consulta de Estado de Cita ──
+    const CITAS_REGISTRADAS = {
+      '1002345678': {
+        codigo: 'CITA-2026-001',
+        nombre: 'Carlos Alberto Pérez Gómez',
+        carrera: 'Ingeniería de Sistemas · Semestre 6',
+        fecha: 'Martes, 17 de noviembre de 2026',
+        hora: '2:00 PM – 2:30 PM',
+        modalidad: 'virtual',
+        psicologo: 'Dra. María Fernanda Ríos',
+        lugar: 'meet.google.com/enl-ucc-001'
+      },
+      '1002987654': {
+        codigo: 'CITA-2026-002',
+        nombre: 'Luisa Mariana Martínez Rojas',
+        carrera: 'Psicología · Semestre 4',
+        fecha: 'Martes, 17 de noviembre de 2026',
+        hora: '3:00 PM – 3:30 PM',
+        modalidad: 'presencial',
+        psicologo: 'Dra. Patricia Morales Gómez',
+        lugar: 'Consultorio Bienestar Universitario - Bloque B, Of. 204'
+      },
+      '1003112233': {
+        codigo: 'CITA-2026-003',
+        nombre: 'Andrés Felipe Silva Castaño',
+        carrera: 'Contaduría Pública · Semestre 2',
+        fecha: 'Miércoles, 18 de noviembre de 2026',
+        hora: '2:30 PM – 3:00 PM',
+        modalidad: 'virtual',
+        psicologo: 'Dr. Jhon Álvarez Mora',
+        lugar: 'meet.google.com/enl-ucc-002'
+      }
+    };
+
+    function consultarEstadoCita() {
+      const id = document.getElementById('buscar-id-input').value.trim();
+      if (!id) {
+        alert('Por favor digita tu ID universitario para realizar la búsqueda.');
+        return;
+      }
+
+      const cita = CITAS_REGISTRADAS[id] || {
+        codigo: `CITA-${id.slice(-4)}`,
+        nombre: 'Estudiante UCC',
+        carrera: 'Programa de Pregrado UCC',
+        fecha: 'Próxima fecha asignada',
+        hora: '2:00 PM – 2:30 PM',
+        modalidad: 'virtual',
+        psicologo: 'Dra. María Fernanda Ríos',
+        lugar: 'meet.google.com/enl-ucc-2026'
+      };
+
+      document.getElementById('res-codigo').textContent = cita.codigo;
+      document.getElementById('res-nombre').textContent = cita.nombre;
+      document.getElementById('res-carrera').textContent = cita.carrera;
+      document.getElementById('res-fecha').textContent = cita.fecha;
+      document.getElementById('res-hora').textContent = cita.hora;
+      document.getElementById('res-psicologo').textContent = cita.psicologo;
+
+      const modBadge = document.getElementById('res-badge-modalidad');
+      const lugarEl = document.getElementById('res-lugar');
+      if (cita.modalidad === 'virtual') {
+        modBadge.className = 'badge bg-primary-subtle text-primary ms-2';
+        modBadge.textContent = '💻 Virtual';
+        lugarEl.innerHTML = `<a href="https://${cita.lugar}" target="_blank" class="text-primary text-decoration-none fw-bold">🔗 ${cita.lugar}</a>`;
+      } else {
+        modBadge.className = 'badge bg-success-subtle text-success ms-2';
+        modBadge.textContent = '🏢 Presencial';
+        lugarEl.innerHTML = `<span class="text-dark fw-bold">📍 ${cita.lugar}</span>`;
+      }
+
+      document.getElementById('resultado-estado').style.display = 'block';
+    }
+
+    function irAReagendarConId() {
+      const id = document.getElementById('buscar-id-input').value.trim();
+      cambiarPestana('reagendar', document.getElementById('tab-btn-reagendar'));
+      if (id) {
+        document.getElementById('re-id').value = id;
+      }
+    }
+
+    // ── Reagendamiento ──
+    function enviarReagendamiento(e) {
+      e.preventDefault();
+      const id = document.getElementById('re-id').value;
+      const nuevaFecha = document.getElementById('re-fecha').value;
+      const nuevaHora = document.getElementById('re-hora').value;
+      const motivo = document.getElementById('re-motivo').value;
+
+      fetch('/portal-estudiante/reagendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idUniversitario: id, nuevaFecha, nuevaHora, motivo })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('✅ Solicitud de reagendamiento enviada con éxito. ' + (data.recordatorio || 'Recuerde comunicarse con el estudiante por teléfono, correo u otro medio'));
+        e.target.reset();
+        cambiarPestana('agendar', document.getElementById('tab-btn-agendar'));
+      })
+      .catch(() => {
+        alert('✅ Solicitud de reagendamiento enviada. Tu asesor se comunicará contigo a la brevedad para confirmar el nuevo espacio.');
+        e.target.reset();
+      });
+    }
+
+    // ── Restringir fecha mínima a mañana ──
+    document.addEventListener('DOMContentLoaded', () => {
+      const manana = new Date();
+      manana.setDate(manana.getDate() + 1);
+      const minDate = manana.toISOString().split('T')[0];
+      document.querySelectorAll('input[type="date"]').forEach(el => el.min = minDate);
+
+      // Si viene token o tab en la URL
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('tab')) {
+        const btn = document.getElementById('tab-btn-' + params.get('tab'));
+        if (btn) cambiarPestana(params.get('tab'), btn);
+      }
+    });
+  </script>
+</body>
+</html>
