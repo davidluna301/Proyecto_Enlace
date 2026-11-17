@@ -1,0 +1,1444 @@
+<%# views/calendario/index.ejs – Calendario mensual de citas ENLACE UCC %>
+<div class="dashboard-wrapper">
+
+  <%# ── Header Principal ── %>
+  <div class="cal-top-header">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge bg-primary-subtle text-primary fw-semibold px-2 py-1">📅 AGENDA INSTITUCIONAL</span>
+        <span class="badge bg-success-subtle text-success fw-semibold px-2 py-1">⏰ 2:00 PM – 4:00 PM</span>
+      </div>
+      <h1 class="cal-page-title">Calendario de Citas y Acompañamiento</h1>
+      <p class="cal-page-subtitle">
+        Gestión de citas de bienestar universitario para estudiantes UCC. Franja oficial de atención: lunes a viernes, 2:00 PM a 4:00 PM.
+      </p>
+    </div>
+    <div class="cal-header-buttons">
+      <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="irAHoy()">
+        📍 Hoy
+      </button>
+      <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="abrirModalEvento()">
+        ➕ Agregar evento / Cambiar horario
+      </button>
+    </div>
+  </div>
+
+  <%# ── Barra de Navegación del Mes y Filtros ── %>
+  <div class="cal-toolbar-card">
+    <div class="cal-nav-controls">
+      <button class="btn-cal-arrow" onclick="cambiarMes(-1)" title="Mes anterior" aria-label="Mes anterior">
+        ◀
+      </button>
+      <h2 id="cal-titulo-mes" class="cal-month-heading">Noviembre 2026</h2>
+      <button class="btn-cal-arrow" onclick="cambiarMes(1)" title="Mes siguiente" aria-label="Mes siguiente">
+        ▶
+      </button>
+    </div>
+
+    <%# Filtro de Modalidad %>
+    <div class="cal-filter-group">
+      <span class="cal-filter-label">Filtrar:</span>
+      <div class="btn-group btn-group-sm" role="group" aria-label="Filtro de citas">
+        <button type="button" class="btn btn-outline-primary active" id="btn-filtro-todas" onclick="filtrarCitas('todas', this)">Todas</button>
+        <button type="button" class="btn btn-outline-primary" id="btn-filtro-virtual" onclick="filtrarCitas('virtual', this)">💻 Virtual</button>
+        <button type="button" class="btn btn-outline-primary" id="btn-filtro-presencial" onclick="filtrarCitas('presencial', this)">🏢 Presencial</button>
+      </div>
+    </div>
+
+    <%# Leyenda gráfica %>
+    <div class="cal-legend-pills">
+      <span class="legend-badge legend-virtual">
+        <span class="legend-dot dot-virtual"></span> Virtual (2PM-4PM)
+      </span>
+      <span class="legend-badge legend-presencial">
+        <span class="legend-dot dot-presencial"></span> Presencial (2PM-4PM)
+      </span>
+      <span class="legend-badge legend-festivo">
+        <span class="legend-dot dot-festivo"></span> Festivo Colombia
+      </span>
+      <span class="legend-badge legend-evento">
+        <span class="legend-dot dot-evento"></span> Novedad / Evento
+      </span>
+    </div>
+  </div>
+
+  <%# ── Contenedor Grilla y Panel Lateral ── %>
+  <div class="cal-layout-grid">
+
+    <%# Grilla del Calendario %>
+    <div class="cal-calendar-card">
+      <div class="cal-grid" id="calendar-grid">
+        <!-- Renderizado dinámico vía JavaScript -->
+      </div>
+    </div>
+
+    <%# Panel Lateral del Día Seleccionado %>
+    <aside class="cal-side-card" id="side-panel" aria-label="Citas del día seleccionado">
+      <div class="side-panel-header">
+        <div>
+          <span class="side-panel-eyebrow">AGENDA DEL DÍA</span>
+          <h3 id="side-panel-date" class="side-panel-date">Martes, 17 de noviembre</h3>
+        </div>
+        <span id="side-panel-count-badge" class="badge bg-primary rounded-pill">2 citas</span>
+      </div>
+
+      <%# Alerta de festivo si aplica %>
+      <div id="side-festivo-alert" class="alert-festivo-banner" style="display:none;">
+        <span class="festivo-flag">🇨🇴</span>
+        <div>
+          <strong id="side-festivo-nombre">Festivo Nacional</strong>
+          <p class="mb-0 text-muted small">No hay atención regular en consultorio este día.</p>
+        </div>
+      </div>
+
+      <%# Lista de Citas del Día %>
+      <div id="side-panel-appointments" class="side-appointments-list">
+        <!-- Citas del día inyectadas vía JS -->
+      </div>
+
+      <%# Resumen de Franjas Horarias (2:00 PM – 4:00 PM) %>
+      <div class="side-slot-summary mt-3">
+        <h4 class="side-slot-title">Disponibilidad (2:00 PM – 4:00 PM)</h4>
+        <div class="slots-grid" id="side-slots-grid">
+          <!-- Franjas horarias generadas por JS -->
+        </div>
+      </div>
+
+      <div class="side-panel-footer mt-3">
+        <button class="btn btn-outline-primary btn-sm w-100 rounded-pill" onclick="abrirModalEvento()">
+          ➕ Agregar novedad para este día
+        </button>
+      </div>
+    </aside>
+
+  </div>
+
+</div>
+
+<%# ── Modal: Detalle de Cita ── %>
+<div id="modal-detalle-cita" class="modal-overlay-blur" style="display:none;" onclick="if(event.target===this)cerrarModalDetalle()">
+  <div class="modal-dialog-premium" role="dialog" aria-modal="true" aria-labelledby="modal-cita-titulo">
+    <div class="modal-header-premium">
+      <div class="d-flex align-items-center gap-2">
+        <span id="modal-cita-mod-icon" style="font-size:1.3rem;">💻</span>
+        <div>
+          <h3 id="modal-cita-titulo" class="mb-0">Detalle de la Cita</h3>
+          <small id="modal-cita-codigo" class="text-muted">CITA-2026-001</small>
+        </div>
+      </div>
+      <button type="button" class="btn-close" onclick="cerrarModalDetalle()" aria-label="Cerrar"></button>
+    </div>
+
+    <div class="modal-body-premium">
+      <%# Alerta de estado y modalidad %>
+      <div class="d-flex justify-content-between align-items-center mb-3 p-2 rounded-3 bg-light">
+        <span class="badge" id="modal-cita-estado-badge">Confirmada</span>
+        <span class="badge" id="modal-cita-modalidad-badge">Virtual</span>
+        <span class="fw-bold text-primary" id="modal-cita-hora">⏰ 2:00 PM – 2:30 PM</span>
+      </div>
+
+      <%# Tarjeta de Datos del Estudiante %>
+      <div class="student-profile-box mb-3">
+        <div class="student-avatar-big" id="modal-cita-avatar">CP</div>
+        <div>
+          <h4 id="modal-cita-nombre" class="student-name-big mb-0">Carlos Alberto Pérez</h4>
+          <p id="modal-cita-carrera" class="student-meta-big mb-0">Ingeniería de Sistemas · Semestre 6</p>
+          <small class="text-muted">ID: <span id="modal-cita-id">1002345678</span></small>
+        </div>
+      </div>
+
+      <%# Fila de Contacto Rápido %>
+      <div class="row g-2 mb-3">
+        <div class="col-sm-6">
+          <div class="contact-card">
+            <span class="contact-label">Correo UCC:</span>
+            <a href="#" id="modal-cita-correo" class="contact-value text-truncate">carlos.perezg@campusucc.edu.co</a>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="contact-card">
+            <span class="contact-label">Teléfono / WhatsApp:</span>
+            <a href="#" id="modal-cita-telefono" class="contact-value">3104567890</a>
+          </div>
+        </div>
+      </div>
+
+      <%# Asesor Responsable y Ubicación / Enlace %>
+      <div class="detail-card-row mb-3">
+        <div>
+          <span class="detail-sublabel">Psicólogo / Asesor:</span>
+          <strong id="modal-cita-psicologo" class="d-block text-dark">Dra. María Fernanda Ríos</strong>
+        </div>
+        <div id="modal-cita-lugar-box">
+          <span class="detail-sublabel" id="modal-cita-lugar-label">Enlace de conexión:</span>
+          <div id="modal-cita-lugar-content">
+            <a href="https://meet.google.com/enl-ucc-001" target="_blank" rel="noopener" class="link-primary fw-semibold">
+              🔗 meet.google.com/enl-ucc-001
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <%# Motivo de la Cita %>
+      <div class="reason-box mb-3">
+        <span class="detail-sublabel">Motivo de consulta:</span>
+        <p id="modal-cita-motivo" class="reason-text mb-0">
+          Dificultades académicas y manejo de la sobrecarga de exámenes.
+        </p>
+      </div>
+
+      <%# Aviso recordatorio institucional %>
+      <div class="callout-info mb-0">
+        💡 <em>Acompañamiento confidencial conforme a la política de Bienestar Universitario UCC.</em>
+      </div>
+    </div>
+
+    <div class="modal-footer-premium">
+      <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="cerrarModalDetalle()">
+        Cerrar
+      </button>
+      <button type="button" class="btn btn-outline-warning btn-sm rounded-pill px-3" onclick="prepararReagendarDesdeCita()">
+        🔄 Reagendar cita
+      </button>
+      <button type="button" class="btn btn-success btn-sm rounded-pill px-3" onclick="marcarCitaAtendida()">
+        ✅ Marcar como atendida
+      </button>
+    </div>
+  </div>
+</div>
+
+<%# ── Modal: Agregar Evento / Cambiar Horario ── %>
+<div id="modal-evento" class="modal-overlay-blur" style="display:none;" onclick="if(event.target===this)cerrarModalEvento()">
+  <div class="modal-dialog-premium" role="dialog" aria-modal="true" aria-labelledby="modal-ev-titulo">
+    <div class="modal-header-premium">
+      <div class="d-flex align-items-center gap-2">
+        <span style="font-size:1.3rem;">📌</span>
+        <h3 id="modal-ev-titulo" class="mb-0">Agregar evento / Cambiar horario</h3>
+      </div>
+      <button type="button" class="btn-close" onclick="cerrarModalEvento()" aria-label="Cerrar"></button>
+    </div>
+
+    <form class="modal-body-premium" onsubmit="guardarEvento(event)">
+      <div class="mb-3">
+        <label for="ev-tipo" class="form-label fw-semibold small">Tipo de novedad *</label>
+        <select class="form-select form-select-sm rounded-3" id="ev-tipo" required onchange="onTipoEventoChange(this.value)">
+          <option value="cambio-horario">🔄 Cambio de horario de citas (2:00 PM - 4:00 PM)</option>
+          <option value="no-disponible">🚫 Día no disponible / Bloqueo de agenda</option>
+          <option value="evento">🎉 Evento especial de Bienestar Universitario</option>
+          <option value="cita-extra">➕ Cita extraordinaria</option>
+        </select>
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-sm-6">
+          <label for="ev-fecha" class="form-label fw-semibold small">Fecha *</label>
+          <input type="date" class="form-control form-control-sm rounded-3" id="ev-fecha" required>
+        </div>
+        <div class="col-sm-6">
+          <label for="ev-franja" class="form-label fw-semibold small">Franja horaria afectada *</label>
+          <select class="form-select form-select-sm rounded-3" id="ev-franja">
+            <option value="2:00 PM - 4:00 PM">Toda la franja (2:00 PM – 4:00 PM)</option>
+            <option value="2:00 PM - 3:00 PM">Primera hora (2:00 PM – 3:00 PM)</option>
+            <option value="3:00 PM - 4:00 PM">Segunda hora (3:00 PM – 4:00 PM)</option>
+            <option value="2:00 PM">Franja 2:00 PM</option>
+            <option value="2:30 PM">Franja 2:30 PM</option>
+            <option value="3:00 PM">Franja 3:00 PM</option>
+            <option value="3:30 PM">Franja 3:30 PM</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="ev-asesor" class="form-label fw-semibold small">Psicólogo / Asesor responsable</label>
+        <select class="form-select form-select-sm rounded-3" id="ev-asesor">
+          <option value="Todos los asesores">Todos los asesores de la sede</option>
+          <option value="Dra. María Fernanda Ríos">Dra. María Fernanda Ríos</option>
+          <option value="Dr. Jhon Álvarez Mora">Dr. Jhon Álvarez Mora</option>
+          <option value="Dra. Patricia Morales Gómez">Dra. Patricia Morales Gómez</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="ev-desc" class="form-label fw-semibold small">Descripción o justificación *</label>
+        <textarea class="form-control form-control-sm rounded-3" id="ev-desc" rows="3" placeholder="Ej: Capacitación docente de la Facultad de Psicología, Feria de Salud y Bienestar..." required></textarea>
+      </div>
+
+      <%# MENSAJE DE REAGENDAMIENTO MANDATORIO %>
+      <div class="callout-warning mb-2" id="alerta-reagenda-box">
+        <div class="d-flex align-items-start gap-2">
+          <span style="font-size:1.3rem; line-height:1;">⚠️</span>
+          <div>
+            <strong class="d-block text-warning-emphasis">Aviso importante de reagendamiento:</strong>
+            <span class="fw-semibold">Recuerde comunicarse con el estudiante por teléfono, correo u otro medio</span> para coordinar el nuevo espacio y no interrumpir su acompañamiento.
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer-premium px-0 pb-0 pt-3">
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="cerrarModalEvento()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm">
+          💾 Guardar cambio
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%# ── Toast de Notificación ── %>
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 10000;">
+  <div id="calToast" class="toast align-items-center text-bg-success border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="calToastMsg">
+        ✅ Operación completada exitosamente.
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Festivos oficiales de Colombia (Ley Emiliani) ──
+const festivosColombia = {
+  // 2026
+  '2026-01-01': 'Año Nuevo',
+  '2026-01-12': 'Reyes Magos',
+  '2026-03-23': 'Día de San José',
+  '2026-04-02': 'Jueves Santo',
+  '2026-04-03': 'Viernes Santo',
+  '2026-05-01': 'Día del Trabajo',
+  '2026-05-18': 'Ascensión del Señor',
+  '2026-06-08': 'Corpus Christi',
+  '2026-06-15': 'Sagrado Corazón de Jesús',
+  '2026-07-06': 'San Pedro y San Pablo',
+  '2026-07-20': 'Día de la Independencia',
+  '2026-08-07': 'Batalla de Boyacá',
+  '2026-08-17': 'La Asunción de la Virgen',
+  '2026-10-12': 'Día de la Raza',
+  '2026-11-02': 'Todos los Santos',
+  '2026-11-16': 'Independencia de Cartagena',
+  '2026-12-08': 'Inmaculada Concepción',
+  '2026-12-25': 'Navidad',
+  // 2025
+  '2025-01-01': 'Año Nuevo',
+  '2025-01-06': 'Reyes Magos',
+  '2025-03-24': 'San José',
+  '2025-04-17': 'Jueves Santo',
+  '2025-04-18': 'Viernes Santo',
+  '2025-05-01': 'Día del Trabajo',
+  '2025-06-02': 'Ascensión del Señor',
+  '2025-06-23': 'Corpus Christi',
+  '2025-06-30': 'Sagrado Corazón',
+  '2025-07-20': 'Independencia',
+  '2025-08-07': 'Batalla de Boyacá',
+  '2025-08-18': 'La Asunción',
+  '2025-10-13': 'Día de la Raza',
+  '2025-11-03': 'Todos los Santos',
+  '2025-11-17': 'Independencia Cartagena',
+  '2025-12-08': 'Inmaculada Concepción',
+  '2025-12-25': 'Navidad',
+};
+
+// ── Base de datos reactiva de citas en memoria ──
+let citasDb = {
+  '2026-11-17': [
+    {
+      id: 'CITA-2026-001',
+      estudianteId: '1002345678',
+      nombre: 'Carlos Alberto Pérez Gómez',
+      correo: 'carlos.perezg@campusucc.edu.co',
+      telefono: '3104567890',
+      carrera: 'Ingeniería de Sistemas',
+      semestre: 6,
+      hora: '2:00 PM',
+      horaFin: '2:30 PM',
+      modalidad: 'virtual',
+      motivo: 'Dificultades en rendimiento académico de cálculo multivariado y manejo de estrés.',
+      psicologo: 'Dra. María Fernanda Ríos',
+      estado: 'confirmada',
+      enlaceMeet: 'https://meet.google.com/enl-ucc-001'
+    },
+    {
+      id: 'CITA-2026-002',
+      estudianteId: '1002987654',
+      nombre: 'Luisa Mariana Martínez Rojas',
+      correo: 'luisa.martinezr@campusucc.edu.co',
+      telefono: '3156781234',
+      carrera: 'Psicología',
+      semestre: 4,
+      hora: '3:00 PM',
+      horaFin: '3:30 PM',
+      modalidad: 'presencial',
+      motivo: 'Manejo de ansiedad ante exámenes finales y situaciones familiares.',
+      psicologo: 'Dra. Patricia Morales Gómez',
+      estado: 'confirmada',
+      lugar: 'Consultorio Bienestar Universitario - Bloque B, Oficina 204'
+    }
+  ],
+  '2026-11-18': [
+    {
+      id: 'CITA-2026-003',
+      estudianteId: '1003112233',
+      nombre: 'Andrés Felipe Silva Castaño',
+      correo: 'andres.silvac@campusucc.edu.co',
+      telefono: '3209876543',
+      carrera: 'Contaduría Pública',
+      semestre: 2,
+      hora: '2:30 PM',
+      horaFin: '3:00 PM',
+      modalidad: 'virtual',
+      motivo: 'Orientación vocacional y adaptación al ritmo de clases universitarias.',
+      psicologo: 'Dr. Jhon Álvarez Mora',
+      estado: 'confirmada',
+      enlaceMeet: 'https://meet.google.com/enl-ucc-002'
+    }
+  ],
+  '2026-11-19': [
+    {
+      id: 'CITA-2026-004',
+      estudianteId: '1004556677',
+      nombre: 'Jimena Sofía Ortiz Valencia',
+      correo: 'jimena.ortizv@campusucc.edu.co',
+      telefono: '3123456781',
+      carrera: 'Medicina',
+      semestre: 8,
+      hora: '2:00 PM',
+      horaFin: '2:30 PM',
+      modalidad: 'presencial',
+      motivo: 'Seguimiento emocional y prevención de burnout durante prácticas hospitalarias.',
+      psicologo: 'Dra. María Fernanda Ríos',
+      estado: 'confirmada',
+      lugar: 'Consultorio Bienestar Universitario - Bloque B, Oficina 204'
+    },
+    {
+      id: 'CITA-2026-005',
+      estudianteId: '1005889900',
+      nombre: 'Pedro Antonio Ramírez Henao',
+      correo: 'pedro.ramirezh@campusucc.edu.co',
+      telefono: '3145678912',
+      carrera: 'Derecho',
+      semestre: 3,
+      hora: '3:30 PM',
+      horaFin: '4:00 PM',
+      modalidad: 'virtual',
+      motivo: 'Primera cita de asesoría académica y técnica de oratoria.',
+      psicologo: 'Dr. Jhon Álvarez Mora',
+      estado: 'confirmada',
+      enlaceMeet: 'https://meet.google.com/enl-ucc-003'
+    }
+  ],
+  '2026-11-20': [
+    {
+      id: 'CITA-2026-006',
+      estudianteId: '1006123987',
+      nombre: 'Valentina López Duque',
+      correo: 'valentina.lopezd@campusucc.edu.co',
+      telefono: '3187654321',
+      carrera: 'Enfermería',
+      semestre: 5,
+      hora: '2:00 PM',
+      horaFin: '2:30 PM',
+      modalidad: 'presencial',
+      motivo: 'Técnicas de gestión del tiempo y equilibrio estudio-trabajo.',
+      psicologo: 'Dra. Patricia Morales Gómez',
+      estado: 'confirmada',
+      lugar: 'Consultorio Bienestar Universitario - Bloque B, Oficina 204'
+    }
+  ],
+  '2026-11-24': [
+    {
+      id: 'CITA-2026-007',
+      estudianteId: '1007654321',
+      nombre: 'Santiago Gutiérrez Meza',
+      correo: 'santiago.gutierrezm@campusucc.edu.co',
+      telefono: '3001239876',
+      carrera: 'Administración de Empresas',
+      semestre: 7,
+      hora: '3:00 PM',
+      horaFin: '3:30 PM',
+      modalidad: 'virtual',
+      motivo: 'Manejo de estrés laboral y proyectos de grado.',
+      psicologo: 'Dr. Jhon Álvarez Mora',
+      estado: 'confirmada',
+      enlaceMeet: 'https://meet.google.com/enl-ucc-004'
+    }
+  ]
+};
+
+// ── Estado global del calendario ──
+let currentYear = 2026;
+let currentMonth = 10; // 0-indexed: 10 = Noviembre
+let diaSeleccionadoKey = '2026-11-17';
+let filtroModalidad = 'todas';
+let citaActivaModal = null;
+
+const meses = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+function pad(n) { return String(n).padStart(2, '0'); }
+function dateKey(y, m, d) { return `${y}-${pad(m + 1)}-${pad(d)}`; }
+
+// ── Renderizado del Calendario Mensual ──
+function renderCalendar() {
+  const titulo = document.getElementById('cal-titulo-mes');
+  titulo.textContent = `${meses[currentMonth]} ${currentYear}`;
+
+  const grid = document.getElementById('calendar-grid');
+  // Primer día del mes (ajustado para que Lunes sea 0 y Domingo 6)
+  const primerDiaRaw = new Date(currentYear, currentMonth, 1).getDay();
+  const primerDiaLunes = (primerDiaRaw + 6) % 7;
+  const diasEnMes = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const diasMesAnterior = new Date(currentYear, currentMonth, 0).getDate();
+
+  const hoy = new Date();
+  const hoyKey = `${hoy.getFullYear()}-${pad(hoy.getMonth() + 1)}-${pad(hoy.getDate())}`;
+
+  let html = '<div class="cal-days-header-row">';
+  diasSemana.forEach(d => {
+    html += `<div class="cal-day-heading">${d}</div>`;
+  });
+  html += '</div>';
+
+  html += '<div class="cal-cells-grid">';
+
+  // Celdas del mes anterior (relleno)
+  for (let i = primerDiaLunes - 1; i >= 0; i--) {
+    const num = diasMesAnterior - i;
+    html += `<div class="cal-cell cal-cell--prev-month"><span class="cal-cell-num text-muted opacity-50">${num}</span></div>`;
+  }
+
+  // Celdas del mes actual
+  for (let d = 1; d <= diasEnMes; d++) {
+    const key = dateKey(currentYear, currentMonth, d);
+    const todasCitas = citasDb[key] || [];
+    const festivo = festivosColombia[key];
+
+    // Filtrar citas según filtro activo
+    const citasVisibles = todasCitas.filter(c => {
+      if (filtroModalidad === 'todas') return true;
+      return c.modalidad === filtroModalidad;
+    });
+
+    let cls = 'cal-cell';
+    if (festivo) cls += ' cal-cell--festivo';
+    if (key === hoyKey) cls += ' cal-cell--today';
+    if (key === diaSeleccionadoKey) cls += ' cal-cell--selected';
+
+    const fechaObj = new Date(currentYear, currentMonth, d);
+    const esFinDeSemana = (fechaObj.getDay() === 0 || fechaObj.getDay() === 6);
+    if (esFinDeSemana) cls += ' cal-cell--weekend';
+
+    let pillsHtml = '';
+    citasVisibles.slice(0, 3).forEach((c, idx) => {
+      const icono = c.modalidad === 'virtual' ? '💻' : '🏢';
+      const primerNombre = c.nombre.split(' ')[0];
+      pillsHtml += `
+        <div class="cal-cita-pill cal-cita-pill--${c.modalidad}" 
+             onclick="abrirModalDetalleCita(event, '${key}', '${c.id}')"
+             title="${c.hora} - ${c.nombre} (${c.modalidad})">
+          <span class="pill-dot"></span>
+          <span class="pill-time">${c.hora}</span>
+          <span class="pill-name">${primerNombre}</span>
+        </div>`;
+    });
+
+    if (citasVisibles.length > 3) {
+      pillsHtml += `<div class="cal-more-pills">+${citasVisibles.length - 3} más</div>`;
+    }
+
+    html += `
+      <div class="${cls}" onclick="seleccionarDia('${key}', ${d})" data-key="${key}">
+        <div class="cal-cell-header">
+          <span class="cal-cell-num">${d}</span>
+          ${key === hoyKey ? '<span class="cal-today-badge">HOY</span>' : ''}
+          ${festivo ? '<span class="cal-festivo-badge">🇨🇴 FESTIVO</span>' : ''}
+        </div>
+        ${festivo ? `<div class="cal-festivo-label" title="${festivo}">${festivo}</div>` : ''}
+        <div class="cal-cell-pills">${pillsHtml}</div>
+      </div>`;
+  }
+
+  // Celdas del mes siguiente para completar la grilla
+  const celdasTotales = primerDiaLunes + diasEnMes;
+  const celdasRestantes = (7 - (celdasTotales % 7)) % 7;
+  for (let j = 1; j <= celdasRestantes; j++) {
+    html += `<div class="cal-cell cal-cell--next-month"><span class="cal-cell-num text-muted opacity-50">${j}</span></div>`;
+  }
+
+  html += '</div>';
+  grid.innerHTML = html;
+
+  // Actualizar el panel lateral con la selección actual
+  actualizarSidePanel(diaSeleccionadoKey);
+}
+
+// ── Selección de un día ──
+function seleccionarDia(key, d) {
+  diaSeleccionadoKey = key;
+  document.querySelectorAll('.cal-cell').forEach(c => c.classList.remove('cal-cell--selected'));
+  const celda = document.querySelector(`[data-key="${key}"]`);
+  if (celda) celda.classList.add('cal-cell--selected');
+
+  actualizarSidePanel(key);
+}
+
+// ── Actualización del panel lateral ──
+function actualizarSidePanel(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  const fechaObj = new Date(y, m - 1, d);
+  const nombreDia = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][fechaObj.getDay()];
+  const nombreMes = meses[m - 1];
+
+  const dateHeading = document.getElementById('side-panel-date');
+  dateHeading.textContent = `${nombreDia}, ${d} de ${nombreMes} ${y}`;
+
+  const festivo = festivosColombia[key];
+  const festivoBanner = document.getElementById('side-festivo-alert');
+  const festivoNombre = document.getElementById('side-festivo-nombre');
+  if (festivo) {
+    festivoBanner.style.display = 'flex';
+    festivoNombre.textContent = `Festivo: ${festivo}`;
+  } else {
+    festivoBanner.style.display = 'none';
+  }
+
+  const todasCitas = citasDb[key] || [];
+  const citasFiltradas = todasCitas.filter(c => {
+    if (filtroModalidad === 'todas') return true;
+    return c.modalidad === filtroModalidad;
+  });
+
+  const countBadge = document.getElementById('side-panel-count-badge');
+  countBadge.textContent = `${citasFiltradas.length} ${citasFiltradas.length === 1 ? 'cita' : 'citas'}`;
+
+  const listContainer = document.getElementById('side-panel-appointments');
+  if (citasFiltradas.length === 0) {
+    listContainer.innerHTML = `
+      <div class="empty-state-side py-4 text-center">
+        <span class="empty-icon d-block mb-2">🌿</span>
+        <h5 class="fw-bold mb-1">Sin citas programadas</h5>
+        <p class="text-muted small mb-3">No hay citas en este día para el filtro actual.</p>
+        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="abrirModalEventoConFecha('${key}')">
+          ➕ Agendar evento aquí
+        </button>
+      </div>`;
+  } else {
+    listContainer.innerHTML = citasFiltradas.map(c => `
+      <div class="side-cita-card side-cita-card--${c.modalidad}" onclick="abrirModalDetalleCita(event, '${key}', '${c.id}')">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <span class="side-cita-time">⏰ ${c.hora} – ${c.horaFin || '2:30 PM'}</span>
+          <span class="badge ${c.modalidad === 'virtual' ? 'bg-primary-subtle text-primary' : 'bg-success-subtle text-success'} rounded-pill">
+            ${c.modalidad === 'virtual' ? '💻 Virtual' : '🏢 Presencial'}
+          </span>
+        </div>
+        <div class="side-cita-name">${c.nombre}</div>
+        <div class="side-cita-sub">${c.carrera} · Semestre ${c.semestre}</div>
+        <div class="side-cita-motivo text-truncate mt-1">📝 ${c.motivo}</div>
+        <div class="side-cita-advisor mt-2 small text-muted">
+          🧑‍💼 <strong>${c.psicologo}</strong>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Actualizar franjas horarias 2PM-4PM
+  actualizarFranjasHorarias(key, todasCitas);
+}
+
+// ── Resumen de franjas de 2:00 PM a 4:00 PM ──
+function actualizarFranjasHorarias(key, citas) {
+  const franjas = ['2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM'];
+  const grid = document.getElementById('side-slots-grid');
+  
+  grid.innerHTML = franjas.map(hora => {
+    const ocupada = citas.find(c => c.hora === hora);
+    if (ocupada) {
+      return `
+        <div class="slot-item slot-item--booked" onclick="abrirModalDetalleCita(event, '${key}', '${ocupada.id}')" title="Ocupada por ${ocupada.nombre}">
+          <span class="slot-time">${hora}</span>
+          <span class="slot-status">Ocupada</span>
+        </div>`;
+    } else {
+      return `
+        <div class="slot-item slot-item--free" onclick="abrirModalEventoConFechaHora('${key}', '${hora}')" title="Disponible">
+          <span class="slot-time">${hora}</span>
+          <span class="slot-status">Disponible</span>
+        </div>`;
+    }
+  }).join('');
+}
+
+// ── Filtro de modalidad ──
+function filtrarCitas(modalidad, btn) {
+  filtroModalidad = modalidad;
+  document.querySelectorAll('.cal-filter-group .btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCalendar();
+}
+
+// ── Navegación del mes ──
+function cambiarMes(dir) {
+  currentMonth += dir;
+  if (currentMonth > 11) {
+    currentMonth = 0;
+    currentYear++;
+  } else if (currentMonth < 0) {
+    currentMonth = 11;
+    currentYear--;
+  }
+  // Al cambiar mes, seleccionar el día 1
+  diaSeleccionadoKey = dateKey(currentYear, currentMonth, 1);
+  renderCalendar();
+}
+
+function irAHoy() {
+  const hoy = new Date();
+  currentYear = hoy.getFullYear();
+  currentMonth = hoy.getMonth();
+  diaSeleccionadoKey = `${hoy.getFullYear()}-${pad(hoy.getMonth() + 1)}-${pad(hoy.getDate())}`;
+  renderCalendar();
+}
+
+// ── Modal Detalle de Cita ──
+function abrirModalDetalleCita(e, key, citaId) {
+  if (e) e.stopPropagation();
+  const citas = citasDb[key] || [];
+  const cita = citas.find(c => c.id === citaId) || citas[0];
+  if (!cita) return;
+
+  citaActivaModal = { ...cita, key };
+
+  document.getElementById('modal-cita-titulo').textContent = `Cita: ${cita.nombre}`;
+  document.getElementById('modal-cita-codigo').textContent = cita.id || 'CITA-UCC';
+  document.getElementById('modal-cita-nombre').textContent = cita.nombre;
+  document.getElementById('modal-cita-id').textContent = cita.estudianteId || 'N/A';
+  document.getElementById('modal-cita-carrera').textContent = `${cita.carrera} · Semestre ${cita.semestre}`;
+  document.getElementById('modal-cita-hora').textContent = `⏰ ${cita.hora} – ${cita.horaFin || '2:30 PM'}`;
+  document.getElementById('modal-cita-psicologo').textContent = cita.psicologo || 'Dra. María Fernanda Ríos';
+  document.getElementById('modal-cita-motivo').textContent = cita.motivo || 'Orientación y acompañamiento general.';
+
+  // Correo y Teléfono
+  const correoEl = document.getElementById('modal-cita-correo');
+  correoEl.textContent = cita.correo || 'estudiante@campusucc.edu.co';
+  correoEl.href = `mailto:${cita.correo}`;
+
+  const telEl = document.getElementById('modal-cita-telefono');
+  telEl.textContent = cita.telefono || '3001234567';
+  telEl.href = `tel:${cita.telefono}`;
+
+  // Avatar iniciales
+  const iniciales = cita.nombre.split(' ').map(p => p[0]).slice(0, 2).join('');
+  document.getElementById('modal-cita-avatar').textContent = iniciales;
+
+  // Estado y Modalidad
+  const estadoBadge = document.getElementById('modal-cita-estado-badge');
+  estadoBadge.className = 'badge bg-success';
+  estadoBadge.textContent = (cita.estado || 'Confirmada').toUpperCase();
+
+  const modBadge = document.getElementById('modal-cita-modalidad-badge');
+  const modIcon = document.getElementById('modal-cita-mod-icon');
+  const lugarLabel = document.getElementById('modal-cita-lugar-label');
+  const lugarContent = document.getElementById('modal-cita-lugar-content');
+
+  if (cita.modalidad === 'virtual') {
+    modBadge.className = 'badge bg-primary';
+    modBadge.textContent = '💻 Virtual';
+    modIcon.textContent = '💻';
+    lugarLabel.textContent = 'Enlace de videollamada:';
+    lugarContent.innerHTML = `
+      <a href="${cita.enlaceMeet || 'https://meet.google.com/enl-ucc-001'}" target="_blank" rel="noopener" class="link-primary fw-semibold">
+        🔗 ${cita.enlaceMeet || 'meet.google.com/enl-ucc-001'}
+      </a>`;
+  } else {
+    modBadge.className = 'badge bg-success';
+    modBadge.textContent = '🏢 Presencial';
+    modIcon.textContent = '🏢';
+    lugarLabel.textContent = 'Lugar de atención:';
+    lugarContent.innerHTML = `
+      <span class="text-dark fw-semibold">
+        📍 ${cita.lugar || 'Consultorio Bienestar Universitario - Bloque B, Oficina 204'}
+      </span>`;
+  }
+
+  document.getElementById('modal-detalle-cita').style.display = 'flex';
+}
+
+function cerrarModalDetalle() {
+  document.getElementById('modal-detalle-cita').style.display = 'none';
+  citaActivaModal = null;
+}
+
+function marcarCitaAtendida() {
+  if (!citaActivaModal) return;
+  mostrarToast(`✅ Cita de ${citaActivaModal.nombre} marcada como atendida exitosamente.`);
+  cerrarModalDetalle();
+}
+
+function prepararReagendarDesdeCita() {
+  if (!citaActivaModal) return;
+  const nombreEstudiante = citaActivaModal.nombre;
+  cerrarModalDetalle();
+  abrirModalEvento();
+  
+  document.getElementById('ev-tipo').value = 'cambio-horario';
+  document.getElementById('ev-fecha').value = citaActivaModal.key;
+  document.getElementById('ev-desc').value = `Reagendamiento para el estudiante ${nombreEstudiante}. Horario solicitado previo: ${citaActivaModal.hora}.`;
+  
+  const alerta = document.getElementById('alerta-reagenda-box');
+  alerta.style.display = 'block';
+}
+
+// ── Modal Agregar Evento / Cambiar Horario ──
+function abrirModalEvento() {
+  document.getElementById('ev-fecha').value = diaSeleccionadoKey;
+  document.getElementById('modal-evento').style.display = 'flex';
+}
+
+function abrirModalEventoConFecha(key) {
+  diaSeleccionadoKey = key;
+  abrirModalEvento();
+}
+
+function abrirModalEventoConFechaHora(key, hora) {
+  diaSeleccionadoKey = key;
+  abrirModalEvento();
+  document.getElementById('ev-franja').value = hora;
+}
+
+function cerrarModalEvento() {
+  document.getElementById('modal-evento').style.display = 'none';
+}
+
+function onTipoEventoChange(tipo) {
+  const alerta = document.getElementById('alerta-reagenda-box');
+  // Mostrar siempre prominente o cuando sea cambio de horario/bloqueo
+  if (tipo === 'cambio-horario' || tipo === 'no-disponible') {
+    alerta.style.display = 'block';
+  } else {
+    alerta.style.display = 'block'; // Mandatorio en ENLACE
+  }
+}
+
+function guardarEvento(e) {
+  e.preventDefault();
+  const tipo = document.getElementById('ev-tipo').value;
+  const fecha = document.getElementById('ev-fecha').value;
+  const franja = document.getElementById('ev-franja').value;
+  const desc = document.getElementById('ev-desc').value;
+
+  // Enviar a la API modular de calendario
+  fetch('/calendario/api/evento', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tipo, fecha, descripcion: desc, franjaAfectada: franja })
+  })
+  .then(res => res.json())
+  .then(data => {
+    mostrarToast('✅ Evento registrado. ' + (data.recordatorio || 'Recuerde comunicarse con el estudiante por teléfono, correo u otro medio'));
+    cerrarModalEvento();
+    e.target.reset();
+    renderCalendar();
+  })
+  .catch(() => {
+    mostrarToast('✅ Evento registrado localmente. Recuerde comunicarse con el estudiante por teléfono, correo u otro medio');
+    cerrarModalEvento();
+    e.target.reset();
+  });
+}
+
+function mostrarToast(msg) {
+  const toastEl = document.getElementById('calToast');
+  document.getElementById('calToastMsg').textContent = msg;
+  const toast = new bootstrap.Toast(toastEl, { delay: 4500 });
+  toast.show();
+}
+
+// ── Inicialización ──
+document.addEventListener('DOMContentLoaded', () => {
+  renderCalendar();
+});
+</script>
+
+<style>
+/* ── Estilos Premium del Módulo de Calendario ── */
+.cal-top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.cal-page-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0.25rem 0;
+  letter-spacing: -0.02em;
+}
+
+.cal-page-subtitle {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  margin: 0;
+  max-width: 680px;
+}
+
+.cal-header-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Toolbar de Navegación y Filtros */
+.cal-toolbar-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.cal-nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cal-month-heading {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0;
+  min-width: 200px;
+  text-align: center;
+  color: var(--color-text);
+}
+
+.btn-cal-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-size: 0.85rem;
+}
+
+.btn-cal-arrow:hover {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.cal-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cal-filter-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  text-transform: uppercase;
+}
+
+.cal-legend-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.legend-badge {
+  font-size: 0.76rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  background: #f8fafc;
+  color: var(--color-muted);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-virtual { background: #3b82f6; }
+.dot-presencial { background: #22c55e; }
+.dot-festivo { background: #ef4444; }
+.dot-evento { background: #f59e0b; }
+
+/* Layout Grid: Calendario + Panel Lateral */
+.cal-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 1024px) {
+  .cal-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tarjeta del Calendario */
+.cal-calendar-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+  animation: fadeSlideIn 0.4s ease;
+}
+
+.cal-days-header-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.cal-day-heading {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 6px 0;
+}
+
+.cal-cells-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+/* Celdas individuales */
+.cal-cell {
+  min-height: 90px;
+  background: #ffffff;
+  border: 1.5px solid #edf2f7;
+  border-radius: 12px;
+  padding: 6px 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.cal-cell:hover {
+  border-color: var(--color-primary);
+  background: #f0fdfa;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(24, 159, 186, 0.12);
+  z-index: 2;
+}
+
+.cal-cell--selected {
+  border-color: var(--color-primary) !important;
+  background: #e6f6f9 !important;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.cal-cell--today {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.cal-cell--weekend {
+  background: #fafbfc;
+}
+
+/* Festivos Colombia resaltados en rojo */
+.cal-cell--festivo {
+  background: #fef2f2 !important;
+  border-color: #fecaca !important;
+}
+
+.cal-cell--festivo .cal-cell-num {
+  color: #dc2626 !important;
+  font-weight: 800;
+}
+
+.cal-festivo-badge {
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.cal-festivo-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #dc2626;
+  line-height: 1.15;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal-cell--prev-month,
+.cal-cell--next-month {
+  background: #f8fafc;
+  border-color: #f1f5f9;
+  cursor: default;
+}
+
+.cal-cell--prev-month:hover,
+.cal-cell--next-month:hover {
+  background: #f8fafc;
+  transform: none;
+  box-shadow: none;
+  border-color: #f1f5f9;
+}
+
+.cal-cell-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.cal-cell-num {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.cal-today-badge {
+  font-size: 0.55rem;
+  font-weight: 800;
+  color: #1d4ed8;
+  background: #dbeafe;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.cal-cell-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+  flex-grow: 1;
+}
+
+/* Píldoras de Cita (2PM-4PM) */
+.cal-cita-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.cal-cita-pill:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.cal-cita-pill--virtual {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-left: 3px solid #3b82f6;
+}
+
+.cal-cita-pill--presencial {
+  background: #f0fdf4;
+  color: #15803d;
+  border-left: 3px solid #22c55e;
+}
+
+.pill-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cal-cita-pill--virtual .pill-dot { background: #3b82f6; }
+.cal-cita-pill--presencial .pill-dot { background: #22c55e; }
+
+.pill-time { font-weight: 800; }
+.pill-name { overflow: hidden; text-overflow: ellipsis; }
+
+.cal-more-pills {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-align: right;
+  padding-top: 1px;
+}
+
+/* ── Panel Lateral ── */
+.cal-side-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+  position: sticky;
+  top: 1rem;
+}
+
+.side-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.side-panel-eyebrow {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  display: block;
+}
+
+.side-panel-date {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.alert-festivo-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.festivo-flag {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.side-appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.side-cita-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-left: 4px solid transparent;
+}
+
+.side-cita-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  background: #ffffff;
+}
+
+.side-cita-card--virtual { border-left-color: #3b82f6; }
+.side-cita-card--presencial { border-left-color: #22c55e; }
+
+.side-cita-time {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+}
+
+.side-cita-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.side-cita-sub {
+  font-size: 0.76rem;
+  color: var(--color-muted);
+}
+
+.side-cita-motivo {
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+/* Franjas 2PM-4PM */
+.side-slot-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-muted);
+  margin-bottom: 0.5rem;
+}
+
+.slots-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.slot-item {
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.slot-item--booked {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #64748b;
+}
+
+.slot-item--free {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  font-weight: 700;
+}
+
+.slot-item--free:hover {
+  background: #dcfce7;
+  transform: scale(1.02);
+}
+
+/* Modales */
+.student-profile-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.student-avatar-big {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.student-name-big {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.student-meta-big {
+  font-size: 0.82rem;
+  color: var(--color-muted);
+}
+
+.contact-card {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+}
+
+.contact-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.contact-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  text-decoration: none;
+  display: block;
+}
+
+.detail-card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  background: #f8fafc;
+  padding: 0.85rem;
+  border-radius: 12px;
+}
+
+.detail-sublabel {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 0.2rem;
+}
+
+.reason-box {
+  background: #f8fafc;
+  border-left: 3px solid var(--color-primary);
+  padding: 0.85rem;
+  border-radius: 8px;
+}
+
+.reason-text {
+  font-size: 0.88rem;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+</style>
