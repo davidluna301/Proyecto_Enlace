@@ -5,33 +5,48 @@
   data-urgency-labels="<%= JSON.stringify(urgencyLabels) %>"
   data-sections="<%= JSON.stringify(sections) %>"
 >
-  <div class="page-heading">
+  <div class="page-heading mb-4">
     <div>
-      <p class="eyebrow">Acompañamiento estudiantil</p>
-      <h1>Generar reporte</h1>
+      <p class="eyebrow mb-1">Acompañamiento estudiantil</p>
+      <h1 class="h2 fw-bold text-dark mb-1">Generar reporte</h1>
       <p class="text-muted mb-0">Selecciona un caso para comenzar.</p>
     </div>
   </div>
+
   <ol class="report-steps mt-4" aria-label="Pasos para generar el reporte">
-    <li class="is-current" data-step-indicator="1" aria-current="step"><span>1</span> Seleccionar caso</li>
-    <li data-step-indicator="2"><span>2</span> Configurar contenido</li>
-    <li data-step-indicator="3"><span>3</span> Previsualizar</li>
+    <li class="is-current" data-step-indicator="1" aria-current="step">
+      <span>1</span> Seleccionar caso
+    </li>
+    <li data-step-indicator="2">
+      <span>2</span> Configurar contenido
+    </li>
+    <li data-step-indicator="3">
+      <span>3</span> Previsualizar
+    </li>
   </ol>
-  <div class="report-alert" id="report-error" role="alert" hidden></div>
+
+  <div class="report-alert alert alert-danger rounded-4 shadow-sm" id="report-error" role="alert" hidden></div>
   <p class="visually-hidden" id="report-announcement" aria-live="polite"></p>
 
-  <section class="report-step-panel mt-4" data-step="1" aria-labelledby="report-case-title">
-    <div>
-      <p class="eyebrow">Paso 1 de 3</p>
-      <h2 id="report-case-title" tabindex="-1">Selecciona un caso</h2>
-      <p>Busca por nombre del estudiante, correo o identificador del caso.</p>
+  <%# ── PASO 1: SELECCIONAR CASO ── %>
+  <section class="report-step-panel mt-4 p-4 p-md-5 bg-white rounded-4 border shadow-sm" data-step="1" aria-labelledby="report-case-title">
+    <div class="mb-4">
+      <p class="eyebrow mb-1">Paso 1 de 3</p>
+      <h2 id="report-case-title" tabindex="-1" class="h3 fw-bold text-dark mb-1">Selecciona un caso</h2>
+      <p class="text-muted mb-0">Busca por nombre del estudiante, correo o identificador del caso.</p>
     </div>
-    <div class="report-search">
-      <label class="form-label" for="report-search">Buscar caso</label>
-      <input class="form-control" id="report-search" type="search" autocomplete="off" placeholder="Ej. Valentina, correo o EN-2026-001">
-      <span class="form-text">Se muestran únicamente casos de tu ámbito.</span>
+
+    <div class="report-search mb-4">
+      <label class="form-label fw-bold" for="report-search">Buscar caso</label>
+      <div class="input-group">
+        <span class="input-group-text bg-light">🔍</span>
+        <input class="form-control form-control-lg form-input-styled" id="report-search" type="search" autocomplete="off" placeholder="Ej. Valentina, correo o EN-2026-001">
+      </div>
+      <span class="form-text mt-1 text-muted">Se muestran únicamente casos de tu ámbito.</span>
     </div>
-    <p class="report-loading" id="report-search-loading" role="status" hidden>Buscando casos…</p>
+
+    <p class="report-loading text-primary fw-bold" id="report-search-loading" role="status" hidden>Buscando casos…</p>
+
     <div class="report-case-results" id="report-case-results" aria-label="Resultados de casos">
       <% if (cases.length) { %>
         <% cases.forEach((studentCase) => { %>
@@ -47,38 +62,49 @@
           >
             <span class="report-case-top">
               <span class="case-id"><%= studentCase.id %></span>
-              <span class="urgency-chip urgency-<%= studentCase.urgency.toLowerCase() %>"><span aria-hidden="true"><%= studentCase.urgency === 'ALTA' ? '!' : studentCase.urgency === 'MEDIA' ? '◷' : '✓' %></span> Urgencia <%= urgencyLabels[studentCase.urgency] %></span>
+              <span class="urgency-chip urgency-<%= studentCase.urgency.toLowerCase() %>">
+                <span aria-hidden="true"><%= studentCase.urgency === 'ALTA' ? '!' : studentCase.urgency === 'MEDIA' ? '◷' : '✓' %></span>
+                Urgencia <%= urgencyLabels[studentCase.urgency] %>
+              </span>
             </span>
             <strong><%= studentCase.studentName %></strong>
             <span><%= studentCase.program %></span>
-            <span class="status-chip status-<%= studentCase.status.toLowerCase() %>"><span aria-hidden="true"><%= statusIcons[studentCase.status] %></span><%= statusLabels[studentCase.status] %></span>
+            <span class="status-chip status-<%= studentCase.status.toLowerCase() %>">
+              <span aria-hidden="true"><%= statusIcons[studentCase.status] %></span>
+              <%= statusLabels[studentCase.status] %>
+            </span>
           </button>
         <% }) %>
       <% } else { %>
-        <div class="report-empty">
-          <h3>No tienes casos disponibles</h3>
-          <p>Registra un caso para poder generar un reporte.</p>
-          <a class="btn btn-primary-action" href="/casos/nuevo">Registrar un caso</a>
+        <div class="report-empty p-5 text-center bg-light rounded-4">
+          <h3 class="h4 fw-bold">No tienes casos disponibles</h3>
+          <p class="text-muted">Registra un caso para poder generar un reporte.</p>
+          <a class="btn btn-primary-action mt-2" href="/casos/nuevo">Registrar un caso</a>
         </div>
       <% } %>
     </div>
-    <div class="report-navigation">
-      <span class="text-muted" id="selected-case-label">Selecciona un caso para continuar.</span>
-      <button class="btn btn-primary-action" id="report-continue" type="button" disabled>Continuar</button>
+
+    <div class="report-navigation d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+      <span class="text-muted fw-semibold" id="selected-case-label">Selecciona un caso para continuar.</span>
+      <button class="btn btn-primary-action btn-lg px-4" id="report-continue" type="button" disabled>Continuar</button>
     </div>
   </section>
 
-  <section class="report-step-panel mt-4" data-step="2" aria-labelledby="report-config-title" hidden>
-    <div>
-      <p class="eyebrow">Paso 2 de 3</p>
-      <h2 id="report-config-title" tabindex="-1">Configura el contenido</h2>
-      <p>Elige las secciones que necesitas incluir.</p>
+  <%# ── PASO 2: CONFIGURAR CONTENIDO ── %>
+  <section class="report-step-panel mt-4 p-4 p-md-5 bg-white rounded-4 border shadow-sm" data-step="2" aria-labelledby="report-config-title" hidden>
+    <div class="mb-4">
+      <p class="eyebrow mb-1">Paso 2 de 3</p>
+      <h2 id="report-config-title" tabindex="-1" class="h3 fw-bold text-dark mb-1">Configura el contenido</h2>
+      <p class="text-muted mb-0">Elige las secciones que necesitas incluir.</p>
     </div>
-    <div class="report-case-context" id="report-case-context"></div>
-    <div class="report-section-heading">
-      <h3>Secciones del reporte</h3>
-      <button class="btn btn-outline-secondary btn-sm" id="toggle-all-sections" type="button">Desmarcar todas</button>
+
+    <div class="report-case-context p-3 bg-light rounded-4 border mb-4" id="report-case-context"></div>
+
+    <div class="report-section-heading d-flex justify-content-between align-items-center mb-3">
+      <h3 class="h5 fw-bold text-dark mb-0">Secciones del reporte</h3>
+      <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold" id="toggle-all-sections" type="button">Desmarcar todas</button>
     </div>
+
     <fieldset class="report-section-options">
       <legend class="visually-hidden">Selecciona las secciones para incluir</legend>
       <% sections.forEach((section) => { %>
@@ -88,55 +114,71 @@
         </label>
       <% }) %>
     </fieldset>
-    <p class="report-selection-count" id="configuration-count" aria-live="polite"></p>
-    <p class="report-soft-warning" id="empty-selection-warning" role="status" hidden>No has seleccionado secciones. El reporte descargado estará prácticamente vacío.</p>
-    <div class="report-navigation">
-      <button class="btn btn-outline-secondary" type="button" data-go-to="1">Volver</button>
-      <button class="btn btn-primary-action" type="button" data-go-to="3">Previsualizar</button>
+
+    <p class="report-selection-count mt-3 fw-bold text-primary" id="configuration-count" aria-live="polite"></p>
+    <p class="report-soft-warning alert alert-warning rounded-3" id="empty-selection-warning" role="status" hidden>No has seleccionado secciones. El reporte descargado estará prácticamente vacío.</p>
+
+    <div class="report-navigation d-flex justify-content-between mt-4 pt-3 border-top">
+      <button class="btn btn-outline-secondary btn-lg px-4" type="button" data-go-to="1">Volver</button>
+      <button class="btn btn-primary-action btn-lg px-4" type="button" data-go-to="3">Previsualizar</button>
     </div>
   </section>
-  <section class="report-step-panel mt-4" data-step="3" aria-labelledby="report-preview-title" hidden>
-    <div>
-      <p class="eyebrow">Paso 3 de 3</p>
-      <h2 id="report-preview-title" tabindex="-1">Previsualiza tu reporte</h2>
-      <p>Las secciones excluidas permanecen visibles aquí para revisar la selección, pero no se incluirán en el PDF.</p>
+
+  <%# ── PASO 3: PREVISUALIZAR ── %>
+  <section class="report-step-panel mt-4 p-4 p-md-5 bg-white rounded-4 border shadow-sm" data-step="3" aria-labelledby="report-preview-title" hidden>
+    <div class="mb-4">
+      <p class="eyebrow mb-1">Paso 3 de 3</p>
+      <h2 id="report-preview-title" tabindex="-1" class="h3 fw-bold text-dark mb-1">Previsualiza tu reporte</h2>
+      <p class="text-muted mb-0">Las secciones excluidas permanecen visibles aquí para revisar la selección, pero no se incluirán en el PDF.</p>
     </div>
-    <p class="report-selection-count" id="preview-count" aria-live="polite"></p>
-    <p class="report-preview-case" id="preview-case-heading"></p>
-    <article class="report-paper" id="report-preview">
-      <header class="report-paper-header">
-        <img src="/img/logolink.png" alt="ENLACE UCC">
-        <div><h3>Reporte de acompañamiento</h3><p id="preview-generated-date"></p></div>
+
+    <p class="report-selection-count fw-bold text-primary mb-2" id="preview-count" aria-live="polite"></p>
+    <p class="report-preview-case text-muted mb-3" id="preview-case-heading"></p>
+
+    <article class="report-paper shadow-sm rounded-4 border p-4" id="report-preview">
+      <header class="report-paper-header d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+        <img src="/img/logolink.png" alt="ENLACE UCC" height="42" style="max-width:140px; object-fit:contain;">
+        <div class="text-end">
+          <h3 class="h5 fw-bold text-dark mb-0">Reporte de acompañamiento</h3>
+          <p id="preview-generated-date" class="text-muted small mb-0"></p>
+        </div>
       </header>
       <div id="preview-sections"></div>
     </article>
-    <div class="report-navigation">
-      <button class="btn btn-outline-secondary" type="button" data-go-to="2">Volver</button>
-      <button class="btn btn-primary-action" id="open-confirmation" type="button">Descargar reporte (PDF)</button>
+
+    <div class="report-navigation d-flex justify-content-between mt-4 pt-3 border-top">
+      <button class="btn btn-outline-secondary btn-lg px-4" type="button" data-go-to="2">Volver</button>
+      <button class="btn btn-primary-action btn-lg px-4" id="open-confirmation" type="button">Descargar reporte (PDF)</button>
     </div>
   </section>
-  <p class="report-download-status" id="report-download-status" role="status" hidden></p>
 
-  <dialog class="report-confirmation" id="report-confirmation" role="dialog" aria-modal="true" aria-labelledby="confirmation-title" aria-describedby="confirmation-warning">
-    <div class="report-confirmation-content">
-      <div class="report-warning-heading">
-        <span aria-hidden="true">⚠</span>
-        <h2 id="confirmation-title">Confirmar generación de reporte</h2>
+  <p class="report-download-status text-primary fw-bold mt-2" id="report-download-status" role="status" hidden></p>
+
+  <%# ── MODAL DE CONFIRMACIÓN ── %>
+  <dialog class="report-confirmation p-0 border-0 rounded-4 shadow-lg" id="report-confirmation" role="dialog" aria-modal="true" aria-labelledby="confirmation-title" aria-describedby="confirmation-warning">
+    <div class="report-confirmation-content p-4 p-md-5">
+      <div class="report-warning-heading d-flex align-items-center gap-2 mb-3">
+        <span aria-hidden="true" style="font-size:1.5rem; color:#f59e0b;">⚠️</span>
+        <h2 id="confirmation-title" class="h4 fw-bold mb-0">Confirmar generación de reporte</h2>
       </div>
-      <p id="confirmation-warning"><%= warning %></p>
-      <div class="report-confirmation-summary">
-        <h3>Secciones que se incluirán</h3>
-        <ul id="confirmation-included"></ul>
-        <details id="confirmation-excluded-container">
-          <summary>Secciones excluidas</summary>
-          <ul id="confirmation-excluded"></ul>
+
+      <p id="confirmation-warning" class="text-muted mb-4"><%= warning %></p>
+
+      <div class="report-confirmation-summary p-3 bg-light rounded-3 border mb-4">
+        <h3 class="h6 fw-bold text-dark mb-2">Secciones que se incluirán</h3>
+        <ul id="confirmation-included" class="mb-3 ps-3"></ul>
+        <details id="confirmation-excluded-container" class="mt-2 text-muted">
+          <summary class="fw-semibold text-secondary" style="cursor:pointer;">Secciones excluidas</summary>
+          <ul id="confirmation-excluded" class="mt-2 ps-3"></ul>
         </details>
       </div>
-      <label class="report-confirmation-check" for="report-reviewed">
-        <input class="form-check-input" id="report-reviewed" type="checkbox">
-        <span>He revisado la información y confirmo que el reporte contiene únicamente los datos necesarios.</span>
+
+      <label class="report-confirmation-check d-flex align-items-start gap-2 p-3 bg-light rounded-3 border mb-4" for="report-reviewed">
+        <input class="form-check-input mt-1" id="report-reviewed" type="checkbox">
+        <span class="small text-dark fw-semibold">He revisado la información y confirmo que el reporte contiene únicamente los datos necesarios.</span>
       </label>
-      <div class="report-navigation">
+
+      <div class="report-navigation d-flex justify-content-end gap-2">
         <button class="btn btn-outline-secondary" id="cancel-confirmation" type="button">Cancelar</button>
         <button class="btn btn-primary-action" id="confirm-download" type="button" disabled>
           Confirmar y descargar
@@ -144,5 +186,6 @@
       </div>
     </div>
   </dialog>
+
   <script src="/js/report-flow.js" defer></script>
 </section>
