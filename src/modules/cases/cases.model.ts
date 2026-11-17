@@ -25,6 +25,29 @@ export const urgencyLabels = {
 export type CaseStatus = keyof typeof statusLabels;
 export type Urgency = keyof typeof urgencyLabels;
 
+export type RiskLevel =
+  | "BAJO"
+  | "MODERADO"
+  | "MEDIO_ALTO"
+  | "ALTO"
+  | "CRITICO";
+
+export const riskEmojis: Record<RiskLevel, string> = {
+  BAJO: "😊",
+  MODERADO: "😐",
+  MEDIO_ALTO: "😟",
+  ALTO: "😰",
+  CRITICO: "💀",
+};
+
+export const riskLabels: Record<RiskLevel, string> = {
+  BAJO: "Bajo",
+  MODERADO: "Moderado",
+  MEDIO_ALTO: "Medio-Alto",
+  ALTO: "Alto",
+  CRITICO: "Crítico",
+};
+
 export interface CaseEvent {
   date: string;
   type: string;
@@ -36,6 +59,9 @@ export interface StudentCase {
   advisorId: string;
   studentName: string;
   program: string;
+  semester?: string;
+  riskLevel?: RiskLevel;
+  riskDescription?: string;
   status: CaseStatus;
   urgency: Urgency;
   lastMovement: string;
