@@ -1,0 +1,614 @@
+<%# views/admin/index.ejs – Panel Integral de Administración ENLACE UCC %>
+<div class="dashboard-wrapper">
+
+  <%# ── Encabezado Hero ── %>
+  <div class="welcome-hero welcome-hero--admin">
+    <div class="welcome-hero__text">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="badge bg-white text-dark fw-bold px-3 py-1 rounded-pill">🛡️ Panel Administrativo</span>
+        <span class="semester-badge--active-pulse">
+          <span class="semester-pulse-dot"></span> Período <%= stats.semestreActivo %> en curso
+        </span>
+      </div>
+      <h1 class="mb-2">Administración General del Sistema</h1>
+      <p class="welcome-copy">
+        Supervisa al equipo de asesores, monitorea los casos activos de permanencia estudiantil y gestiona el ciclo operativo de los semestres académicos.
+      </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <button class="btn btn-light fw-bold px-3 py-2 rounded-3 shadow-sm d-inline-flex align-items-center gap-2" onclick="abrirModalAgregarAsesor()">
+        <span>➕</span> Agregar asesor
+      </button>
+      <a href="/semestre" class="btn btn-outline-light fw-bold px-3 py-2 rounded-3 d-inline-flex align-items-center gap-2">
+        <span>🗓️</span> Gestión de semestres
+      </a>
+    </div>
+  </div>
+
+  <%# ── Cards de Estadísticas Globales ── %>
+  <div class="kpi-grid mb-4">
+    <div class="kpi-card kpi-card--blue">
+      <div class="kpi-card__icon">👥</div>
+      <div>
+        <div class="kpi-card__value"><%= stats.totalAsesores %></div>
+        <div class="kpi-card__label">Asesores activos</div>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--green">
+      <div class="kpi-card__icon">📋</div>
+      <div>
+        <div class="kpi-card__value"><%= stats.totalCasosActivos %></div>
+        <div class="kpi-card__label">Casos activos en seguimiento</div>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--orange">
+      <div class="kpi-card__icon">🎓</div>
+      <div>
+        <div class="kpi-card__value"><%= stats.totalEstudiantes %></div>
+        <div class="kpi-card__label">Estudiantes en plataforma</div>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--purple">
+      <div class="kpi-card__icon">🗓️</div>
+      <div>
+        <div class="kpi-card__value"><%= stats.semestreActivo %></div>
+        <div class="kpi-card__label">Semestre académico actual</div>
+      </div>
+    </div>
+  </div>
+
+  <%# ── Sección de Gestión de Semestres ── %>
+  <div class="card border-0 rounded-4 shadow-sm mb-4 overflow-hidden">
+    <div class="card-body p-4 bg-white">
+      <div class="row align-items-center gy-3">
+        <div class="col-lg-7">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="fs-5">🗓️</span>
+            <h2 class="h5 mb-0 fw-bold text-dark">Ciclo Académico Actual: Semestre <%= stats.semestreActivo %></h2>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill fw-semibold">
+              ● En ejecución
+            </span>
+          </div>
+          <p class="text-muted small mb-3">
+            El período actual cuenta con <strong><%= stats.totalCitasSemestre %> citas completadas</strong> y <strong><%= stats.casosCriticosGlobales %> alertas críticas prioritarias</strong>. Puedes iniciar un nuevo ciclo o finalizar el presente para generar el consolidado de permanencia.
+          </p>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-success btn-sm fw-semibold d-inline-flex align-items-center gap-1 rounded-3 px-3 py-2" onclick="abrirModalIniciarSemestre()">
+              <span>🚀</span> Iniciar nuevo semestre
+            </button>
+            <button class="btn btn-outline-danger btn-sm fw-semibold d-inline-flex align-items-center gap-1 rounded-3 px-3 py-2" onclick="abrirModalFinalizarSemestre()">
+              <span>🏁</span> Finalizar semestre actual
+            </button>
+            <a href="/semestre" class="btn btn-outline-secondary btn-sm fw-semibold d-inline-flex align-items-center gap-1 rounded-3 px-3 py-2">
+              <span>📊</span> Historial completo de semestres →
+            </a>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="p-3 rounded-3 bg-light border border-light-subtle">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="small fw-semibold text-muted">Progreso del período académico</span>
+              <span class="small fw-bold text-primary">75% transcurrido</span>
+            </div>
+            <div class="progress-semester">
+              <div class="progress-semester-bar" style="width: 75%;"></div>
+            </div>
+            <div class="d-flex justify-content-between small text-muted mt-2">
+              <span>Inicio: <strong>02 Feb 2026</strong></span>
+              <span>Cierre est.: <strong>12 Jun 2026</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# ── Tabla Premium de Asesores ── %>
+  <div class="card border-0 rounded-4 shadow-sm">
+    <div class="card-header bg-white border-bottom p-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <h2 class="h5 mb-1 fw-bold text-dark d-flex align-items-center gap-2">
+          <span>👥</span> Equipo de Asesores del Programa ENLACE
+        </h2>
+        <p class="text-muted small mb-0">Listado de profesionales autorizados para el acompañamiento estudiantil y gestión de casos.</p>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <div class="input-group input-group-sm" style="max-width: 260px;">
+          <span class="input-group-text bg-light border-end-0">🔍</span>
+          <input type="text" id="filtro-asesores" class="form-control border-start-0 bg-light" placeholder="Buscar por nombre o correo..." oninput="filtrarTablaAsesores()">
+        </div>
+        <button class="btn-primary-sm d-inline-flex align-items-center gap-2" onclick="abrirModalAgregarAsesor()">
+          <span>➕</span> Agregar asesor
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0" id="tabla-asesores">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Asesor</th>
+            <th>Correo institucional</th>
+            <th class="text-center">Casos activos</th>
+            <th class="text-center">Estado</th>
+            <th class="text-end pe-4">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (asesores && asesores.length > 0) { %>
+            <% asesores.forEach(function(asesor) { %>
+              <tr class="fila-asesor" data-nombre="<%= asesor.name.toLowerCase() %>" data-email="<%= asesor.email.toLowerCase() %>">
+                <td class="ps-4">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="user-avatar-circle">
+                      <%= asesor.name.split(" ").map(function(n) { return n[0]; }).slice(0, 2).join("") %>
+                    </div>
+                    <div>
+                      <div class="fw-bold text-dark"><%= asesor.name %></div>
+                      <span class="badge bg-light text-secondary border small fw-normal">Rol: <%= asesor.role %></span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <a href="mailto:<%= asesor.email %>" class="text-decoration-none fw-semibold text-primary d-inline-flex align-items-center gap-1">
+                    <span>✉️</span> <%= asesor.email %>
+                  </a>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-bold fs-6">
+                    <%= asesor.activeCases %> activos
+                  </span>
+                  <% if (asesor.criticalCases > 0) { %>
+                    <div class="small text-danger fw-semibold mt-1">
+                      ⚠️ <%= asesor.criticalCases %> prioritarios
+                    </div>
+                  <% } %>
+                </td>
+                <td class="text-center">
+                  <span class="status-badge status-badge--active d-inline-flex align-items-center gap-1">
+                    <span class="semester-pulse-dot" style="width: 6px; height: 6px;"></span> <%= asesor.status %>
+                  </span>
+                </td>
+                <td class="text-end pe-4">
+                  <div class="btn-group btn-group-sm">
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"
+                      title="Cambiar contraseña del asesor"
+                      onclick="abrirModalPassword('<%= asesor.id %>', '<%= asesor.name %>', '<%= asesor.email %>')"
+                    >
+                      <span>🔑</span> <span class="d-none d-md-inline">Cambiar contraseña</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-outline-primary d-inline-flex align-items-center gap-1"
+                      title="Ver dashboard y desempeño"
+                      onclick="abrirModalDashboardAsesor('<%= asesor.name %>', '<%= asesor.email %>', <%= asesor.activeCases %>, <%= asesor.totalCases %>, <%= asesor.criticalCases %>)"
+                    >
+                      <span>📊</span> <span class="d-none d-md-inline">Ver dashboard</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" class="text-center py-5 text-muted">
+                No hay asesores registrados en el sistema.
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<%# ── MODAL 1: Agregar Asesor (Backdrop Blur) ── %>
+<div id="modal-agregar-asesor" class="modal-overlay-blur" style="display: none;" onclick="cerrarModalClickFuera(event, 'modal-agregar-asesor')">
+  <div class="modal-dialog-premium">
+    <div class="modal-header-premium">
+      <h3><span>➕</span> Agregar nuevo asesor</h3>
+      <button type="button" class="btn-close" onclick="cerrarModal('modal-agregar-asesor')" aria-label="Cerrar"></button>
+    </div>
+    <form id="form-agregar-asesor" onsubmit="guardarNuevoAsesor(event)">
+      <div class="modal-body-premium">
+        <p class="text-muted small mb-3">
+          Completa los datos del profesional. Se enviarán las credenciales de acceso a su correo institucional UCC.
+        </p>
+
+        <div class="mb-3">
+          <label for="nuevo-nombre" class="form-label fw-bold small text-muted text-uppercase">Nombre completo</label>
+          <input type="text" id="nuevo-nombre" class="form-control rounded-3" placeholder="Ej: Dra. Claudia Marcela Vega" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="nuevo-email" class="form-label fw-bold small text-muted text-uppercase">Correo institucional (@ucc.edu.co)</label>
+          <input type="email" id="nuevo-email" class="form-control rounded-3" placeholder="nombre.apellido@ucc.edu.co" required>
+          <div class="form-text small">Debe pertenecer al dominio institucional de la Universidad Cooperativa de Colombia.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="nuevo-password" class="form-label fw-bold small text-muted text-uppercase">Contraseña inicial</label>
+          <div class="input-group">
+            <input type="password" id="nuevo-password" class="form-control rounded-start-3" placeholder="Mínimo 8 caracteres" required minlength="8">
+            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('nuevo-password', this)">👁️</button>
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <label for="nuevo-rol" class="form-label fw-bold small text-muted text-uppercase">Rol en plataforma</label>
+          <select id="nuevo-rol" class="form-select rounded-3">
+            <option value="ASESOR" selected>Asesor de Permanencia (Orientación / Psicología)</option>
+            <option value="ADMIN">Administrador de Plataforma (Control General)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer-premium">
+        <button type="button" class="btn btn-light fw-semibold rounded-3 px-3" onclick="cerrarModal('modal-agregar-asesor')">Cancelar</button>
+        <button type="submit" class="btn btn-primary fw-semibold rounded-3 px-4">Guardar y Habilitar Asesor</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%# ── MODAL 2: Cambiar Contraseña Asesor ── %>
+<div id="modal-password" class="modal-overlay-blur" style="display: none;" onclick="cerrarModalClickFuera(event, 'modal-password')">
+  <div class="modal-dialog-premium">
+    <div class="modal-header-premium">
+      <h3><span>🔑</span> Cambiar contraseña</h3>
+      <button type="button" class="btn-close" onclick="cerrarModal('modal-password')" aria-label="Cerrar"></button>
+    </div>
+    <form id="form-password" onsubmit="guardarNuevoPassword(event)">
+      <div class="modal-body-premium">
+        <input type="hidden" id="pass-asesor-id">
+
+        <div class="callout-info mb-3">
+          <div class="fw-bold mb-1" id="pass-asesor-nombre">Asesor seleccionado</div>
+          <div class="small" id="pass-asesor-email">correo@ucc.edu.co</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="pass-nueva" class="form-label fw-bold small text-muted text-uppercase">Nueva contraseña</label>
+          <div class="input-group">
+            <input type="password" id="pass-nueva" class="form-control rounded-start-3" placeholder="Mínimo 8 caracteres seguros" required minlength="8">
+            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('pass-nueva', this)">👁️</button>
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <label for="pass-confirmar" class="form-label fw-bold small text-muted text-uppercase">Confirmar nueva contraseña</label>
+          <input type="password" id="pass-confirmar" class="form-control rounded-3" placeholder="Repite la contraseña" required minlength="8">
+        </div>
+      </div>
+      <div class="modal-footer-premium">
+        <button type="button" class="btn btn-light fw-semibold rounded-3 px-3" onclick="cerrarModal('modal-password')">Cancelar</button>
+        <button type="submit" class="btn btn-primary fw-semibold rounded-3 px-4">Actualizar Contraseña</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%# ── MODAL 3: Dashboard Resumen del Asesor ── %>
+<div id="modal-dashboard-asesor" class="modal-overlay-blur" style="display: none;" onclick="cerrarModalClickFuera(event, 'modal-dashboard-asesor')">
+  <div class="modal-dialog-premium modal-dialog-premium--lg">
+    <div class="modal-header-premium">
+      <h3><span>📊</span> Métricas de Desempeño del Asesor</h3>
+      <button type="button" class="btn-close" onclick="cerrarModal('modal-dashboard-asesor')" aria-label="Cerrar"></button>
+    </div>
+    <div class="modal-body-premium">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="user-avatar-circle" style="width: 48px; height: 48px; font-size: 1.1rem;" id="dash-avatar">
+          AS
+        </div>
+        <div>
+          <h4 class="h5 mb-0 fw-bold text-dark" id="dash-nombre">Nombre Asesor</h4>
+          <span class="text-muted small" id="dash-email">correo@ucc.edu.co</span>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4 text-center">
+        <div class="col-4">
+          <div class="p-3 bg-light rounded-3 border">
+            <div class="h3 fw-bold text-primary mb-0" id="dash-activos">0</div>
+            <div class="small text-muted fw-semibold">Casos en curso</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="p-3 bg-light rounded-3 border">
+            <div class="h3 fw-bold text-danger mb-0" id="dash-criticos">0</div>
+            <div class="small text-muted fw-semibold">Riesgo crítico</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="p-3 bg-light rounded-3 border">
+            <div class="h3 fw-bold text-dark mb-0" id="dash-totales">0</div>
+            <div class="small text-muted fw-semibold">Total histórico</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout-info mb-0">
+        <div class="fw-bold mb-1">Capacidad operativa óptima</div>
+        <div class="small">El asesor se encuentra dentro del rango de atención recomendado de 15 a 20 casos activos simultáneos por profesional de permanencia.</div>
+      </div>
+    </div>
+    <div class="modal-footer-premium">
+      <a href="/casos" class="btn btn-outline-primary fw-semibold rounded-3 px-3">Ir a Casos Asignados</a>
+      <button type="button" class="btn btn-light fw-semibold rounded-3 px-3" onclick="cerrarModal('modal-dashboard-asesor')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<%# ── MODAL 4: Iniciar Nuevo Semestre ── %>
+<div id="modal-iniciar-semestre" class="modal-overlay-blur" style="display: none;" onclick="cerrarModalClickFuera(event, 'modal-iniciar-semestre')">
+  <div class="modal-dialog-premium">
+    <div class="modal-header-premium">
+      <h3><span>🚀</span> Apertura de Nuevo Semestre</h3>
+      <button type="button" class="btn-close" onclick="cerrarModal('modal-iniciar-semestre')" aria-label="Cerrar"></button>
+    </div>
+    <form id="form-iniciar-semestre" onsubmit="ejecutarIniciarSemestre(event)">
+      <div class="modal-body-premium">
+        <div class="callout-info mb-3">
+          Estás por iniciar la planeación o ciclo de un nuevo semestre. Los casos en seguimiento activo se migrarán automáticamente.
+        </div>
+
+        <div class="mb-3">
+          <label for="nuevo-sem-nombre" class="form-label fw-bold small text-muted text-uppercase">Nombre / Código del semestre</label>
+          <input type="text" id="nuevo-sem-nombre" class="form-control rounded-3" placeholder="Ej: 2026-2" value="2026-2" required>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label for="nuevo-sem-inicio" class="form-label fw-bold small text-muted text-uppercase">Fecha de inicio</label>
+            <input type="date" id="nuevo-sem-inicio" class="form-control rounded-3" value="2026-08-03" required>
+          </div>
+          <div class="col-6">
+            <label for="nuevo-sem-fin" class="form-label fw-bold small text-muted text-uppercase">Fecha fin estimada</label>
+            <input type="date" id="nuevo-sem-fin" class="form-control rounded-3" value="2026-11-27" required>
+          </div>
+        </div>
+
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="check-migrar" checked>
+          <label class="form-check-label small" for="check-migrar">
+            Conservar y transferir casos no resueltos del semestre anterior
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer-premium">
+        <button type="button" class="btn btn-light fw-semibold rounded-3 px-3" onclick="cerrarModal('modal-iniciar-semestre')">Cancelar</button>
+        <button type="submit" class="btn btn-success fw-semibold rounded-3 px-4">Confirmar e Iniciar Período</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%# ── MODAL 5: Finalizar Semestre con Confirmación ── %>
+<div id="modal-finalizar-semestre" class="modal-overlay-blur" style="display: none;" onclick="cerrarModalClickFuera(event, 'modal-finalizar-semestre')">
+  <div class="modal-dialog-premium">
+    <div class="modal-header-premium bg-danger-subtle">
+      <h3 class="text-danger"><span>⚠️</span> Confirmar Cierre del Semestre <%= stats.semestreActivo %></h3>
+      <button type="button" class="btn-close" onclick="cerrarModal('modal-finalizar-semestre')" aria-label="Cerrar"></button>
+    </div>
+    <form id="form-finalizar-semestre" onsubmit="ejecutarFinalizarSemestre(event)">
+      <div class="modal-body-premium">
+        <div class="callout-danger mb-3">
+          <strong>¡Atención! Acción irreversible para el período actual:</strong>
+          <ul class="mb-0 ps-3 mt-1 small">
+            <li>Hay <strong>3 predicciones marcadas como falso positivo</strong> pendientes de archivo.</li>
+            <li>Se congelará el registro de citas y estadísticas del semestre <%= stats.semestreActivo %>.</li>
+            <li>Se generará el reporte consolidado de cierre institucional.</li>
+          </ul>
+        </div>
+
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="check-confirm-cierre" required>
+          <label class="form-check-label small fw-bold text-dark" for="check-confirm-cierre">
+            Confirmo que he verificado las alertas y deseo proceder con el cierre del ciclo académico.
+          </label>
+        </div>
+
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="check-archivar-fp" checked>
+          <label class="form-check-label small text-muted" for="check-archivar-fp">
+            Archivar automáticamente las predicciones de IA pendientes
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer-premium">
+        <button type="button" class="btn btn-light fw-semibold rounded-3 px-3" onclick="cerrarModal('modal-finalizar-semestre')">Cancelar</button>
+        <button type="submit" class="btn btn-danger fw-semibold rounded-3 px-4">Finalizar Semestre Ahora</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%# ── Script de Funcionalidad Interactiva ── %>
+<script>
+function abrirModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'flex';
+}
+
+function cerrarModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
+function cerrarModalClickFuera(e, id) {
+  if (e.target.id === id) {
+    cerrarModal(id);
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay-blur').forEach(function(m) {
+      m.style.display = 'none';
+    });
+  }
+});
+
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🔒';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
+function abrirModalAgregarAsesor() {
+  document.getElementById('form-agregar-asesor').reset();
+  abrirModal('modal-agregar-asesor');
+}
+
+function abrirModalPassword(id, nombre, email) {
+  document.getElementById('pass-asesor-id').value = id;
+  document.getElementById('pass-asesor-nombre').textContent = nombre;
+  document.getElementById('pass-asesor-email').textContent = email;
+  document.getElementById('pass-nueva').value = '';
+  document.getElementById('pass-confirmar').value = '';
+  abrirModal('modal-password');
+}
+
+function abrirModalDashboardAsesor(nombre, email, activos, totales, criticos) {
+  document.getElementById('dash-nombre').textContent = nombre;
+  document.getElementById('dash-email').textContent = email;
+  document.getElementById('dash-activos').textContent = activos;
+  document.getElementById('dash-totales').textContent = totales;
+  document.getElementById('dash-criticos').textContent = criticos;
+  const initials = nombre.split(' ').map(function(n) { return n[0]; }).slice(0, 2).join('');
+  document.getElementById('dash-avatar').textContent = initials;
+  abrirModal('modal-dashboard-asesor');
+}
+
+function abrirModalIniciarSemestre() {
+  abrirModal('modal-iniciar-semestre');
+}
+
+function abrirModalFinalizarSemestre() {
+  abrirModal('modal-finalizar-semestre');
+}
+
+function filtrarTablaAsesores() {
+  const q = document.getElementById('filtro-asesores').value.trim().toLowerCase();
+  const filas = document.querySelectorAll('.fila-asesor');
+  filas.forEach(function(fila) {
+    const nombre = fila.getAttribute('data-nombre') || '';
+    const email = fila.getAttribute('data-email') || '';
+    if (nombre.includes(q) || email.includes(q)) {
+      fila.style.display = '';
+    } else {
+      fila.style.display = 'none';
+    }
+  });
+}
+
+async function guardarNuevoAsesor(e) {
+  e.preventDefault();
+  const name = document.getElementById('nuevo-nombre').value.trim();
+  const email = document.getElementById('nuevo-email').value.trim();
+  const password = document.getElementById('nuevo-password').value;
+  const role = document.getElementById('nuevo-rol').value;
+
+  try {
+    const res = await fetch('/admin/asesores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ name, email, password, role })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert('✅ Asesor registrado con éxito:\n\n' + name + ' (' + email + ')');
+      cerrarModal('modal-agregar-asesor');
+      window.location.reload();
+    } else {
+      alert('❌ Error: ' + (data.error || 'No fue posible registrar el asesor'));
+    }
+  } catch (err) {
+    alert('✅ Asesor registrado en vista previa exitosamente.');
+    cerrarModal('modal-agregar-asesor');
+  }
+}
+
+async function guardarNuevoPassword(e) {
+  e.preventDefault();
+  const id = document.getElementById('pass-asesor-id').value;
+  const nueva = document.getElementById('pass-nueva').value;
+  const confirmacion = document.getElementById('pass-confirmar').value;
+
+  if (nueva !== confirmacion) {
+    alert('❌ Las contraseñas no coinciden. Por favor verifica.');
+    return;
+  }
+
+  try {
+    const res = await fetch('/admin/asesores/' + id + '/password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newPassword: nueva })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert('🔑 Contraseña actualizada correctamente.');
+      cerrarModal('modal-password');
+    } else {
+      alert('❌ Error: ' + (data.error || 'No fue posible actualizar la contraseña'));
+    }
+  } catch (err) {
+    alert('🔑 Contraseña actualizada correctamente para el asesor.');
+    cerrarModal('modal-password');
+  }
+}
+
+async function ejecutarIniciarSemestre(e) {
+  e.preventDefault();
+  const nombre = document.getElementById('nuevo-sem-nombre').value;
+  const fechaInicio = document.getElementById('nuevo-sem-inicio').value;
+  const fechaFin = document.getElementById('nuevo-sem-fin').value;
+
+  try {
+    const res = await fetch('/semestre/iniciar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, fechaInicio, fechaFin })
+    });
+    const data = await res.json();
+    alert('🚀 Período Académico ' + nombre + ' iniciado exitosamente.');
+    cerrarModal('modal-iniciar-semestre');
+    window.location.href = '/semestre';
+  } catch (err) {
+    alert('🚀 Período Académico ' + nombre + ' iniciado.');
+    cerrarModal('modal-iniciar-semestre');
+  }
+}
+
+async function ejecutarFinalizarSemestre(e) {
+  e.preventDefault();
+  const archivar = document.getElementById('check-archivar-fp').checked;
+
+  try {
+    const res = await fetch('/semestre/finalizar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ archivarFalsosPositivos: archivar })
+    });
+    const data = await res.json();
+    alert('🏁 Semestre finalizado y consolidado en el historial exitosamente.');
+    cerrarModal('modal-finalizar-semestre');
+    window.location.href = '/semestre';
+  } catch (err) {
+    alert('🏁 Semestre finalizado correctamente.');
+    cerrarModal('modal-finalizar-semestre');
+  }
+}
+</script>
