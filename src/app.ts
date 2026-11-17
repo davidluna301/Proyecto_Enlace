@@ -57,7 +57,7 @@ export function createApp(options: { auditDirectory?: string } = {}) {
       rolling: true,
       cookie: {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: env.isProduction ? "none" : "lax",
         secure: env.isProduction,
         maxAge: env.sessionMaxAgeMs,
       },

@@ -5,3 +5,7 @@ npm-debug.log*
 logs/
 .DS_Store
 .agents/
+.claude/
+.firebase/
+firebase-debug.log
+skills-lock.json
