@@ -1,0 +1,43 @@
+import { randomBytes } from "node:crypto";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+function readPort(value: string | undefined): number {
+  const port = Number(value ?? 3000);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error("PORT debe ser un número entero entre 1 y 65535.");
+  }
+  return port;
+}
+
+const isProduction = process.env.NODE_ENV === "production";
+const sessionSecret =
+  process.env.SESSION_SECRET ||
+  (isProduction ? "" : randomBytes(32).toString("hex"));
+
+if (isProduction && (!sessionSecret || sessionSecret.length < 32)) {
+  throw new Error(
+    "SESSION_SECRET debe tener al menos 32 caracteres en producción.",
+  );
+}
+
+export const env = {
+  nodeEnv: isProduction ? "production" : "development",
+  port: readPort(process.env.PORT),
+  sessionSecret: sessionSecret || "desarrollo-enlace-ucc-secret-key-32chars!",
+  isProduction,
+  sessionMaxAgeMs: 30 * 60 * 1000,
+  institutionalEmailDomain:
+    process.env.INSTITUTIONAL_EMAIL_DOMAIN?.trim().toLowerCase() ||
+    "campusucc.edu.co",
+  // Cloud & DB Placeholders (Prepared for Vercel, Render, Supabase, Firebase)
+  supabaseUrl: process.env.SUPABASE_URL || "",
+  supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "",
+  databaseUrl: process.env.DATABASE_URL || "",
+  firebaseProjectId: process.env.FIREBASE_PROJECT_ID || "",
+  firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL || "",
+  firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY || "",
+  geminiApiKey: process.env.GEMINI_API_KEY || "",
+  openaiApiKey: process.env.OPENAI_API_KEY || "",
+};

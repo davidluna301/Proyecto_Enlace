@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: proyecto-enlace-backend
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        fromSecret: SESSION_SECRET
+      - key: SUPABASE_URL
+        fromSecret: SUPABASE_URL
+      - key: SUPABASE_ANON_KEY
+        fromSecret: SUPABASE_ANON_KEY
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        fromSecret: SUPABASE_SERVICE_ROLE_KEY
+      - key: FIREBASE_PROJECT_ID
+        fromSecret: FIREBASE_PROJECT_ID
+      - key: FIREBASE_CLIENT_EMAIL
+        fromSecret: FIREBASE_CLIENT_EMAIL
+      - key: FIREBASE_PRIVATE_KEY
+        fromSecret: FIREBASE_PRIVATE_KEY
+      - key: GEMINI_API_KEY
+        fromSecret: GEMINI_API_KEY
+    autoDeploy:
+      branch: main
