@@ -1,0 +1,528 @@
+<%# views/reportes/pdf.ejs – Generador de Reportes PDF Institucionales ENLACE UCC %>
+<div class="container-fluid px-3 px-md-4 py-4 report-container">
+
+  <%# Encabezado %>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+      <p class="eyebrow-dark mb-1">📊 Informes Institucionales & Gestión de Datos</p>
+      <h1 class="h2 fw-bold text-dark mb-1">Generador de Reportes PDF</h1>
+      <p class="text-muted mb-0">
+        Configura filtros, ajusta los niveles de privacidad y genera documentos oficiales protegidos para comités de acompañamiento.
+      </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2 fw-semibold">
+        🔒 PDF Protegido & Auditado
+      </span>
+      <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2 fw-semibold">
+        🛡️ Ley 1581 (Habeas Data)
+      </span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    
+    <%# Columna Izquierda: Formulario de Filtros %>
+    <div class="col-lg-5">
+      <div class="dash-card p-4 rounded-4 shadow-sm h-100">
+        <div class="dash-card__header pb-3 mb-3 border-bottom d-flex justify-content-between align-items-center">
+          <h2 class="h5 fw-bold text-dark m-0">⚙️ Configuración del Reporte</h2>
+          <button type="button" class="btn btn-link text-decoration-none p-0 text-muted small" id="btn-reset-filters">
+            ↺ Restablecer
+          </button>
+        </div>
+
+        <form action="/reportes/pdf/generar" method="POST" id="form-pdf-report" target="_blank">
+          
+          <%# Selector de Semestre %>
+          <div class="mb-3">
+            <label for="semestre" class="form-label fw-semibold text-dark small mb-1">
+              🗓️ Semestre Académico <span class="text-danger">*</span>
+            </label>
+            <select class="form-select form-select-sm rounded-3" id="semestre" name="semestre">
+              <% semestres.forEach((s) => { %>
+                <option value="<%= s.id %>" <%= s.id === '2026-2' ? 'selected' : '' %>>
+                  <%= s.name %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <%# Rango de fechas %>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label for="fechaDesde" class="form-label fw-semibold text-dark small mb-1">
+                📅 Fecha inicio
+              </label>
+              <input type="date" class="form-control form-control-sm rounded-3" id="fechaDesde" name="fechaDesde" value="2026-08-01">
+            </div>
+            <div class="col-6">
+              <label for="fechaHasta" class="form-label fw-semibold text-dark small mb-1">
+                📅 Fecha corte
+              </label>
+              <input type="date" class="form-control form-control-sm rounded-3" id="fechaHasta" name="fechaHasta" value="2026-11-30">
+            </div>
+          </div>
+
+          <%# Asesor %>
+          <div class="mb-3">
+            <label for="asesor" class="form-label fw-semibold text-dark small mb-1">
+              🧑‍💼 Asesor Responsable
+            </label>
+            <select class="form-select form-select-sm rounded-3" id="asesor" name="asesor">
+              <% asesores.forEach((a) => { %>
+                <option value="<%= a.id %>"><%= a.name %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <%# Estado del caso %>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label for="estado" class="form-label fw-semibold text-dark small mb-1">
+                📌 Estado del caso
+              </label>
+              <select class="form-select form-select-sm rounded-3" id="estado" name="estado">
+                <% estados.forEach((e) => { %>
+                  <option value="<%= e.id %>"><%= e.name %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="col-6">
+              <label for="urgencia" class="form-label fw-semibold text-dark small mb-1">
+                🚨 Urgencia
+              </label>
+              <select class="form-select form-select-sm rounded-3" id="urgencia" name="urgencia">
+                <option value="TODAS">Todas las urgencias</option>
+                <option value="ALTA">Alta</option>
+                <option value="MEDIA">Media</option>
+                <option value="BAJA">Baja</option>
+              </select>
+            </div>
+          </div>
+
+          <hr class="my-3 text-muted opacity-25">
+
+          <%# Checkboxes de Inclusión / Exclusión de Campos %>
+          <div class="mb-3">
+            <label class="form-label fw-bold text-dark small mb-2 d-flex justify-content-between align-items-center">
+              <span>🛡️ Campos y Niveles de Privacidad</span>
+              <span class="badge bg-secondary-subtle text-secondary small">Habeas Data</span>
+            </label>
+
+            <div class="privacy-options-list d-flex flex-column gap-2">
+              
+              <%# 1. Datos personales %>
+              <div class="form-check form-switch p-2 bg-light rounded-3 border">
+                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="incluirDatosPersonales" name="incluirDatosPersonales" checked>
+                <label class="form-check-label d-flex flex-column" for="incluirDatosPersonales">
+                  <strong class="text-dark small">Datos personales del estudiante</strong>
+                  <span class="text-muted" style="font-size: 0.76rem;">Nombre, correo institucional y programa académico.</span>
+                </label>
+              </div>
+
+              <%# 2. Diagnóstico y motivo %>
+              <div class="form-check form-switch p-2 bg-light rounded-3 border">
+                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="incluirDiagnostico" name="incluirDiagnostico" checked>
+                <label class="form-check-label d-flex flex-column" for="incluirDiagnostico">
+                  <strong class="text-dark small">Diagnóstico y descripción del caso</strong>
+                  <span class="text-muted" style="font-size: 0.76rem;">Motivo del acompañamiento y marcadores críticos detectados.</span>
+                </label>
+              </div>
+
+              <%# 3. Notas privadas del asesor %>
+              <div class="form-check form-switch p-2 bg-light rounded-3 border">
+                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="incluirNotasPrivadas" name="incluirNotasPrivadas">
+                <label class="form-check-label d-flex flex-column" for="incluirNotasPrivadas">
+                  <strong class="text-dark small text-warning-emphasis">Notas privadas y observaciones confidenciales</strong>
+                  <span class="text-muted" style="font-size: 0.76rem;">Anotaciones internas del asesor durante las sesiones.</span>
+                </label>
+              </div>
+
+              <%# 4. Historial completo %>
+              <div class="form-check form-switch p-2 bg-light rounded-3 border">
+                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="incluirHistorial" name="incluirHistorial" checked>
+                <label class="form-check-label d-flex flex-column" for="incluirHistorial">
+                  <strong class="text-dark small">Historial completo y línea de tiempo</strong>
+                  <span class="text-muted" style="font-size: 0.76rem;">Trazabilidad cronológica de eventos y seguimientos.</span>
+                </label>
+              </div>
+
+              <%# 5. Marca de agua segura %>
+              <div class="form-check form-switch p-2 bg-light rounded-3 border">
+                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="marcaAguaSegura" name="marcaAguaSegura" checked>
+                <label class="form-check-label d-flex flex-column" for="marcaAguaSegura">
+                  <strong class="text-dark small">Sello de agua y seguridad institucional</strong>
+                  <span class="text-muted" style="font-size: 0.76rem;">Añade marca de agua diagonal de documento confidencial.</span>
+                </label>
+              </div>
+
+            </div>
+          </div>
+
+          <%# Botón de Generación %>
+          <div class="mt-4 pt-2">
+            <button type="submit" class="btn btn-primary-action w-100 py-2 fs-6 fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2" id="btn-generar">
+              <span>📄 Generar PDF protegido</span>
+            </button>
+            <p class="text-muted text-center mt-2 mb-0" style="font-size: 0.76rem;">
+              El documento se descargará en formato PDF estándar A4 generado en servidor.
+            </p>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <%# Columna Derecha: Previsualización en Vivo %>
+    <div class="col-lg-7">
+      <div class="dash-card p-4 rounded-4 shadow-sm h-100 preview-wrapper">
+        <div class="dash-card__header pb-3 mb-3 border-bottom d-flex justify-content-between align-items-center">
+          <div>
+            <h2 class="h5 fw-bold text-dark m-0">👁️ Previsualización del Contenido</h2>
+            <small class="text-muted">Simulación dinámica en tiempo real según filtros seleccionados</small>
+          </div>
+          <span class="badge bg-light text-secondary border" id="preview-total-badge">
+            <%= totalCases %> casos en sistema
+          </span>
+        </div>
+
+        <%# Hoja A4 Virtual %>
+        <div class="preview-sheet-frame p-3 p-md-4 rounded-3 border bg-white shadow-sm position-relative">
+          
+          <%# Marca de agua virtual %>
+          <div class="preview-watermark" id="preview-watermark">
+            ENLACE UCC · CONFIDENCIAL
+          </div>
+
+          <%# Encabezado del documento %>
+          <div class="preview-doc-header d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+            <div class="d-flex align-items-center gap-3">
+              <img src="/img/logolink.png" alt="Logo ENLACE UCC" class="preview-doc-logo" style="max-height: 40px; width: auto;">
+              <div>
+                <h6 class="m-0 fw-bold text-primary-dark" style="color: #0e6577;">UNIVERSIDAD COOPERATIVA DE COLOMBIA</h6>
+                <div class="fw-semibold text-primary" style="font-size: 0.82rem; color: #189fba;">SISTEMA ENLACE · Reporte Institucional</div>
+              </div>
+            </div>
+            <div class="text-end text-muted" style="font-size: 0.75rem;">
+              <div>Fecha: <strong id="preview-doc-date">Hoy</strong></div>
+              <div class="text-success fw-semibold">Protegido por PDFKit</div>
+            </div>
+          </div>
+
+          <%# Parámetros activos %>
+          <div class="preview-meta-grid p-2 px-3 rounded-2 mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0; font-size: 0.78rem;">
+            <div class="row g-2">
+              <div class="col-sm-4">
+                <span class="text-muted">Semestre:</span> <strong id="pv-semestre">2026-2</strong>
+              </div>
+              <div class="col-sm-4">
+                <span class="text-muted">Asesor:</span> <strong id="pv-asesor">Todos</strong>
+              </div>
+              <div class="col-sm-4">
+                <span class="text-muted">Estado:</span> <strong id="pv-estado">Todos</strong>
+              </div>
+              <div class="col-sm-8">
+                <span class="text-muted">Período:</span> <strong id="pv-rango">01/08/2026 al 30/11/2026</strong>
+              </div>
+              <div class="col-sm-4">
+                <span class="text-muted">Urgencia:</span> <strong id="pv-urgencia">Todas</strong>
+              </div>
+            </div>
+          </div>
+
+          <%# Resumen de Secciones Incluidas (Chips) %>
+          <div class="d-flex flex-wrap gap-1 mb-3" id="preview-chips-container">
+            <span class="badge bg-success-subtle text-success border border-success-subtle" id="chip-datos">
+              ✓ Datos personales
+            </span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle" id="chip-diag">
+              ✓ Diagnóstico
+            </span>
+            <span class="badge bg-secondary-subtle text-secondary border" id="chip-notas">
+              ✗ Notas privadas excluidas
+            </span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle" id="chip-historial">
+              ✓ Historial completo
+            </span>
+          </div>
+
+          <%# Caso de Demostración %>
+          <div class="preview-case-box border rounded-3 p-3 bg-light bg-opacity-50">
+            <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+              <div>
+                <strong class="text-dark small">Caso Muestra #1: EN-2026-001</strong>
+              </div>
+              <div class="d-flex gap-1">
+                <span class="badge bg-danger text-white" style="font-size: 0.7rem;">Urgencia: Alta</span>
+                <span class="badge bg-primary text-white" style="font-size: 0.7rem;">En seguimiento</span>
+              </div>
+            </div>
+
+            <%# Bloque Datos Personales %>
+            <div id="pv-block-datos" class="mb-2">
+              <div class="text-secondary small fw-bold" style="font-size: 0.75rem;">Estudiante:</div>
+              <div class="text-dark fw-semibold small" id="pv-student-name">Valentina Gómez · Psicología</div>
+              <div class="text-muted" style="font-size: 0.72rem;" id="pv-student-email">valentina.gomez@campusucc.edu.co</div>
+            </div>
+
+            <%# Bloque Diagnóstico %>
+            <div id="pv-block-diag" class="mb-2 pt-1 border-top">
+              <div class="text-secondary small fw-bold" style="font-size: 0.75rem;">Motivo y Marcadores:</div>
+              <p class="text-dark mb-1" style="font-size: 0.78rem;">
+                La estudiante solicita orientación para retomar sus actividades académicas y definir un plan de acompañamiento prioritario.
+              </p>
+              <div class="d-flex gap-1">
+                <span class="badge bg-danger-subtle text-danger" style="font-size: 0.68rem;">Marcador: Ausentismo</span>
+                <span class="badge bg-warning-subtle text-warning-emphasis" style="font-size: 0.68rem;">Marcador: Riesgo evaluativo</span>
+              </div>
+            </div>
+
+            <%# Bloque Notas Privadas (Oculto si no está marcado) %>
+            <div id="pv-block-notas" class="mb-2 pt-1 border-top" style="display: none;">
+              <div class="text-warning-emphasis small fw-bold" style="font-size: 0.75rem;">Notas Privadas del Asesor:</div>
+              <p class="text-muted fst-italic mb-0" style="font-size: 0.76rem;">
+                "Se evidencia compromiso para retomar evaluaciones de cierre. Se coordinó reunión de seguimiento para validar soportes."
+              </p>
+            </div>
+
+            <%# Bloque Historial %>
+            <div id="pv-block-historial" class="pt-1 border-top">
+              <div class="text-secondary small fw-bold" style="font-size: 0.75rem;">Línea de Tiempo Registrada:</div>
+              <ul class="list-unstyled mb-0 text-muted" style="font-size: 0.72rem;">
+                <li>• 28/10/2026 [Caso creado]: Se recibió solicitud de acompañamiento.</li>
+                <li>• 02/11/2026 [Contacto inicial]: Primer acercamiento acordado.</li>
+                <li>• 09/11/2026 [Seguimiento]: Quedó pendiente definir el plan de apoyo.</li>
+              </ul>
+            </div>
+          </div>
+
+          <%# Pie de página virtual %>
+          <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top text-muted" style="font-size: 0.7rem;">
+            <span>ENLACE UCC · Confidencial · Prohibida su divulgación no autorizada</span>
+            <span>Página 1 de 1</span>
+          </div>
+
+        </div>
+
+        <%# Mensaje legal y aviso %>
+        <div class="alert alert-warning d-flex align-items-start gap-2 mt-3 mb-0 py-2 px-3 rounded-3" style="font-size: 0.78rem;">
+          <span class="fs-5 lh-1">⚠️</span>
+          <div>
+            <strong>Advertencia de Responsabilidad:</strong>
+            El reporte generado contiene información confidencial sujeta a secreto profesional y protección de datos. Verifique que los campos seleccionados correspondan con el propósito oficial requerido.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<style>
+/* ── Estilos del Generador de PDF ENLACE UCC ── */
+.report-container {
+  max-width: 1350px;
+  margin: 0 auto;
+}
+.eyebrow-dark {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-primary-dark, #0e6577);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.privacy-options-list .form-check {
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.privacy-options-list .form-check:hover {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Previsualización tipo hoja A4 */
+.preview-sheet-frame {
+  min-height: 460px;
+  background: #ffffff;
+  border: 1px solid #d1d5db !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+  overflow: hidden;
+}
+.preview-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-35deg);
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: rgba(148, 163, 184, 0.12);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+/* Botón principal */
+.btn-primary-action {
+  background: var(--color-primary, #189fba);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.65rem 1.25rem;
+  font-weight: 700;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+.btn-primary-action:hover {
+  background: var(--color-primary-dark, #0e6577);
+  color: #fff;
+  transform: translateY(-1px);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('form-pdf-report');
+  const semestreInput = document.getElementById('semestre');
+  const fechaDesdeInput = document.getElementById('fechaDesde');
+  const fechaHastaInput = document.getElementById('fechaHasta');
+  const asesorInput = document.getElementById('asesor');
+  const estadoInput = document.getElementById('estado');
+  const urgenciaInput = document.getElementById('urgencia');
+
+  // Checkboxes
+  const checkDatos = document.getElementById('incluirDatosPersonales');
+  const checkDiag = document.getElementById('incluirDiagnostico');
+  const checkNotas = document.getElementById('incluirNotasPrivadas');
+  const checkHistorial = document.getElementById('incluirHistorial');
+  const checkWatermark = document.getElementById('marcaAguaSegura');
+
+  // Preview elements
+  const pvSemestre = document.getElementById('pv-semestre');
+  const pvAsesor = document.getElementById('pv-asesor');
+  const pvEstado = document.getElementById('pv-estado');
+  const pvUrgencia = document.getElementById('pv-urgencia');
+  const pvRango = document.getElementById('pv-rango');
+  const pvWatermark = document.getElementById('preview-watermark');
+  const previewDocDate = document.getElementById('preview-doc-date');
+
+  // Preview blocks
+  const pvBlockDatos = document.getElementById('pv-block-datos');
+  const pvStudentName = document.getElementById('pv-student-name');
+  const pvStudentEmail = document.getElementById('pv-student-email');
+  const pvBlockDiag = document.getElementById('pv-block-diag');
+  const pvBlockNotas = document.getElementById('pv-block-notas');
+  const pvBlockHistorial = document.getElementById('pv-block-historial');
+
+  // Chips
+  const chipDatos = document.getElementById('chip-datos');
+  const chipDiag = document.getElementById('chip-diag');
+  const chipNotas = document.getElementById('chip-notas');
+  const chipHistorial = document.getElementById('chip-historial');
+
+  // Establecer fecha de hoy en el preview
+  const today = new Intl.DateTimeFormat('es-CO', { dateStyle: 'short' }).format(new Date());
+  if (previewDocDate) previewDocDate.textContent = today;
+
+  function updatePreview() {
+    // 1. Textos de configuración
+    if (pvSemestre) pvSemestre.textContent = semestreInput.value;
+    if (pvAsesor) {
+      const selectedAsesor = asesorInput.options[asesorInput.selectedIndex]?.text || 'Todos';
+      pvAsesor.textContent = selectedAsesor;
+    }
+    if (pvEstado) {
+      const selectedEstado = estadoInput.options[estadoInput.selectedIndex]?.text || 'Todos';
+      pvEstado.textContent = selectedEstado;
+    }
+    if (pvUrgencia) {
+      const selectedUrgencia = urgenciaInput.options[urgenciaInput.selectedIndex]?.text || 'Todas';
+      pvUrgencia.textContent = selectedUrgencia;
+    }
+    if (pvRango) {
+      const d1 = fechaDesdeInput.value || 'Inicio';
+      const d2 = fechaHastaInput.value || 'Cierre';
+      pvRango.textContent = `${d1} al ${d2}`;
+    }
+
+    // 2. Marca de agua
+    if (pvWatermark) {
+      pvWatermark.style.display = checkWatermark.checked ? 'block' : 'none';
+    }
+
+    // 3. Datos personales
+    if (checkDatos.checked) {
+      pvStudentName.textContent = 'Valentina Gómez · Psicología';
+      pvStudentEmail.textContent = 'valentina.gomez@campusucc.edu.co';
+      pvStudentEmail.style.display = 'block';
+      chipDatos.className = 'badge bg-success-subtle text-success border border-success-subtle';
+      chipDatos.textContent = '✓ Datos personales';
+    } else {
+      pvStudentName.textContent = '[IDENTIDAD PROTEGIDA - HABEAS DATA] · Psicología';
+      pvStudentEmail.style.display = 'none';
+      chipDatos.className = 'badge bg-secondary-subtle text-secondary border';
+      chipDatos.textContent = '✗ Datos personales protegidos';
+    }
+
+    // 4. Diagnóstico
+    if (pvBlockDiag) {
+      pvBlockDiag.style.display = checkDiag.checked ? 'block' : 'none';
+      if (checkDiag.checked) {
+        chipDiag.className = 'badge bg-success-subtle text-success border border-success-subtle';
+        chipDiag.textContent = '✓ Diagnóstico';
+      } else {
+        chipDiag.className = 'badge bg-secondary-subtle text-secondary border';
+        chipDiag.textContent = '✗ Diagnóstico excluido';
+      }
+    }
+
+    // 5. Notas privadas
+    if (pvBlockNotas) {
+      pvBlockNotas.style.display = checkNotas.checked ? 'block' : 'none';
+      if (checkNotas.checked) {
+        chipNotas.className = 'badge bg-warning-subtle text-warning-emphasis border border-warning-subtle';
+        chipNotas.textContent = '⚠️ Notas privadas incluidas';
+      } else {
+        chipNotas.className = 'badge bg-secondary-subtle text-secondary border';
+        chipNotas.textContent = '✗ Notas privadas excluidas';
+      }
+    }
+
+    // 6. Historial
+    if (pvBlockHistorial) {
+      pvBlockHistorial.style.display = checkHistorial.checked ? 'block' : 'none';
+      if (checkHistorial.checked) {
+        chipHistorial.className = 'badge bg-success-subtle text-success border border-success-subtle';
+        chipHistorial.textContent = '✓ Historial completo';
+      } else {
+        chipHistorial.className = 'badge bg-secondary-subtle text-secondary border';
+        chipHistorial.textContent = '✗ Historial excluido';
+      }
+    }
+  }
+
+  // Escuchadores de eventos para todos los campos
+  [
+    semestreInput, fechaDesdeInput, fechaHastaInput, asesorInput, estadoInput, urgenciaInput,
+    checkDatos, checkDiag, checkNotas, checkHistorial, checkWatermark
+  ].forEach(function (el) {
+    if (el) {
+      el.addEventListener('change', updatePreview);
+      el.addEventListener('input', updatePreview);
+    }
+  });
+
+  // Botón reset
+  const btnReset = document.getElementById('btn-reset-filters');
+  if (btnReset) {
+    btnReset.addEventListener('click', function () {
+      form.reset();
+      updatePreview();
+    });
+  }
+
+  // Ejecución inicial
+  updatePreview();
+});
+</script>
