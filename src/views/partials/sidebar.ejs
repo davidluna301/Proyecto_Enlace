@@ -4,19 +4,72 @@
     <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Cerrar navegación"></button>
   </div>
   <div class="offcanvas-body sidebar-body">
-    <p class="sidebar-role"><%= currentUser.role === 'ASESOR' ? 'Asesor' : 'Administrador' %></p>
+    <p class="sidebar-role">
+      <%= currentUser.role === 'ASESOR' ? '🧑‍💼 Asesor' : '🛡️ Administrador' %>
+    </p>
+    <div class="sidebar-user-name">
+      <small><%= currentUser.name %></small>
+    </div>
+
     <div class="sidebar-links">
-      <a class="sidebar-link <%= currentPath === '/home' ? 'active' : '' %>" href="/home" <%- currentPath === '/home' ? 'aria-current="page"' : '' %>><span aria-hidden="true">⌂</span> Inicio</a>
+      <%# --- Inicio --- %>
+      <a class="sidebar-link <%= currentPath === '/home' ? 'active' : '' %>" href="/home" <%- currentPath === '/home' ? 'aria-current="page"' : '' %>>
+        <span aria-hidden="true">🏠</span> Inicio
+      </a>
+
       <% if (currentUser.role === 'ASESOR') { %>
-        <a class="sidebar-link <%= (currentPath.startsWith('/casos') || currentPath.startsWith('/cases')) && !currentPath.endsWith('/nuevo') ? 'active' : '' %>" href="/casos" <%- (currentPath === '/casos' || currentPath === '/cases') ? 'aria-current="page"' : '' %>><span aria-hidden="true">▤</span> Casos</a>
-        <a class="sidebar-link <%= currentPath.startsWith('/reportes') ? 'active' : '' %>" href="/reportes/nuevo" <%- currentPath.startsWith('/reportes') ? 'aria-current="page"' : '' %>><span aria-hidden="true">▧</span> Generar reporte</a>
-        <a class="sidebar-link <%= currentPath === '/casos/nuevo' || currentPath === '/cases/nuevo' ? 'active' : '' %>" href="/casos/nuevo" <%- currentPath === '/casos/nuevo' || currentPath === '/cases/nuevo' ? 'aria-current="page"' : '' %>><span aria-hidden="true">＋</span> Nuevo caso</a>
+        <%# --- Módulos Asesor --- %>
+        <div class="sidebar-section-label">GESTIÓN DE CASOS</div>
+
+        <a class="sidebar-link <%= (currentPath.startsWith('/casos') || currentPath.startsWith('/cases')) && !currentPath.includes('marcadores') && !currentPath.endsWith('/nuevo') ? 'active' : '' %>" href="/casos" <%- (currentPath === '/casos' || currentPath === '/cases') ? 'aria-current="page"' : '' %>>
+          <span aria-hidden="true">📋</span> Casos
+        </a>
+        <a class="sidebar-link <%= currentPath === '/casos/nuevo' || currentPath === '/cases/nuevo' ? 'active' : '' %>" href="/casos/nuevo" <%- currentPath === '/casos/nuevo' || currentPath === '/cases/nuevo' ? 'aria-current="page"' : '' %>>
+          <span aria-hidden="true">➕</span> Nuevo caso
+        </a>
+        <a class="sidebar-link <%= currentPath.startsWith('/casos/marcadores') ? 'active' : '' %>" href="/casos/marcadores" <%- currentPath.startsWith('/casos/marcadores') ? 'aria-current="page"' : '' %>>
+          <span aria-hidden="true">🎯</span> Marcadores críticos
+        </a>
+
+        <div class="sidebar-section-label">AGENDA Y ATENCIÓN</div>
+
+        <a class="sidebar-link <%= currentPath.startsWith('/calendario') ? 'active' : '' %>" href="/calendario" <%- currentPath.startsWith('/calendario') ? 'aria-current="page"' : '' %>>
+          <span aria-hidden="true">📅</span> Calendario
+        </a>
+        <a class="sidebar-link <%= currentPath.startsWith('/qr') ? 'active' : '' %>" href="/qr" <%- currentPath.startsWith('/qr') ? 'aria-current="page"' : '' %>>
+          <span aria-hidden="true">📲</span> QR del semestre
+        </a>
+
+        <div class="sidebar-section-label">ANÁLISIS Y REPORTES</div>
+
+        <a class="sidebar-link <%= currentPath.startsWith('/ia') ? 'active' : '' %>" href="/ia/predicciones" <%- currentPath.startsWith('/ia') ? 'aria-current="page"' : '' %>>
+          <span aria-hidden="true">🤖</span> Predicción IA
+        </a>
+        <a class="sidebar-link <%= currentPath.startsWith('/reportes/nuevo') ? 'active' : '' %>" href="/reportes/nuevo" <%- currentPath.startsWith('/reportes/nuevo') ? 'aria-current="page"' : '' %>>
+          <span aria-hidden="true">▧</span> Generar reporte
+        </a>
+        <a class="sidebar-link <%= currentPath.startsWith('/reportes/pdf') ? 'active' : '' %>" href="/reportes/pdf" <%- currentPath.startsWith('/reportes/pdf') ? 'aria-current="page"' : '' %>>
+          <span aria-hidden="true">📥</span> Reportes PDF protegidos
+        </a>
+
       <% } else { %>
-        <a class="sidebar-link" href="/home#usuarios"><span aria-hidden="true">♙</span> Usuarios</a>
+        <%# --- Módulos Admin: Exclusivamente 2 funciones solicitadas --- %>
+        <div class="sidebar-section-label">ADMINISTRACIÓN</div>
+
+        <a class="sidebar-link <%= currentPath === '/home#usuarios' || currentPath === '/home' ? 'active' : '' %>" href="/home#usuarios" <%- currentPath === '/home' ? 'aria-current="page"' : '' %>>
+          <span aria-hidden="true">♙</span> Usuarios disponibles
+        </a>
+        <a class="sidebar-link <%= currentPath.startsWith('/admin') ? 'active' : '' %>" href="/admin" <%- currentPath.startsWith('/admin') ? 'aria-current="page"' : '' %>>
+          <span aria-hidden="true">👥</span> Gestión de asesores
+        </a>
       <% } %>
     </div>
+
+    <div class="sidebar-divider"></div>
     <form class="sidebar-logout" action="/logout" method="post">
-      <button class="sidebar-link" type="submit"><span aria-hidden="true">↪</span> Cerrar sesión</button>
+      <button class="sidebar-link sidebar-link--danger" type="submit">
+        <span aria-hidden="true">↪</span> Cerrar sesión
+      </button>
     </form>
   </div>
 </nav>

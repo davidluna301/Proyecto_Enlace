@@ -1,27 +1,201 @@
-<section class="container py-5">
-  <div class="welcome-panel">
-    <div>
-      <p class="eyebrow">Tu espacio de acompañamiento</p>
+<%# views/home/asesor.ejs – Dashboard Asesor/Psicólogo ENLACE %>
+<div class="dashboard-wrapper">
+
+  <%# ── Bienvenida ── %>
+  <div class="welcome-hero">
+    <div class="welcome-hero__text">
+      <p class="eyebrow">👋 Tu espacio de acompañamiento</p>
       <h1>Hola, <%= currentUser.name.split(" ")[0] %>.</h1>
-      <p class="welcome-copy">Cada conversación cuenta. Aquí puedes revisar cómo va el proceso de tus estudiantes y encontrar el siguiente paso.</p>
-      <a class="btn btn-primary-action btn-lg mt-2" href="/casos">Ver casos de estudiantes <span aria-hidden="true">→</span></a>
+      <p class="welcome-copy">Cada conversación cuenta. Aquí puedes revisar el proceso de tus estudiantes y tomar decisiones informadas.</p>
     </div>
-    <div class="welcome-mark" aria-hidden="true"><span>EN</span><span class="welcome-mark-dot"></span></div>
+    <div class="welcome-hero__badge" aria-hidden="true"><span>EN</span><span class="dot"></span></div>
   </div>
-  <div class="row g-4 mt-2">
-    <div class="col-md-6">
-      <article class="info-card h-100">
-        <span class="info-icon" aria-hidden="true">♡</span>
-        <h2>Un espacio para escuchar</h2>
-        <p>Consulta cada historia con calma y acompaña a cada estudiante desde sus necesidades.</p>
-      </article>
+
+  <%# ── KPI Cards ── %>
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-card--blue">
+      <div class="kpi-card__icon">📋</div>
+      <div>
+        <div class="kpi-card__value">12</div>
+        <div class="kpi-card__label">Casos activos</div>
+      </div>
     </div>
-    <div class="col-md-6">
-      <article class="info-card h-100">
-        <span class="info-icon" aria-hidden="true">↗</span>
-        <h2>Avances a la vista</h2>
-        <p>Encuentra el estado del proceso, su nivel de atención y los pasos que ya se han dado.</p>
-      </article>
+    <div class="kpi-card kpi-card--green">
+      <div class="kpi-card__icon">📅</div>
+      <div>
+        <div class="kpi-card__value">3</div>
+        <div class="kpi-card__label">Citas hoy</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-card--orange">
+      <div class="kpi-card__icon">⚠️</div>
+      <div>
+        <div class="kpi-card__value">2</div>
+        <div class="kpi-card__label">Casos críticos</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-card--purple">
+      <div class="kpi-card__icon">🤖</div>
+      <div>
+        <div class="kpi-card__value">1</div>
+        <div class="kpi-card__label">Alerta IA</div>
+      </div>
     </div>
   </div>
-</section>
+
+  <%# ── Fila principal: Próximas citas + Acciones rápidas ── %>
+  <div class="dash-row">
+
+    <%# Próximas citas %>
+    <div class="dash-card dash-card--lg">
+      <div class="dash-card__header">
+        <h2>📅 Próximas citas de hoy</h2>
+        <a href="/calendario" class="btn-link">Ver calendario →</a>
+      </div>
+      <div class="appointment-list">
+        <div class="appt-item appt-item--virtual">
+          <div class="appt-time">2:00 PM</div>
+          <div class="appt-info">
+            <strong>Carlos Pérez Gómez</strong>
+            <span>Ing. de Sistemas · Semestre 6</span>
+            <span class="appt-badge appt-badge--virtual">Virtual</span>
+          </div>
+          <div class="appt-actions">
+            <button class="btn-icon" title="Iniciar cita">▶</button>
+            <button class="btn-icon" title="Ver historial">📄</button>
+          </div>
+        </div>
+        <div class="appt-item appt-item--presencial">
+          <div class="appt-time">3:00 PM</div>
+          <div class="appt-info">
+            <strong>Luisa Martínez Torres</strong>
+            <span>Psicología · Semestre 4</span>
+            <span class="appt-badge appt-badge--presencial">Presencial</span>
+          </div>
+          <div class="appt-actions">
+            <button class="btn-icon" title="Iniciar cita">▶</button>
+            <button class="btn-icon" title="Ver historial">📄</button>
+          </div>
+        </div>
+        <div class="appt-item appt-item--virtual">
+          <div class="appt-time">3:30 PM</div>
+          <div class="appt-info">
+            <strong>Andrés Silva Ruiz</strong>
+            <span>Contaduría · Semestre 2</span>
+            <span class="appt-badge appt-badge--virtual">Virtual</span>
+          </div>
+          <div class="appt-actions">
+            <button class="btn-icon" title="Iniciar cita">▶</button>
+            <button class="btn-icon" title="Ver historial">📄</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# Acciones rápidas %>
+    <div class="dash-card">
+      <div class="dash-card__header">
+        <h2>⚡ Acciones rápidas</h2>
+      </div>
+      <div class="quick-actions">
+        <a href="/qr" class="quick-action-btn quick-action-btn--primary">
+          <span>📲</span> Generar QR del semestre
+        </a>
+        <a href="/reportes/pdf" class="quick-action-btn quick-action-btn--secondary">
+          <span>📥</span> Descargar reporte PDF
+        </a>
+        <a href="/semestre/iniciar" class="quick-action-btn quick-action-btn--success">
+          <span>🚀</span> Iniciar nuevo semestre
+        </a>
+        <a href="/semestre/finalizar" class="quick-action-btn quick-action-btn--danger">
+          <span>🏁</span> Finalizar semestre
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <%# ── Fila: Alertas IA + Marcadores críticos ── %>
+  <div class="dash-row">
+
+    <%# Alerta IA %>
+    <div class="dash-card dash-card--alert">
+      <div class="dash-card__header">
+        <h2>🤖 Predicción IA – Falsos positivos</h2>
+        <span class="badge-alert">1 alerta activa</span>
+      </div>
+      <div class="ia-alert-box">
+        <div class="ia-alert-icon">⚡</div>
+        <div>
+          <p class="ia-alert-title">Posible inconsistencia detectada</p>
+          <p class="ia-alert-desc">El caso de <strong>Andrés Silva Ruiz</strong> muestra reportes de inasistencia reiterada al final del semestre con justificación enviada tardíamente. El modelo detecta un patrón atípico.</p>
+          <div class="ia-alert-actions">
+            <button class="btn-sm btn-warning">Ver caso</button>
+            <button class="btn-sm btn-outline">Ignorar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# Marcadores críticos %>
+    <div class="dash-card">
+      <div class="dash-card__header">
+        <h2>🎯 Marcadores críticos activos</h2>
+      </div>
+      <div class="markers-list">
+        <div class="marker-item">
+          <span class="marker-dot marker-dot--red"></span>
+          <div>
+            <strong>Carlos Pérez Gómez</strong>
+            <small>Riesgo alto · Caso sensible activo</small>
+          </div>
+          <span class="marker-status marker-status--critical">Crítico</span>
+        </div>
+        <div class="marker-item">
+          <span class="marker-dot marker-dot--orange"></span>
+          <div>
+            <strong>Luisa Martínez Torres</strong>
+            <small>Riesgo medio · En seguimiento</small>
+          </div>
+          <span class="marker-status marker-status--medium">Medio</span>
+        </div>
+        <div class="marker-item">
+          <span class="marker-dot marker-dot--green"></span>
+          <div>
+            <strong>Jimena Ortiz</strong>
+            <small>En proceso · Sin alerta</small>
+          </div>
+          <span class="marker-status marker-status--ok">Estable</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <%# ── Semestre activo ── %>
+  <div class="dash-card dash-card--semester">
+    <div class="dash-card__header">
+      <h2>🗓️ Semestre activo: 2024-2</h2>
+      <span class="semester-badge semester-badge--active">● En curso</span>
+    </div>
+    <div class="semester-stats">
+      <div class="sem-stat">
+        <div class="sem-stat__num">45</div>
+        <div class="sem-stat__label">Estudiantes atendidos</div>
+      </div>
+      <div class="sem-stat">
+        <div class="sem-stat__num">87</div>
+        <div class="sem-stat__label">Citas realizadas</div>
+      </div>
+      <div class="sem-stat">
+        <div class="sem-stat__num">6</div>
+        <div class="sem-stat__label">Casos críticos</div>
+      </div>
+      <div class="sem-stat">
+        <div class="sem-stat__num">3</div>
+        <div class="sem-stat__label">Falsos positivos IA</div>
+      </div>
+    </div>
+  </div>
+
+</div>
